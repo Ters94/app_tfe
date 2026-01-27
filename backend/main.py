@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from backend.database import client
 from contextlib import asynccontextmanager
+from backend.routes.users import router as users_router
 
 
 @asynccontextmanager
@@ -21,6 +22,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.include_router(users_router)
 
 @app.get("/")
 def root():
