@@ -1,4 +1,5 @@
 from typing import List
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from backend.database import db, get_users_collection
 from backend.models.user import UserCreate, UserInDB, UserPublic
@@ -40,3 +41,17 @@ def get_users():
 
     return result
 
+@router.get("/{user_id}", response_model=UserPublic)
+def get_user_by_id(user_id: str):
+    users_collection = get_users_collection()
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    user = users_collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user["id"] = str(user["_id"])
+    return user
