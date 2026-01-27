@@ -1,6 +1,6 @@
 from typing import List
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from backend.database import db, get_users_collection
 from backend.models.user import UserCreate, UserInDB, UserPublic
 
@@ -55,3 +55,17 @@ def get_user_by_id(user_id: str):
 
     user["id"] = str(user["_id"])
     return user
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: str):
+    users_collection = get_users_collection()
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    result = users_collection.delete_one({"_id": ObjectId(user_id)})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return None
