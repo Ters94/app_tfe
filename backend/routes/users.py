@@ -3,6 +3,8 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from backend.database import db, get_users_collection
 from backend.models.user import UserCreate, UserInDB, UserPublic
+from backend.security import get_password_hash
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -16,7 +18,7 @@ def create_user(user: UserCreate):
         username=user.username,
         email=user.email,
         role=user.role,
-        password_hash="hashed_password"  # temporaire
+        password_hash=get_password_hash(user.password)  # temporaire
     )
 
     db.users.insert_one(user_db.model_dump(by_alias=True))

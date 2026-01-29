@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
-from backend.security import verify_password, create_access_token
+from backend.security import verify_password
 
 
 from backend.database import db
