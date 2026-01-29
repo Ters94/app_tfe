@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
-from backend.security import verify_password
+from backend.models import user
+from backend.security import verify_password, create_access_token
 
 
 from backend.database import db
@@ -30,7 +31,9 @@ def login(data: LoginRequest):
             detail="Invalid credentials"
         )
 
+    token = create_access_token({"sub": str(user["_id"])})
     return {
-        "message": "Login successful",
-        "user_id": str(user["_id"])
+    "access_token": token,
+    "token_type": "bearer"
     }
+
