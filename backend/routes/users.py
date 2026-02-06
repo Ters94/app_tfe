@@ -2,7 +2,7 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from backend.database import db, get_users_collection
-from backend.models.user import UserCreate, UserInDB, UserPublic
+from backend.models.user import UserCreate, UserInDB, UserPublic, UserUpdate
 from backend.security import get_password_hash
 from fastapi import Depends
 from backend.security import get_current_user, get_current_admin
