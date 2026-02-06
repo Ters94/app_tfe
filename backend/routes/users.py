@@ -5,7 +5,7 @@ from backend.database import db, get_users_collection
 from backend.models.user import UserCreate, UserInDB, UserPublic
 from backend.security import get_password_hash
 from fastapi import Depends
-from backend.security import get_current_user
+from backend.security import get_current_user, get_current_admin
 
 
 
@@ -13,7 +13,7 @@ router = APIRouter(prefix="/users", tags=["Users"])
 
 
 @router.post("/", response_model=UserPublic)
-def create_user(user: UserCreate):
+def create_user(user: UserCreate, admin = Depends(get_current_admin)):
     if db.users.find_one({"email": user.email}):
         raise HTTPException(status_code=400, detail="Email already exists")
 
@@ -75,7 +75,7 @@ def get_user_by_id(user_id: str):
     return user
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: str):
+def delete_user(user_id: str, admin = Depends(get_current_admin)):
     users_collection = get_users_collection()
 
     if not ObjectId.is_valid(user_id):
@@ -87,4 +87,31 @@ def delete_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
 
     return None
+@router.put("/{user_id}", response_model=UserPublic)
+def update_user(
+    user_id: str,
+    data: UserUpdate,
+    admin = Depends(get_current_admin)
+):
+    users_collection = get_users_collection()
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    update_data = {
+        k: v for k, v in data.dict().items() if v is not None
+    }
+
+    result = users_collection.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_data}
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    updated_user = users_collection.find_one({"_id": ObjectId(user_id)})
+    updated_user["id"] = str(updated_user["_id"])
+
+    return updated_user
 

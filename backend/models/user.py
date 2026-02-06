@@ -19,3 +19,8 @@ class UserInDB(MongoBaseModel, UserBase):
 
 class UserPublic(UserBase):
     id: str
+
+class UserUpdate(BaseModel):
+    username: str | None = None
+    email: EmailStr | None = None
+    role: RoleEnum | None = None
