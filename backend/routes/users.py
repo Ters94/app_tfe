@@ -4,6 +4,9 @@ from fastapi import APIRouter, HTTPException, status
 from backend.database import db, get_users_collection
 from backend.models.user import UserCreate, UserInDB, UserPublic
 from backend.security import get_password_hash
+from fastapi import Depends
+from backend.security import get_current_user
+
 
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -31,7 +34,7 @@ def create_user(user: UserCreate):
     )
 
 @router.get("/", response_model=List[UserPublic])
-def get_users():
+def get_users(current_user: str = Depends(get_current_user)):
     users_collection = get_users_collection()
 
     users = users_collection.find()
@@ -42,6 +45,19 @@ def get_users():
         result.append(user)
 
     return result
+
+@router.get("/me", response_model=UserPublic)
+def get_me(current_user: str = Depends(get_current_user)):
+
+    users_collection = get_users_collection()
+
+    user = users_collection.find_one({"_id": ObjectId(current_user)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user["id"] = str(user["_id"])
+    return user
 
 @router.get("/{user_id}", response_model=UserPublic)
 def get_user_by_id(user_id: str):
@@ -71,3 +87,4 @@ def delete_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
 
     return None
+

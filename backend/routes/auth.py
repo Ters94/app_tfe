@@ -1,7 +1,8 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr
 from backend.models import user
 from backend.security import verify_password, create_access_token
+from fastapi.security import OAuth2PasswordRequestForm
 
 
 from backend.database import db
@@ -16,8 +17,8 @@ class LoginRequest(BaseModel):
 
 
 @router.post("/login")
-def login(data: LoginRequest):
-    user = db.users.find_one({"email": data.email})
+def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = db.users.find_one({"email": form_data.username})
 
     if not user:
         raise HTTPException(
@@ -25,7 +26,7 @@ def login(data: LoginRequest):
             detail="Invalid credentials"
         )
 
-    if not verify_password(data.password, user["password_hash"]):
+    if not verify_password(form_data.password, user["password_hash"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials"
