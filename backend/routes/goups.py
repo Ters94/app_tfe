@@ -12,7 +12,7 @@ router = APIRouter(prefix="/groups", tags=["Groups"])
 @router.post("/", response_model=GroupPublic)
 def create_group(
     group: GroupCreate,
-    current_user = Depends(get_current_user)
+    current_user: str = Depends(get_current_user)
 ):
     group_db = GroupInDB(
         name=group.name,

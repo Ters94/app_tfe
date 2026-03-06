@@ -56,8 +56,12 @@ def get_me(current_user: str = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    user["id"] = str(user["_id"])
-    return user
+    return UserPublic(
+        id=str(user["_id"]),
+        username=user["username"],
+        email=user["email"],
+        role=user["role"]
+    )
 
 @router.get("/{user_id}", response_model=UserPublic)
 def get_user_by_id(user_id: str):
