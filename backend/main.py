@@ -3,7 +3,7 @@ from backend.database import client
 from contextlib import asynccontextmanager
 from backend.routes.users import router as users_router
 from backend.routes.auth import router as auth_router
-from backend.routes.goups import router as groups_router
+from backend.routes.groups import router as groups_router
 
 
 
