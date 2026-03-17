@@ -5,6 +5,7 @@ from bson import ObjectId
 from backend.database import db
 from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdate
 from backend.security import get_current_user
+from backend.models.query import QueryCreate, QueryInDB, QueryPublic
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
@@ -142,3 +143,56 @@ def desactivate_group(
 
     return {"message": "Group desactivated"}
     
+@router.post("/{group_id}/queries", response_model=QueryPublic)
+def create_query(
+    group_id: str,
+    query: QueryCreate,
+    current_user: str = Depends(get_current_user)
+):
+
+    if not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid group id")
+
+ 
+    group = db.groups.find_one({
+        "_id": ObjectId(group_id),
+        "status": True
+    })
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+
+    allowed = False
+
+    if group["owner_id"] == current_user:
+        allowed = True
+    else:
+        membership = db.memberships.find_one({
+            "group_id": ObjectId(group_id),
+            "user_id": ObjectId(current_user)
+        })
+
+        allowed = membership is not None
+
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+   
+    query_db = QueryInDB(
+        product=query.product,
+        filters=query.filters,
+        group_id=ObjectId(group_id),
+        created_by=ObjectId(current_user)
+    )
+
+    result = db.queries.insert_one(query_db.model_dump(by_alias=True))
+
+    return QueryPublic(
+        id=str(result.inserted_id),
+        product=query.product,
+        filters=query.filters,
+        group_id=group_id,
+        created_by=current_user,
+        status=query_db.status
+    )

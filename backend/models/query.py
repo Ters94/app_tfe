@@ -15,7 +15,6 @@ class QueryCreate(QueryBase):
 class QueryInDB(MongoBaseModel, QueryBase):
     group_id: PyObjectId = Field(...)
     created_by: PyObjectId = Field(...)
-    status: str = "open"
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -23,4 +22,4 @@ class QueryPublic(QueryBase):
     id: str
     group_id: str
     created_by: str
-    status: str
+    
