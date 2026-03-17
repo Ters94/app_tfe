@@ -211,19 +211,36 @@ def get_group_members(
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
 
+
+        result = []
+
+        owner = db.users.find_one({
+        "_id": ObjectId(group["owner_id"])
+    })
+
+        if owner:
+            result.append({
+            "user_id": str(owner["_id"]),
+            "username": owner.get("username"),
+            "email": owner.get("email"),
+            "role": "owner"
+        })
+
         memberships = db.memberships.find({
             "group_id": ObjectId(group_id)
         })
-
-        result = []
 
         for m in memberships:
             user = db.users.find_one({
             "_id": m["user_id"]
             })
 
-        if user:
-            result.append({
+            if user:
+
+                if str(user["_id"]) == str(group["owner_id"]):
+                    continue
+
+                result.append({
                 "user_id": str(user["_id"]),
                 "username": user.get("username"),
                 "email": user.get("email")
