@@ -1,10 +1,14 @@
+from unittest import result
+
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from bson import ObjectId
 
 from backend.database import db
+from backend.models import membership
 from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdate
 from backend.security import get_current_user
+from backend.models.membership import Membership
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 
@@ -142,3 +146,50 @@ def desactivate_group(
 
     return {"message": "Group desactivated"}
     
+@router.post("/{group_id}/members")
+def add_member(
+    group_id: str,
+    user_id: str,
+    current_user: str = Depends(get_current_user)
+):
+
+    if not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid group id")
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user id")
+
+    group = db.groups.find_one({
+        "_id": ObjectId(group_id),
+        "status": True
+    })
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    allowed = False
+
+    if group["owner_id"] == current_user:
+        allowed = True
+    else:
+
+        membership = db.memberships.find_one({
+        "group_id": ObjectId(group_id),
+        "user_id": ObjectId(current_user)
+    })
+        allowed = membership is not None
+
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    membership = Membership(
+        user_id=ObjectId(user_id),
+        group_id=ObjectId(group_id)
+    )
+    result = db.memberships.insert_one(membership.model_dump(by_alias=True))
+
+    return {
+        "id": str(result.inserted_id),
+        "user_id": user_id,
+        "group_id": group_id
+    }
