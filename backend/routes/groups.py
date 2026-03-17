@@ -230,3 +230,51 @@ def get_group_members(
             })
 
         return result
+
+@router.delete("/{group_id}/members/{user_id}")
+def remove_member(
+    group_id: str,
+    user_id: str,
+    current_user: str = Depends(get_current_user)
+):
+
+    if not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid group id")
+
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user id")
+
+    group = db.groups.find_one({
+        "_id": ObjectId(group_id),
+        "status": True
+    })
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+   
+    allowed = False
+
+    if group["owner_id"] == current_user:
+        allowed = True
+    else:
+        membership = db.memberships.find_one({
+            "group_id": ObjectId(group_id),
+            "user_id": ObjectId(current_user)
+        })
+
+        allowed = membership is not None
+
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # 🔹 supprimer membership
+    result = db.memberships.delete_one({
+        "group_id": ObjectId(group_id),
+        "user_id": ObjectId(user_id)
+    })
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Member not found")
+
+    return {"message": "Member removed"}
