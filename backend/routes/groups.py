@@ -193,3 +193,40 @@ def add_member(
         "user_id": user_id,
         "group_id": group_id
     }
+
+@router.get("/{group_id}/members")
+def get_group_members(
+    group_id: str,
+    current_user: str = Depends(get_current_user)
+    ):
+
+        if not ObjectId.is_valid(group_id):
+            raise HTTPException(status_code=400, detail="Invalid group id")
+
+        group = db.groups.find_one({
+        "_id": ObjectId(group_id),
+        "status": True
+        })
+
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+
+        memberships = db.memberships.find({
+            "group_id": ObjectId(group_id)
+        })
+
+        result = []
+
+        for m in memberships:
+            user = db.users.find_one({
+            "_id": m["user_id"]
+            })
+
+        if user:
+            result.append({
+                "user_id": str(user["_id"]),
+                "username": user.get("username"),
+                "email": user.get("email")
+            })
+
+        return result
