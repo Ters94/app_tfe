@@ -240,3 +240,43 @@ def get_group_queries(
         })
 
     return result
+
+@router.get("/queries/{query_id}")
+def get_query_by_id(
+    query_id: str,
+    current_user: str = Depends(get_current_user)
+):
+
+    if not ObjectId.is_valid(query_id):
+        raise HTTPException(status_code=400, detail="Invalid query id")
+
+    query = db.queries.find_one({
+        "_id": ObjectId(query_id)
+    })
+
+    if not query:
+        raise HTTPException(status_code=404, detail="Query not found")
+
+
+    user = db.users.find_one({
+        "_id": query["created_by"]
+    })
+
+
+    group = db.groups.find_one({
+        "_id": query["group_id"]
+    })
+
+    return {
+        "id": str(query["_id"]),
+        "product": query["product"],
+        "filters": query["filters"],
+        "created_by": {
+            "id": str(user["_id"]) if user else None,
+            "username": user.get("username") if user else None
+        },
+        "group": {
+            "id": str(group["_id"]) if group else None,
+            "name": group.get("name") if group else None
+        }
+    }
