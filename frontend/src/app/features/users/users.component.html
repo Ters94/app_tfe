@@ -1,1 +1,25 @@
-<p>users works!</p>
+ <h2>Liste des utilisateurs</h2>
+
+
+<input
+  type="text"
+  placeholder="Rechercher un utilisateur..."
+  [(ngModel)]="searchTerm"
+  style="margin-bottom: 10px; width: 300px;"
+>
+
+<ul>
+  <li *ngFor="let user of filteredUsers">
+    {{ user.lastname }} {{ user.name }} - {{ user.email }}
+
+    <!-- Boutons -->
+    <button (click)="viewUser(user)" [routerLink]="['/users', user.id]">Consulter</button>
+    <button [routerLink]="['/users/edit', user.id]">Modifier</button>
+    <button>Supprimer</button>
+  </li>
+</ul>
+
+<br>
+
+<button routerLink="/users/create">+ Créer un utilisateur</button>
+    <button (click)="logout()">Logout</button>

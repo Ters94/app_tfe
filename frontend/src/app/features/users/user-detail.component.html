@@ -1,0 +1,15 @@
+<h2>Détail utilisateur</h2>
+<div *ngIf="errorMessage" style="color:red;">
+  {{ errorMessage }}
+</div>
+<div *ngIf="user">
+  <p><strong>Nom :</strong> {{ user.lastname }}</p>
+  <p><strong>Prénom :</strong> {{ user.name }}</p>
+  <p><strong>Username :</strong> {{ user.username }}</p>
+  <p><strong>Email :</strong> {{ user.email }}</p>
+  <p><strong>Téléphone :</strong> {{ user.phone }}</p>
+  <p><strong>Adresse :</strong> {{ user.address }}</p>
+</div>
+
+    <button (click)="editUser()">Modifier</button>
+<button (click)="goBack()">Retour</button>

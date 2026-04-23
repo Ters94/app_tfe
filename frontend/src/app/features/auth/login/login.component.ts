@@ -18,7 +18,7 @@ export class LoginComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
- login() {
+login() {
   const body = new URLSearchParams();
   body.set('username', this.email);
   body.set('password', this.password);
@@ -29,11 +29,15 @@ export class LoginComponent {
     }
   }).subscribe({
     next: (res: any) => {
-      localStorage.setItem('token', res.access_token);
+      console.log('TOKEN:', res.access_token); // debug
+
+      localStorage.setItem('token', res.access_token); // ✅ stockage
+
       this.router.navigate(['/admin']);
     },
     error: () => {
       this.error = "Login failed";
     }
   });
-}}
+}
+}

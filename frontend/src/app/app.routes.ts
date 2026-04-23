@@ -8,7 +8,13 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin.component')
-        .then(m => m.AdminComponent)
+    .then(m => m.AdminComponent)
+  },
+  {
+    path: 'users/create',
+    loadComponent: () =>
+      import('./features/users/user-form.component')
+        .then(m => m.UserFormComponent)
   },
   {
     path: 'users',
@@ -30,10 +36,4 @@ export const routes: Routes = [
       .then(m => m.UserFormComponent)
 },
 
-{
-  path: 'users/create',
-  loadComponent: () =>
-    import('./features/users/user-form.component')
-      .then(m => m.UserFormComponent)
-}
 ];

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from backend.routes.users import router as users_router
 from backend.routes.auth import router as auth_router
 from backend.routes.groups import router as groups_router
+from fastapi.middleware.cors import CORSMiddleware
 
 
 
@@ -23,6 +24,13 @@ app = FastAPI(
     description="API backend du projet TFE",
     version="1.0.0",
     lifespan=lifespan
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200","http://127.0.0.1:4200"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(users_router)

@@ -1,74 +1,105 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+
 @Component({
   standalone: true,
-   imports: [CommonModule],
-  template: `
-    <h1>Users</h1>
-
-   <ul>
-      <li *ngFor="let user of users">
-        {{ user.email }}
-
-        
-        <button (click)="viewUser(user)">Consulter</button>
-        <button (click)="editUser(user)">Modifier</button>
-        <button (click)="deleteUser(user.id)">Supprimer</button>
-      </li>
-    </ul>
-
-    <hr>
- <button (click)="createUser()">Créer un utilisateur</button>
-    <button (click)="logout()">Logout</button>
-  `
+  imports: [CommonModule, FormsModule, RouterModule],
+  templateUrl: './users.component.html'
 })
 export class UsersComponent implements OnInit {
 
   users: any[] = [];
-viewUser(user: any) {
-    this.router.navigate(['/users', user.id]);;
-}
+  searchTerm: string = '';
+  errorMessage: string = '';
 
-editUser(user: any) {
-   this.router.navigate(['/users/edit', user.id]);
-}
-
-deleteUser(id: number) {
-  const token = localStorage.getItem('token');
-
-  this.http.delete(`http://localhost:8000/users/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  }).subscribe(() => {
-    //refresh liste
-    this.users = this.users.filter(u => u.id !== id);
-  });
-}
-
-createUser() {
-   this.router.navigate(['/users/create']);
-}
-  constructor(private http: HttpClient,
-     private router: Router
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Session expirée, reconnecte-toi');
+      this.router.navigate(['/']);
+      return;
+    }
 
     this.http.get('http://localhost:8000/users', {
       headers: {
         Authorization: `Bearer ${token}`
       }
-    }).subscribe((res: any) => {
-      this.users = res;
+    }).subscribe({
+      next: (res: any) => {
+        this.users = res;
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err?.error?.detail || 'Erreur lors du chargement des utilisateurs';
+
+        if (err.status === 401) {
+          localStorage.removeItem('token');
+          this.router.navigate(['/']);
+        }
+      }
     });
   }
-   logout() {
+
+  viewUser(user: any): void {
+    this.router.navigate(['/users', user.id]);
+  }
+
+  editUser(user: any): void {
+    this.router.navigate(['/users/edit', user.id]);
+  }
+
+  deleteUser(id: number): void {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert('Session expirée, reconnecte-toi');
+      this.router.navigate(['/']);
+      return;
+    }
+
+    const confirmed = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');
+    if (!confirmed) return;
+
+    this.http.delete(`http://localhost:8000/users/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).subscribe({
+      next: () => {
+        this.users = this.users.filter(u => u.id !== id);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err?.error?.detail || 'Erreur lors de la suppression';
+      }
+    });
+  }
+
+  createUser(): void {
+    this.router.navigate(['/users/create']);
+  }
+
+  get filteredUsers() {
+    return this.users.filter(user =>
+      (user.lastname || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      (user.name || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      (user.email || '').toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
+  logout(): void {
     localStorage.removeItem('token');
     this.router.navigate(['/']);
   }
 }
-
