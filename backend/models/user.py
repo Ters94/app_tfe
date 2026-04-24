@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr,Field
 from backend.models.base import MongoBaseModel
 from backend.models.role import RoleEnum
 
@@ -8,7 +8,9 @@ class UserBase(BaseModel):
     name: str
 
     username: str
-    phone: str | None = None
+    phone: str  | None = Field(
+        default=None,
+                        pattern=r'^(\+?\d{1,3})?[0-9]{9,12}$')
     address: str | None = None
 
     email: EmailStr
@@ -31,6 +33,9 @@ class UserUpdate(BaseModel):
     lastname: str | None = None
     username: str | None = None
     email: EmailStr | None = None
-    phone: str | None = None
+    phone: str | None = Field(
+        default=None,
+        pattern=r'^(\+?\d{1,3})?[0-9]{9,12}$'
+    )
     adress: str | None = None
     role: RoleEnum | None = None

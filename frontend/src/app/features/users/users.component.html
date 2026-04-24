@@ -1,25 +1,74 @@
- <h2>Liste des utilisateurs</h2>
+<div class="app-page">
 
+  <header class="topbar">
+    <div class="brand">ENGIE – Admin</div>
 
-<input
-  type="text"
-  placeholder="Rechercher un utilisateur..."
-  [(ngModel)]="searchTerm"
-  style="margin-bottom: 10px; width: 300px;"
->
+    <nav>
+      <button routerLink="/dashboard">Dashboard</button>
+      <button routerLink="/groups">Groupes</button>
+      <button routerLink="/queries">Queries</button>
+      <button (click)="logout()">Logout</button>
+    </nav>
+  </header>
 
-<ul>
-  <li *ngFor="let user of filteredUsers">
-    {{ user.lastname }} {{ user.name }} - {{ user.email }}
+  <main class="content">
+    <div class="page-header">
+      <h2>Liste des utilisateurs</h2>
 
-    <!-- Boutons -->
-    <button (click)="viewUser(user)" [routerLink]="['/users', user.id]">Consulter</button>
-    <button [routerLink]="['/users/edit', user.id]">Modifier</button>
-    <button>Supprimer</button>
-  </li>
-</ul>
+      <button *ngIf="role === 'ADMIN'" class="primary-btn" (click)="createUser()">
+        + Nouvel utilisateur
+      </button>
+    </div>
 
-<br>
+    <div class="toolbar">
+      <input
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom, prénom, email..."
+      />
+    </div>
 
-<button routerLink="/users/create">+ Créer un utilisateur</button>
-    <button (click)="logout()">Logout</button>
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Rôle</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let user of filteredUsers">
+          <td>{{ user.lastname || '-' }}</td>
+          <td>{{ user.name || '-' }}</td>
+          <td>{{ user.username || '-' }}</td>
+          <td>{{ user.email || '-' }}</td>
+          <td>
+            <span class="badge" [class.admin]="user.role === 'ADMIN'">
+              {{ user.role }}
+            </span>
+          </td>
+
+          <td class="actions">
+            <button (click)="viewUser(user)">Consulter</button>
+
+            <button *ngIf="role === 'ADMIN'" (click)="editUser(user)">
+              Modifier
+            </button>
+
+            <button *ngIf="role === 'ADMIN'" class="danger" (click)="deleteUser(user.id)">
+              Supprimer
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </main>
+
+</div>

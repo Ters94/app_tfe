@@ -8,7 +8,20 @@ from backend.security import get_password_hash
 from fastapi import Depends
 from backend.security import get_current_user, get_current_admin
 
+import re
 
+def clean_phone(phone):
+    if not phone:
+        return None
+
+    phone = str(phone).replace(" ", "").replace(".", "").replace("-", "")
+
+    pattern = r'^(\+?\d{1,3})?[0-9]{9,12}$'
+
+    if re.match(pattern, phone):
+        return phone
+
+    return None
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -22,7 +35,7 @@ def create_user(user: UserCreate, admin = Depends(get_current_admin)):
         name=user.name,
         username=user.username,
         email=user.email,
-        phone=user.phone,
+        phone=clean_phone(user.phone),
         address=user.address,
         role=user.role,
         password_hash=get_password_hash(user.password)
@@ -56,7 +69,7 @@ def get_users(current_user: str = Depends(get_current_user)):
                 name=user.get("name", ""),
                 username=user.get("username", ""),
                 email=user.get("email", ""),
-                phone=user.get("phone"),
+                phone=clean_phone(user.get("phone")),
                 address=user.get("address"),
                 role=user.get("role")
             )
@@ -80,7 +93,7 @@ def get_me(current_user: str = Depends(get_current_user)):
         name=user.get("name", ""),
         username=user.get("username", ""),
         email=user.get("email", ""),
-        phone=user.get("phone"),
+        phone=clean_phone(user.get("phone")),
         address=user.get("address"),
         role=user.get("role")
     )
@@ -103,7 +116,7 @@ def get_user_by_id(user_id: str,):
         name=user.get("name", ""),
         username=user.get("username", ""),
         email=user.get("email", ""),
-        phone=user.get("phone"),
+        phone=clean_phone(user.get("phone")),
         address=user.get("address"),
         role=user.get("role")
     )
@@ -153,7 +166,7 @@ def update_user(
         name=updated_user.get("name", ""),
         username=updated_user.get("username", ""),
         email=updated_user.get("email", ""),
-        phone=updated_user.get("phone"),
+        phone=clean_phone(updated_user.get("phone")),
         address=updated_user.get("address"),
         role=updated_user.get("role")
     )

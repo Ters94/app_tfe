@@ -8,7 +8,8 @@ import { RouterModule } from '@angular/router';
 @Component({
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './users.component.html'
+  templateUrl: './users.component.html',
+   styleUrls: ['./users.component.css']
 })
 export class UsersComponent implements OnInit {
 
@@ -21,9 +22,10 @@ export class UsersComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute
   ) {}
-
+role: string = '';
   ngOnInit(): void {
     const token = localStorage.getItem('token');
+    this.role = localStorage.getItem('role') || '';
 
     if (!token) {
       alert('Session expirée, reconnecte-toi');
@@ -59,7 +61,7 @@ export class UsersComponent implements OnInit {
     this.router.navigate(['/users/edit', user.id]);
   }
 
-  deleteUser(id: number): void {
+  deleteUser(id: string): void {
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -78,10 +80,15 @@ export class UsersComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.users = this.users.filter(u => u.id !== id);
+         alert('Utilisateur supprimé');
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors de la suppression';
+ if (err.status === 401 || err.status === 403) {
+        alert("Vous n'avez pas le droit de supprimer cet utilisateur.");
+      } else {
+        alert("Erreur lors de la suppression.");
+      }
       }
     });
   }

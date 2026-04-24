@@ -8,7 +8,8 @@ import { Router } from '@angular/router';
   selector: 'app-login',
   standalone: true,
   imports: [FormsModule, CommonModule],
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
 
@@ -18,7 +19,8 @@ export class LoginComponent {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-login() {
+login() : void{
+  this.error = '';
   const body = new URLSearchParams();
   body.set('username', this.email);
   body.set('password', this.password);
@@ -29,13 +31,29 @@ login() {
     }
   }).subscribe({
     next: (res: any) => {
-      console.log('TOKEN:', res.access_token); // debug
+      const token = res.access_token;
 
-      localStorage.setItem('token', res.access_token); // ✅ stockage
+      localStorage.setItem('token', token); //
 
-      this.router.navigate(['/admin']);
+      this.http.get('http://localhost:8000/users/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }).subscribe({
+        next: (user: any) => {
+          localStorage.setItem('role', user.role);
+          localStorage.setItem('username', user.username);
+          localStorage.setItem('userId', user.id);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          console.error('Failed to fetch user info', err);
+          this.error = 'impossible de récupérer les informations de l\'utilisateur';
+        }
+      });
     },
-    error: () => {
+    error: (err) => {
+      console.error('Login failed', err);
       this.error = "Login failed";
     }
   });

@@ -1,61 +1,117 @@
-<h2>
-  {{ isEdit ? 'Modifier' : 'Créer' }} un utilisateur
-</h2>
+<div class="page-container">
+  <h2>{{ isEdit ? 'Modifier un utilisateur' : 'Créer un utilisateur' }}</h2>
 
-<form (ngSubmit)="saveUser()">
-
-  <div>
-    <label>Nom</label><br>
-    <input type="text" 
-    [(ngModel)]="user.lastname" 
-    name="nom"
-    (input)="generateUsername()"
-     required>
+  <div *ngIf="errorMessage" class="global-error">
+    {{ errorMessage }}
   </div>
 
-  <div>
-    <label>Prénom</label><br>
-    <input type="text"
-     [(ngModel)]="user.name" 
-     name="prenom"
-     (input)="generateUsername()"
-      required>
-  </div>
-  <div>
-    <div>
-  <label>Username</label><br>
-  <input type="text" [(ngModel)]="user.username" name="username" readonly>
+  <form (ngSubmit)="saveUser()" novalidate>
+
+    <div class="form-group">
+      <label>Nom</label>
+      <input
+        [(ngModel)]="user.lastname"
+        name="lastname"
+        (ngModelChange)="generateUsername()"
+        [class.input-error]="fieldErrors.lastname"
+      />
+      <div class="error" *ngIf="fieldErrors.lastname">
+        {{ fieldErrors.lastname }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Prénom</label>
+      <input
+        [(ngModel)]="user.name"
+        name="name"
+        (ngModelChange)="generateUsername()"
+        [class.input-error]="fieldErrors.name"
+      />
+      <div class="error" *ngIf="fieldErrors.name">
+        {{ fieldErrors.name }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Username</label>
+      <input
+        [(ngModel)]="user.username"
+        name="username"
+        [class.input-error]="fieldErrors.username"
+        readonly
+      />
+      <div class="error" *ngIf="fieldErrors.username">
+        {{ fieldErrors.username }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email</label>
+      <input
+        [(ngModel)]="user.email"
+        name="email"
+        type="email"
+        [class.input-error]="fieldErrors.email"
+      />
+      <div class="error" *ngIf="fieldErrors.email">
+        {{ fieldErrors.email }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Téléphone</label>
+      <input
+        [(ngModel)]="user.phone"
+        name="phone"
+        (input)="cleanPhone()"
+        [class.input-error]="fieldErrors.phone"
+        placeholder="Ex : 0470123456 ou +32470123456"
+      />
+      <div class="error" *ngIf="fieldErrors.phone">
+        {{ fieldErrors.phone }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Adresse</label>
+      <input
+        [(ngModel)]="user.address"
+        name="address"
+        [class.input-error]="fieldErrors.address"
+      />
+      <div class="error" *ngIf="fieldErrors.address">
+        {{ fieldErrors.address }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Mot de passe</label>
+      <input
+        [(ngModel)]="user.password"
+        name="password"
+        type="password"
+        [class.input-error]="fieldErrors.password"
+        [placeholder]="isEdit ? 'Laisser vide pour ne pas changer' : ''"
+      />
+      <div class="error" *ngIf="fieldErrors.password">
+        {{ fieldErrors.password }}
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit">
+        {{ isEdit ? 'Modifier' : 'Créer' }}
+      </button>
+
+      <button type="button" (click)="goBack()">
+        Annuler
+      </button>
+
+      <button type="button" routerLink="/dashboard">
+        Accueil
+      </button>
+    </div>
+
+  </form>
 </div>
-    <label>Email</label><br>
-    <input type="email" [(ngModel)]="user.email" name="email" required>
-  </div>
-
-  <div>
-    <label>Téléphone</label><br>
-    <input type="text" [(ngModel)]="user.phone" name="phone">
-  </div>
-
-    <div>
-    <label>Adresse</label><br>
-    <input type="text" [(ngModel)]="user.address" name="address">
-  </div>
-
-  <div *ngIf="!isEdit">
-    <label>Mot de passe</label><br>
-    <input type="password" [(ngModel)]="user.password" name="password" required>
-  </div>
-
-  <br>
-
-  <button type="submit">
-    {{ isEdit ? 'Modifier' : 'Créer' }}
-  </button>
-
-  <button type="button" (click)="goBack()">
-    Annuler
-  </button>
-  
-<p style="color:red" *ngIf="errorMessage">
-  {{ errorMessage }}
-</p>
-</form>

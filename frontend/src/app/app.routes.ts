@@ -11,6 +11,11 @@ export const routes: Routes = [
     .then(m => m.AdminComponent)
   },
   {
+  path: 'dashboard',
+  loadComponent: () =>
+    import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+},
+  {
     path: 'users/create',
     loadComponent: () =>
       import('./features/users/user-form.component')
