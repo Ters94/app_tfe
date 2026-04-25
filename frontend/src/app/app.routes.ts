@@ -11,6 +11,11 @@ export const routes: Routes = [
     .then(m => m.AdminComponent)
   },
   {
+  path: 'groups',
+  loadComponent: () =>
+    import('./features/groups/groups.component').then(m => m.GroupsComponent)
+},
+  {
   path: 'dashboard',
   loadComponent: () =>
     import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)

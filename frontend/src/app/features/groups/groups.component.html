@@ -1,0 +1,111 @@
+<div class="app-page">
+
+  <header class="topbar">
+    <div class="brand">ENGIE – Groups</div>
+
+    <nav>
+      <button routerLink="/dashboard">Dashboard</button>
+      <button routerLink="/users">Users</button>
+      <button class="active" routerLink="/groups">Groupes</button>
+      <button routerLink="/queries">Queries</button>
+      <button (click)="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <div class="page-header">
+      <h2>Gestion des groupes</h2>
+
+      <button class="primary-btn" (click)="openCreateForm()">
+        + Nouveau groupe
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <input
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom ou description..."
+      />
+    </div>
+
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-box">
+      {{ successMessage }}
+    </div>
+
+    <section *ngIf="showForm" class="form-card">
+      <h3>{{ isEdit ? 'Modifier un groupe' : 'Créer un groupe' }}</h3>
+
+      <div class="form-group">
+        <label>Nom du groupe</label>
+        <input
+          [(ngModel)]="group.name"
+          name="name"
+          placeholder="Ex : ENGIE_GAZ"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="group.description"
+          name="description"
+          placeholder="Description du groupe"
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="primary-btn" (click)="saveGroup()">
+          {{ isEdit ? 'Modifier' : 'Créer' }}
+        </button>
+
+        <button class="secondary-btn" (click)="cancelForm()">
+          Annuler
+        </button>
+      </div>
+    </section>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Description</th>
+          <th>Owner</th>
+          <th>Statut</th>
+          <th class="actions-col">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let group of filteredGroups">
+          <td>{{ group.name || '-' }}</td>
+          <td>{{ group.description || '-' }}</td>
+          <td>{{ group.owner_id || '-' }}</td>
+          <td>
+            <span class="badge">
+              Actif
+            </span>
+          </td>
+
+          <td class="actions">
+            <button (click)="viewGroup(group)">Consulter</button>
+            <button (click)="openEditForm(group)">Modifier</button>
+            <button class="danger" (click)="deleteGroup(group.id)">Désactiver</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filteredGroups.length === 0">
+          <td colspan="5" class="empty-message">
+            Aucun groupe trouvé.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+  </main>
+
+</div>
