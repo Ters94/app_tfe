@@ -5,6 +5,7 @@ from backend.routes.users import router as users_router
 from backend.routes.auth import router as auth_router
 from backend.routes.groups import router as groups_router
 from fastapi.middleware.cors import CORSMiddleware
+from backend.routes.membership import router as membership_router
 
 
 
@@ -36,7 +37,7 @@ app.add_middleware(
 app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(groups_router)
-
+app.include_router(membership_router)
 
 @app.get("/")
 def root():

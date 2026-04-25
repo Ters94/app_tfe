@@ -22,15 +22,21 @@ def create_group(
         owner_id=current_user
     )
 
+    # 1. Créer le groupe
     result = db.groups.insert_one(group_db.model_dump(by_alias=True))
 
-
+    # 2. Créer le membership OWNER après avoir obtenu result.inserted_id
+    db.memberships.insert_one({
+        "group_id": str(result.inserted_id),
+        "user_id": current_user,
+        "role": "OWNER"
+    })
     return GroupPublic(
         id=str(result.inserted_id),
         name=group.name,
         description=group.description,
         owner_id=current_user,
-        status=group.status
+        status=True
     )
 
 
@@ -74,7 +80,7 @@ def get_groups(group_id: str, current_user: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Group not found")
     
 
-    if group["owner_id"] != current_user:
+    if group["owner_id"] != current_user and not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not authorized")
     
     return GroupPublic(
@@ -100,7 +106,7 @@ def update_group(
         raise HTTPException(status_code=404, detail="Group not found")
     
 
-    if group["owner_id"] != current_user:
+    if group["owner_id"] != current_user and not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not authorized")
     
     update_data ={
