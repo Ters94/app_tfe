@@ -1,0 +1,104 @@
+
+<div class="app-page">
+
+  <header class="topbar">
+    <div class="brand">ENGIE – Groupes</div>
+
+    <nav>
+      <button routerLink="/dashboard">Dashboard</button>
+      <button routerLink="/users">Users</button>
+      <button routerLink="/groups">Groupes</button>
+      <button routerLink="/queries">Queries</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+
+    <section class="group-card">
+      <h2>{{ group.name }}</h2>
+      <p>{{ group.description || 'Aucune description' }}</p>
+
+      <div class="info-grid">
+        <div>
+          <strong>Owner ID</strong>
+          <span>{{ group.owner_id }}</span>
+        </div>
+
+        <div>
+          <strong>Statut</strong>
+          <span class="badge">Actif</span>
+        </div>
+      </div>
+    </section>
+
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-box">
+      {{ successMessage }}
+    </div>
+
+    <section *ngIf="canManageMembers" class="form-card">
+      <h3>Ajouter un membre</h3>
+
+      <div class="form-row">
+        <select [(ngModel)]="selectedUserId">
+          <option value="">Sélectionner un utilisateur</option>
+          <option *ngFor="let user of users" [value]="user.id">
+            {{ user.username }} - {{ user.email }}
+          </option>
+        </select>
+
+        <button class="primary-btn" (click)="addMember()">
+          + Ajouter
+        </button>
+      </div>
+    </section>
+
+    <section class="members-section">
+      <h3>Liste des membres</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th *ngIf="canManageMembers">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let member of members">
+            <td>{{ member.username || '-' }}</td>
+            <td>{{ member.email || '-' }}</td>
+            <td>
+              <span class="role-badge" [class.owner]="member.role === 'OWNER'">
+                {{ member.role }}
+              </span>
+            </td>
+            <td *ngIf="canManageMembers">
+              <button
+                class="danger"
+                *ngIf="member.role !== 'OWNER'"
+                (click)="removeMember(member)"
+              >
+                Supprimer
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="members.length === 0">
+            <td colspan="4" class="empty-message">
+              Aucun membre trouvé.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+  </main>
+</div>

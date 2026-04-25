@@ -86,15 +86,29 @@
           <td>{{ group.description || '-' }}</td>
           <td>{{ group.owner_id || '-' }}</td>
           <td>
-            <span class="badge">
-              Actif
+            <span class="badge" [class.inactive]="group.status === false">
+               {{ group.status === false ? 'Clotué' : 'Actif' }}
             </span>
           </td>
 
-          <td class="actions">
+          <td class="actions">  
             <button (click)="viewGroup(group)">Consulter</button>
             <button (click)="openEditForm(group)">Modifier</button>
-            <button class="danger" (click)="deleteGroup(group.id)">Désactiver</button>
+           <button
+  class="danger"
+  *ngIf="group.status !== false"
+  (click)="deleteGroup(group.id)"
+>
+  Désactiver
+</button>
+
+<button
+  disabled
+  *ngIf="group.status === false"
+  disabled
+>
+  Désactivé
+</button>
           </td>
         </tr>
 

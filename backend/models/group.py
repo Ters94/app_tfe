@@ -22,6 +22,7 @@ class GroupInDB(MongoBaseModel, GroupBase):
 class GroupPublic(GroupBase):
     id: str
     owner_id: str
+    status: bool=True
 
 class GroupUpdate(BaseModel):
     name: str | None = None
