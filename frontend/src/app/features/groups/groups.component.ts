@@ -174,9 +174,7 @@ export class GroupsComponent implements OnInit {
   }
 
   viewGroup(group: any): void {
-    alert(
-      `Groupe : ${group.name}\nDescription : ${group.description || '-'}\nOwner ID : ${group.owner_id}`
-    );
+     this.router.navigate(['/groups', group.id]);
   }
 
   cancelForm(): void {

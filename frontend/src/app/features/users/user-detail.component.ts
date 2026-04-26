@@ -21,14 +21,23 @@ export class UserDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    const currentUserId = localStorage.getItem('userId');
+        const id = this.route.snapshot.paramMap.get('id');
+
 
     if (!token) {
       alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
       return;
     }
+    if (role !== 'ADMIN' && id !== currentUserId) {
+  alert('Accès refusé');
+  this.router.navigate(['/dashboard']);
+  return;
+}
 
-    const id = this.route.snapshot.paramMap.get('id');
+
 
     this.http.get(`http://localhost:8000/users/${id}`, {
       headers: {
@@ -49,7 +58,9 @@ export class UserDetailComponent implements OnInit {
       }
     });
   }
-
+  get isAdmin(): boolean {
+  return localStorage.getItem('role') === 'ADMIN';
+}
   goBack(): void {
     this.router.navigate(['/users']);
   }

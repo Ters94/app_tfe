@@ -45,5 +45,9 @@ export const routes: Routes = [
     import('./features/users/user-form.component')
       .then(m => m.UserFormComponent)
 },
-
+{
+  path: 'groups/:id',
+  loadComponent: () =>
+    import('./features/groups/group-detail.component').then(m => m.GroupDetailComponent)
+},
 ];

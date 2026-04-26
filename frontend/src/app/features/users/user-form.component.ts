@@ -36,10 +36,17 @@ export class UserFormComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
 
     if (!token) {
       alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
+      return;
+    }
+
+    if (role !== 'ADMIN') {
+      this.errorMessage = "Accès refusé - vous n'avez pas les permissions nécessaires";
+      this.router.navigate(['/dashboard']);
       return;
     }
 

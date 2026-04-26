@@ -11,5 +11,5 @@
   <p><strong>Adresse :</strong> {{ user.address }}</p>
 </div>
 
-    <button (click)="editUser()">Modifier</button>
+    <button *ngIf="isAdmin" (click)="editUser()">Modifier</button>
 <button (click)="goBack()">Retour</button>

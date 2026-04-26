@@ -72,8 +72,7 @@ def get_groups(group_id: str, current_user: str = Depends(get_current_user)):
     if not ObjectId.is_valid(group_id):
         raise HTTPException(status_code=400, detail="Invalid group id")
     
-    group = db.groups.find_one({"_id": ObjectId(group_id),
-                                "status": True
+    group = db.groups.find_one({"_id": ObjectId(group_id)
                                 })
 
     if not group:

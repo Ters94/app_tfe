@@ -52,13 +52,19 @@ role: string = '';
       }
     });
   }
-
+  get isAdmin(): boolean {
+  return localStorage.getItem('role') === 'ADMIN';
+  }
   viewUser(user: any): void {
     this.router.navigate(['/users', user.id]);
   }
 
   editUser(user: any): void {
     this.router.navigate(['/users/edit', user.id]);
+    if (!this.isAdmin) {
+    this.errorMessage = "Accès refusé";
+    return;
+}
   }
 
   deleteUser(id: string): void {
@@ -68,6 +74,10 @@ role: string = '';
       alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
       return;
+    }
+    if (!this.isAdmin) {
+    this.errorMessage = "Accès refusé";
+    return;
     }
 
     const confirmed = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');

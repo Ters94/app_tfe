@@ -5,6 +5,7 @@
 
     <nav>
       <button routerLink="/dashboard">Dashboard</button>
+      <button routerLink="/users">Users</button>
       <button routerLink="/groups">Groupes</button>
       <button routerLink="/queries">Queries</button>
       <button (click)="logout()">Logout</button>
@@ -39,7 +40,7 @@
           <th>Username</th>
           <th>Email</th>
           <th>Rôle</th>
-          <th class="actions-col">Actions</th>
+          <th *ngIf="isAdmin" class="actions-col">Actions</th>
         </tr>
       </thead>
 
@@ -55,14 +56,14 @@
             </span>
           </td>
 
-          <td class="actions">
-            <button (click)="viewUser(user)">Consulter</button>
+          <td class="actions" *ngIf="isAdmin">
+            <button *ngIf="isAdmin" (click)="viewUser(user)">Consulter</button>
 
-            <button *ngIf="role === 'ADMIN'" (click)="editUser(user)">
+            <button *ngIf="isAdmin" (click)="editUser(user)">
               Modifier
             </button>
 
-            <button *ngIf="role === 'ADMIN'" class="danger" (click)="deleteUser(user.id)">
+            <button *ngIf="isAdmin" class="danger" (click)="deleteUser(user.id)">
               Supprimer
             </button>
           </td>
