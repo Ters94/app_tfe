@@ -7,7 +7,8 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   selector: 'app-user-detail',
   imports: [CommonModule, RouterModule],
-  templateUrl: './user-detail.component.html'
+  templateUrl: './user-detail.component.html',
+  styleUrls: ['./user-detail.component.css']
 })
 export class UserDetailComponent implements OnInit {
   user: any = {};
@@ -67,5 +68,11 @@ export class UserDetailComponent implements OnInit {
 
   editUser(): void {
     this.router.navigate(['/users/edit', this.user.id]);
+  }
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    this.router.navigate(['/']);
   }
 }

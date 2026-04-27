@@ -51,10 +51,12 @@ def get_group_members(
     result = []
 
     for membership in memberships:
+
+        user_id = membership.get("user_id")
         user = None
 
-        if ObjectId.is_valid(membership.get("user_id", "")):
-            user = db.users.find_one({"_id": ObjectId(membership["user_id"])})
+        if user_id and ObjectId.is_valid(user_id):
+            user = db.users.find_one({"_id": ObjectId(user_id)})
 
         result.append(
             MembershipPublic(

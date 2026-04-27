@@ -148,7 +148,22 @@ export class GroupDetailComponent implements OnInit {
     });
   }
 
+  viewUser(member: any): void {
+  if (!member.user_id) {
+    this.errorMessage = "Utilisateur introuvable";
+    return;
+  }
+
+  this.router.navigate(['/users', member.user_id]);
+}
   goBack(): void {
     this.router.navigate(['/groups']);
   }
+  logout(): void {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+  localStorage.removeItem('username');
+  localStorage.removeItem('userId');
+  this.router.navigate(['/']);
+}
 }

@@ -81,13 +81,15 @@ def get_groups(group_id: str, current_user: str = Depends(get_current_user)):
 
     if group["owner_id"] != current_user and not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+    owner = db.users.find_one({"_id": ObjectId(group["owner_id"])})
     return GroupPublic(
         id=str(group["_id"]),
         name=group["name"],
         description=group.get("description"),
         owner_id=group["owner_id"],
-        status=group.get("status", True)
+        owner_username=owner.get("username") if owner else None,
+        status=group.get("status", True),
+        created_at=group.get("created_at")
     )
 @router.put("/{group_id}", response_model=GroupPublic)
 def update_group(
@@ -119,13 +121,15 @@ def update_group(
         )
 
     updated_group = db.groups.find_one({"_id": ObjectId(group_id)})
-
+    owner = db.users.find_one({"_id": ObjectId(updated_group["owner_id"])})
     return GroupPublic(
         id=str(updated_group["_id"]),
         name=updated_group["name"],
         description=updated_group.get("description"),
         owner_id=updated_group["owner_id"],
-        status=updated_group.get("status", True)
+        owner_username=owner.get("username") if owner else None,
+        status=updated_group.get("status", True),
+        created_at=updated_group.get("created_at")
     )
 
 @router.delete("/{group_id}")

@@ -178,3 +178,17 @@ td {
   color: #6b7280;
   padding: 20px;
 }
+.info-btn {
+  border: 1px solid #c7c7c7;
+  background: #ffffff;
+  color: #111827;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.info-btn:hover {
+  background: #f3f4f6;
+}

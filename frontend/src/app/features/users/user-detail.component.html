@@ -1,15 +1,70 @@
-<h2>Détail utilisateur</h2>
-<div *ngIf="errorMessage" style="color:red;">
-  {{ errorMessage }}
-</div>
-<div *ngIf="user">
-  <p><strong>Nom :</strong> {{ user.lastname }}</p>
-  <p><strong>Prénom :</strong> {{ user.name }}</p>
-  <p><strong>Username :</strong> {{ user.username }}</p>
-  <p><strong>Email :</strong> {{ user.email }}</p>
-  <p><strong>Téléphone :</strong> {{ user.phone }}</p>
-  <p><strong>Adresse :</strong> {{ user.address }}</p>
-</div>
+<div class="app-page">
 
-    <button *ngIf="isAdmin" (click)="editUser()">Modifier</button>
-<button (click)="goBack()">Retour</button>
+  <header class="topbar">
+    <div class="brand">ENGIE – User</div>
+
+    <nav>
+      <button routerLink="/dashboard">Dashboard</button>
+      <button routerLink="/users">Users</button>
+      <button routerLink="/groups">Groupes</button>
+      <button routerLink="/queries">Queries</button>
+      <button (click)="logout()">Logout</button>
+    </nav>
+  </header>
+
+  <main class="content">
+
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+
+    <section class="user-card">
+      <div class="user-header">
+        <div>
+          <h2>{{ user.lastname }} {{ user.name }}</h2>
+          <p>{{ user.email }}</p>
+        </div>
+
+        <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+          {{ user.role }}
+        </span>
+      </div>
+
+      <div class="info-grid">
+        <div>
+          <strong>Username</strong>
+          <span>{{ user.username || '-' }}</span>
+        </div>
+
+        <div>
+          <strong>Téléphone</strong>
+          <span>{{ user.phone || '-' }}</span>
+        </div>
+
+        <div>
+          <strong>Adresse</strong>
+          <span>{{ user.address || '-' }}</span>
+        </div>
+
+        <div>
+          <strong>Email</strong>
+          <span>{{ user.email || '-' }}</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button *ngIf="isAdmin" class="primary-btn" (click)="editUser()">
+          Modifier
+        </button>
+
+        <button class="secondary-btn" (click)="goBack()">
+          Annuler
+        </button>
+      </div>
+    </section>
+
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+  </main>
+
+</div>

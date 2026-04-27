@@ -91,12 +91,12 @@
             </span>
           </td>
 
-          <td class="actions">  
+          <td class="actions">
             <button (click)="viewGroup(group)">Consulter</button>
-            <button (click)="openEditForm(group)">Modifier</button>
+            <button *ngIf="canEdit(group)" (click)="openEditForm(group)">Modifier</button>
            <button
   class="danger"
-  *ngIf="group.status !== false"
+  *ngIf="canEdit(group) && group.status !== false"
   (click)="deleteGroup(group.id)"
 >
   Désactiver

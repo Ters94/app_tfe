@@ -9,6 +9,7 @@
       <button routerLink="/users">Users</button>
       <button routerLink="/groups">Groupes</button>
       <button routerLink="/queries">Queries</button>
+      <button (click)="logout()">Logout</button>
     </nav>
   </header>
 
@@ -22,8 +23,8 @@
 
       <div class="info-grid">
         <div>
-          <strong>Owner ID</strong>
-          <span>{{ group.owner_id }}</span>
+          <strong>Owner</strong>
+          <span>{{ group.owner_username || group.owner_id }}</span>
         </div>
 
         <div>
@@ -31,6 +32,10 @@
           <span class="badge" [class.inactive]="group.status === false">
             {{ group.status === false ? 'Clôturé' : 'Actif' }}
           </span>
+        </div>
+        <div>
+          <strong>Créé le</strong>
+          <span>{{ group.created_at | date:'dd/MM/yyyy' }}</span>
         </div>
       </div>
     </section>
@@ -83,6 +88,10 @@
               </span>
             </td>
             <td *ngIf="canManageMembers">
+
+               <button class="info-btn" (click)="viewUser(member)">
+                  Consulter
+                </button>
               <button
                 class="danger"
                 *ngIf="member.role !== 'OWNER'"

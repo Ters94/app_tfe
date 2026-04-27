@@ -58,11 +58,20 @@ export class GroupsComponent implements OnInit {
     });
   }
 
+  get role(): string {
+  return localStorage.getItem('role') || '';
+  }
+
+  get currentUserId(): string {
+  return localStorage.getItem('userId') || '';
+  }
+
   get filteredGroups() {
     return this.groups.filter(group =>
       (group.name || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       (group.description || '').toLowerCase().includes(this.searchTerm.toLowerCase())
     );
+
   }
 
   openCreateForm(): void {
@@ -76,6 +85,9 @@ export class GroupsComponent implements OnInit {
     this.clearMessages();
   }
 
+  canEdit(group: any): boolean {
+  return this.role === 'ADMIN' || group.owner_id === this.currentUserId;
+}
   openEditForm(group: any): void {
     this.showForm = true;
     this.isEdit = true;

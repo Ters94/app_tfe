@@ -17,4 +17,7 @@ class MembershipPublic(BaseModel):
     id: str
     user_id: str
     group_id: str
+    username: str | None = None
+    email: str | None = None
+
     role: str
