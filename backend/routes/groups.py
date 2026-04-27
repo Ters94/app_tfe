@@ -16,6 +16,20 @@ def create_group(
     group: GroupCreate,
     current_user: str = Depends(get_current_user)
 ):
+    user = db.users.find_one({"_id": ObjectId(current_user)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if user.get("role") =="ADMIN":
+        if not group.owner_id:
+            raise HTTPException(status_code=400, detail="owner is required for admin")
+        if not ObjectId.is_valid(group.owner_id):
+            raise HTTPException(status_code=400, detail="Invalid owner id")
+        
+        owner_id = ObjectId(group.owner_id)
+    else:
+        owner_id = ObjectId(current_user)
+        
     group_db = GroupInDB(
         name=group.name,
         description=group.description,

@@ -56,6 +56,15 @@
           name="description"
           placeholder="Description du groupe"
         ></textarea>
+        <div *ngIf="isAdmin()">
+  <label>Owner</label>
+  <select  [(ngModel)]="group.owner_id" required>
+    <option value="">Sélectionner un owner</option>
+    <option *ngFor="let user of users" [value]="user.id">
+      {{ user.username }} - {{ user.email }}
+    </option>
+  </select>
+</div>
       </div>
 
       <div class="form-actions">

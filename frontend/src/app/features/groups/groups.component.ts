@@ -20,11 +20,12 @@ export class GroupsComponent implements OnInit {
   showForm: boolean = false;
   isEdit: boolean = false;
   selectedGroupId: string | null = null;
-
+users: any[] = [];
   group: any = {
     name: '',
     description: ''
   };
+
 
   constructor(
     private http: HttpClient,
@@ -33,6 +34,7 @@ export class GroupsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadGroups();
+    this.loadUsers();
   }
 
   loadGroups(): void {
@@ -72,6 +74,9 @@ export class GroupsComponent implements OnInit {
       (group.description || '').toLowerCase().includes(this.searchTerm.toLowerCase())
     );
 
+  }
+    isAdmin(): boolean {
+    return localStorage.getItem('role') === 'ADMIN';
   }
 
   openCreateForm(): void {
@@ -116,9 +121,14 @@ export class GroupsComponent implements OnInit {
       return;
     }
 
+    if (this.isAdmin() && !this.group.owner_id) {
+  this.errorMessage = 'Veuillez sélectionner un owner';
+  return;
+}
     const payload = {
       name: this.group.name,
-      description: this.group.description
+      description: this.group.description,
+      owner_id: this.group.owner_id || null
     };
 
     if (this.isEdit && this.selectedGroupId) {
@@ -184,6 +194,20 @@ export class GroupsComponent implements OnInit {
       }
     });
   }
+loadUsers(): void {
+  const token = localStorage.getItem('token');
+
+  this.http.get('http://localhost:8000/users/', {
+    headers: { Authorization: `Bearer ${token}` }
+  }).subscribe({
+    next: (res: any) => {
+      this.users = res;
+    },
+    error: () => {
+      this.users = [];
+    }
+  });
+}
 
   viewGroup(group: any): void {
      this.router.navigate(['/groups', group.id]);
