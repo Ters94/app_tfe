@@ -25,7 +25,7 @@
     <div class="toolbar">
       <input
         [(ngModel)]="searchTerm"
-        placeholder="Rechercher par nom ou description..."
+        placeholder="Rechercher par nom, description ou owner..."
       />
     </div>
 
@@ -56,15 +56,16 @@
           name="description"
           placeholder="Description du groupe"
         ></textarea>
-        <div *ngIf="isAdmin()">
-  <label>Owner</label>
-  <select  [(ngModel)]="group.owner_id" required>
-    <option value="">Sélectionner un owner</option>
-    <option *ngFor="let user of users" [value]="user.id">
-      {{ user.username }} - {{ user.email }}
-    </option>
-  </select>
-</div>
+      </div>
+
+      <div class="form-group" *ngIf="isAdmin() && !isEdit">
+        <label>Owner</label>
+        <select [(ngModel)]="group.owner_id" name="owner_id" required>
+          <option value="">Sélectionner un owner</option>
+          <option *ngFor="let user of users" [value]="user.id">
+            {{ user.username }} - {{ user.email }}
+          </option>
+        </select>
       </div>
 
       <div class="form-actions">
@@ -90,34 +91,41 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let group of filteredGroups">
+        <tr *ngFor="let group of filteredGroups" [class.disabled-row]="group.status === false">
           <td>{{ group.name || '-' }}</td>
           <td>{{ group.description || '-' }}</td>
-          <td>{{ group.owner_id || '-' }}</td>
+          <td>{{ group.owner_username || group.owner_id || '-' }}</td>
+
           <td>
             <span class="badge" [class.inactive]="group.status === false">
-               {{ group.status === false ? 'Clotué' : 'Actif' }}
+              {{ group.status === false ? 'Clôturé' : 'Actif' }}
             </span>
           </td>
 
           <td class="actions">
-            <button (click)="viewGroup(group)">Consulter</button>
-            <button *ngIf="canEdit(group)" (click)="openEditForm(group)">Modifier</button>
-           <button
-  class="danger"
-  *ngIf="canEdit(group) && group.status !== false"
-  (click)="deleteGroup(group.id)"
->
-  Désactiver
-</button>
+            <button (click)="viewGroup(group)">
+              Consulter
+            </button>
 
-<button
-  disabled
-  *ngIf="group.status === false"
-  disabled
->
-  Désactivé
-</button>
+            <button *ngIf="canEdit(group)" (click)="openEditForm(group)">
+              Modifier
+            </button>
+
+            <button
+              class="danger"
+              *ngIf="canEdit(group) && group.status !== false"
+              (click)="deleteGroup(group.id)"
+            >
+              Désactiver
+            </button>
+
+            <button
+              class="disabled-btn"
+              *ngIf="group.status === false"
+              disabled
+            >
+              Désactivé
+            </button>
           </td>
         </tr>
 
@@ -130,5 +138,4 @@
     </table>
 
   </main>
-
 </div>

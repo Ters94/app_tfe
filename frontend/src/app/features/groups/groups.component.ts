@@ -100,7 +100,8 @@ users: any[] = [];
 
     this.group = {
       name: group.name,
-      description: group.description || ''
+      description: group.description || '',
+      owner_id: group.owner_id || null
     };
 
     this.clearMessages();
@@ -121,7 +122,7 @@ users: any[] = [];
       return;
     }
 
-    if (this.isAdmin() && !this.group.owner_id) {
+    if (!this.isEdit && this.isAdmin() && !this.group.owner_id) {
   this.errorMessage = 'Veuillez sélectionner un owner';
   return;
 }

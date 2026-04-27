@@ -6,6 +6,7 @@ from backend.routes.auth import router as auth_router
 from backend.routes.groups import router as groups_router
 from fastapi.middleware.cors import CORSMiddleware
 from backend.routes.membership import router as membership_router
+from backend.routes.audits import router as audits_router
 
 
 
@@ -38,7 +39,7 @@ app.include_router(users_router)
 app.include_router(auth_router)
 app.include_router(groups_router)
 app.include_router(membership_router)
-
+app.include_router(audits_router)
 @app.get("/")
 def root():
     return {"message": "API is running correctly"}
