@@ -192,3 +192,9 @@ td {
 .info-btn:hover {
   background: #f3f4f6;
 }
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}

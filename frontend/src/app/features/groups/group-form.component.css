@@ -1,0 +1,270 @@
+.app-page {
+  min-height: 100vh;
+  background: #f5f6f8;
+  font-family: Arial, sans-serif;
+  color: #111827;
+}
+
+.topbar {
+  height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 15px;
+}
+
+nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+nav button {
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: #111827;
+}
+
+nav button.active {
+  border-bottom: 2px solid #111827;
+}
+
+nav button:hover {
+  text-decoration: underline;
+}
+
+.content {
+  padding: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+}
+
+.toolbar input {
+  width: 100%;
+  max-width: 620px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+}
+
+.primary-btn {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #374151;
+}
+
+.secondary-btn {
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.form-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  max-width: 620px;
+}
+
+.form-card h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.form-group textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+thead {
+  background: #eef0f4;
+}
+
+th,
+td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+.actions-col {
+  width: 260px;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  border: 1px solid #c7c7c7;
+  background: #ffffff;
+  padding: 6px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+.actions .danger {
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.actions .danger:hover {
+  background: #fee2e2;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.error-box {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  font-weight: 700;
+}
+
+.success-box {
+  background: #dcfce7;
+  color: #166534;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  font-weight: 700;
+}
+
+.empty-message {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px;
+}
+.badge.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.disabled-btn {
+  background: #e5e7eb;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+  cursor: not-allowed;
+}
+.back-btn {
+  background: transparent;
+  border: none;
+  font-weight: 700;
+  margin-bottom: 16px;
+  cursor: pointer;
+}
+.danger {
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+  background: white;
+  padding: 6px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.danger:hover {
+  background: #fee2e2;
+}
+
+.info-btn {
+  border: 1px solid #c7c7c7;
+  background: #ffffff;
+  color: #111827;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 6px;
+}
+
+.info-btn:hover {
+  background: #f3f4f6;
+}

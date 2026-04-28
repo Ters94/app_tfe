@@ -107,9 +107,13 @@
               Consulter
             </button>
 
-            <button *ngIf="canEdit(group)" (click)="openEditForm(group)">
-              Modifier
-            </button>
+            <button
+  *ngIf="canEdit(group)"
+  [routerLink]="['/groups/group-form', group.id]"
+>
+  Modifier
+</button>
+             
 
             <button
               class="danger"

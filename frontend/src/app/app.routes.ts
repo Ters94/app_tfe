@@ -50,4 +50,14 @@ export const routes: Routes = [
   loadComponent: () =>
     import('./features/groups/group-detail.component').then(m => m.GroupDetailComponent)
 },
+{
+  path: 'groups/create',
+  loadComponent: () =>
+    import('./features/groups/group-create.component').then(m => m.GroupCreateComponent)
+},
+{
+  path: 'groups/group-form/:id',
+  loadComponent: () =>
+    import('./features/groups/group-form.component').then(m => m.GroupFormComponent)
+},
 ];

@@ -5,48 +5,46 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
+  selector: 'app-group-form',
   standalone: true,
-  selector: 'app-group-detail',
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './group-detail.component.html',
-  styleUrls: ['./group-detail.component.css']
+  templateUrl: './group-form.component.html',
+  styleUrl: './group-form.component.css'
 })
-export class GroupDetailComponent implements OnInit {
-  groupId: string | null = null;
-  group: any = {};
-  members: any[] = [];
-  users: any[] = [];
+export class GroupFormComponent implements OnInit {
 
-  role: string = '';
-  currentUserId: string = '';
-
-  selectedUserId: string = '';
   errorMessage: string = '';
   successMessage: string = '';
 
+  groupId: string | null = null;
+
+  group: any = {
+    name: '',
+    description: '',
+    owner_id: ''
+  };
+
+  users: any[] = [];
+  members: any[] = [];
+  selectedUserId: string = '';
+
   constructor(
-    private route: ActivatedRoute,
+    private http: HttpClient,
     private router: Router,
-    private http: HttpClient
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.groupId = this.route.snapshot.paramMap.get('id');
-    this.role = localStorage.getItem('role') || '';
-    this.currentUserId = localStorage.getItem('userId') || '';
 
     if (!this.groupId) {
-      this.router.navigate(['/groups']);
+      this.errorMessage = 'Aucun groupe sélectionné';
       return;
     }
 
     this.loadGroup();
-    this.loadMembers();
     this.loadUsers();
-  }
-
-  canManageMembers(group: any): boolean {
-    return this.role === 'ADMIN' || this.group.owner_id === this.currentUserId;
+    this.loadMembers();
   }
 
   loadGroup(): void {
@@ -60,27 +58,41 @@ export class GroupDetailComponent implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors du chargement du groupe';
+        this.errorMessage = 'Erreur lors du chargement du groupe';
       }
     });
   }
 
-
-editGroupPage(): void {
-  this.router.navigate(['/groups/edit', this.groupId]);
-}
-  loadMembers(): void {
+  saveGroup(): void {
     const token = localStorage.getItem('token');
 
-    this.http.get(`http://localhost:8000/groups/${this.groupId}/members`, {
+    if (!token) {
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.clearMessages();
+
+    if (!this.group.name || this.group.name.trim() === '') {
+      this.errorMessage = 'Le nom du groupe est obligatoire';
+      return;
+    }
+
+    const payload = {
+      name: this.group.name,
+      description: this.group.description
+    };
+
+    this.http.put(`http://localhost:8000/groups/${this.groupId}`, payload, {
       headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
-      next: (res: any) => {
-        this.members = res;
+      next: () => {
+        this.successMessage = 'Groupe modifié avec succès';
+        this.loadGroup();
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors du chargement des membres';
+        this.errorMessage = err?.error?.detail || 'Erreur lors de la modification du groupe';
       }
     });
   }
@@ -130,7 +142,46 @@ editGroupPage(): void {
     });
   }
 
-  removeMember(member: any): void {
+  loadMembers(): void {
+    const token = localStorage.getItem('token');
+
+    this.http.get<any[]>(`http://localhost:8000/groups/${this.groupId}/members`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: (data) => {
+        this.members = data;
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = 'Erreur lors du chargement des membres';
+      }
+    });
+  }
+
+  get role(): string {
+    return localStorage.getItem('role') || '';
+  }
+
+  get currentUserId(): string {
+    return localStorage.getItem('userId') || '';
+  }
+
+  canManageMembers(group: any): boolean {
+    return this.role === 'ADMIN' || group.owner_id === this.currentUserId;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/groups']);
+  }
+ viewUser(member: any): void {
+  if (!member.user_id) {
+    this.errorMessage = "Utilisateur introuvable";
+    return;
+  }
+
+  this.router.navigate(['/users', member.user_id]);
+}
+ removeMember(member: any): void {
     const confirmed = confirm('Voulez-vous supprimer ce membre du groupe ?');
     if (!confirmed) return;
 
@@ -151,22 +202,17 @@ editGroupPage(): void {
       }
     });
   }
-  viewUser(member: any): void {
-  if (!member.user_id) {
-    this.errorMessage = "Utilisateur introuvable";
-    return;
+
+  clearMessages(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
-  this.router.navigate(['/users', member.user_id]);
-}
-  goBack(): void {
-    this.router.navigate(['/groups']);
-  }
   logout(): void {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('userId');
-  this.router.navigate(['/']);
-}
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    this.router.navigate(['/']);
+  }
 }
