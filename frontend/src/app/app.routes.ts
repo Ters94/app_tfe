@@ -1,9 +1,13 @@
 import { Routes } from '@angular/router';
+import { AuditsComponent } from './features/audits/audits.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () =>
      import('./features/auth/login/login.component')
-     .then(m => m.LoginComponent) },
+     .then(m => m.LoginComponent)
+    },
+    {
+       path: 'audits', component: AuditsComponent },
     {
     path: 'admin',
     loadComponent: () =>

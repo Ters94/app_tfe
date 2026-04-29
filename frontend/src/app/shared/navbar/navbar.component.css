@@ -1,0 +1,56 @@
+.app-page {
+  min-height: 100vh;
+  background: #f5f6f8;
+  font-family: Arial, sans-serif;
+}
+
+.topbar {
+  height: 56px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+
+.brand {
+  font-weight: bold;
+  font-size: 15px;
+}
+
+nav {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+nav button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #111827;
+}
+
+nav button.active {
+  border-bottom: 2px solid #111827;
+}
+
+nav button:hover {
+  text-decoration: underline;
+}
+
+.content {
+  padding: 30px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 24px;
+}
+.welcome {
+  color: #6b7280;
+  margin-top: 6px;
+  margin-bottom: 25px;
+}

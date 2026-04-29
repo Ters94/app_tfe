@@ -1,22 +1,6 @@
 <div class="app-page">
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <div class="brand">ENGIE – Queries</div>
 
-    <nav>
-      <button routerLink="/dashboard" class="active">Dashboard</button>
-
-      <button  routerLink="/users">
-        Users
-      </button>
-
-      <button routerLink="/groups">Groups</button>
-      <button routerLink="/queries">Queries</button>
-
-      <button (click)="logout()">Logout</button>
-    </nav>
-  </header>
 
   <!-- CONTENU -->
   <main class="content">
@@ -43,7 +27,7 @@
       </div>
 
       <!-- ADMIN ONLY -->
-      <div class="card admin" *ngIf="role === 'ADMIN'" routerLink="/audit">
+      <div class="card admin" *ngIf="role === 'ADMIN'" routerLink="/audits">
         <h3>Audit</h3>
         <p>Consulter les logs et activités</p>
       </div>
