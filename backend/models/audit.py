@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 from pydantic import BaseModel, Field
 from backend.models.base import MongoBaseModel
 
@@ -28,6 +29,7 @@ class AuditPublic(BaseModel):
     target_label: str | None = None
 
     user_id: str
+    username: str | None = None
     group_id: str | None = None
 
     old_values: dict | None = None

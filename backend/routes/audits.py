@@ -12,18 +12,22 @@ router = APIRouter(prefix="/audits", tags=["Audits"])
 @router.get("/groups/{group_id}", response_model=List[AuditPublic])
 def get_group_audits(
     group_id: str,
-    admin=Depends(get_current_admin)  
+    admin=Depends(get_current_admin)
 ):
- 
     if not ObjectId.is_valid(group_id):
         raise HTTPException(status_code=400, detail="Invalid group id")
 
-  
     audits = db.audits.find({"group_id": group_id}).sort("timestamp", -1)
 
     result = []
 
     for a in audits:
+        user = None
+        user_id = a.get("user_id", "")
+
+        if user_id and ObjectId.is_valid(user_id):
+            user = db.users.find_one({"_id": ObjectId(user_id)})
+
         result.append(
             AuditPublic(
                 id=str(a["_id"]),
@@ -34,7 +38,9 @@ def get_group_audits(
                 target_id=a.get("target_id", ""),
                 target_label=a.get("target_label"),
 
-                user_id=a.get("user_id", ""),
+                user_id=user_id,
+                username=user.get("username") if user else "Utilisateur inconnu",
+
                 group_id=a.get("group_id"),
 
                 old_values=a.get("old_values"),
