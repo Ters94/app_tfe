@@ -7,7 +7,12 @@ export const routes: Routes = [
      .then(m => m.LoginComponent)
     },
     {
-       path: 'audits', component: AuditsComponent },
+  path: 'audits',
+  component: AuditsComponent
+},
+    {
+       path: 'audits/groups/:groupId',
+        component: AuditsComponent },
     {
     path: 'admin',
     loadComponent: () =>

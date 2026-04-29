@@ -1,11 +1,15 @@
 <div class="audit-page">
 
+
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+
   <div class="audit-header">
     <h2>Journal d’audit</h2>
-    <p>Rechercher les audits d’un groupe précis.</p>
+    <p *ngIf="selectedGroup">
+      Groupe : {{ selectedGroup.name }}</p>
   </div>
 
-  <div class="search-card">
+  <div *ngIf="!isGroupMode" class="search-card">
 
   <div class="autocomplete">
     <input

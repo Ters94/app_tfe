@@ -195,3 +195,51 @@ pre {
   font-style: italic;
   font-size: 13px;
 }
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #111827;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 18px;
+  padding: 6px 0;
+}
+
+.back-btn:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.primary-btn {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1f2937;
+}
+
+.secondary-btn {
+  background: white;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary-btn:hover {
+  background: #f3f4f6;
+}

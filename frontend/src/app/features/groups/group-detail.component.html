@@ -1,17 +1,6 @@
 
 <div class="app-page">
 
-  <header class="topbar">
-    <div class="brand">ENGIE – Groupes</div>
-
-    <nav>
-      <button routerLink="/dashboard">Dashboard</button>
-      <button routerLink="/users">Users</button>
-      <button routerLink="/groups">Groupes</button>
-      <button routerLink="/queries">Queries</button>
-      <button (click)="logout()">Logout</button>
-    </nav>
-  </header>
 
   <main class="content">
 
@@ -28,6 +17,9 @@
 [routerLink]="['/groups/group-form', group.id]" >
       Modifier
     </button>
+
+    <button class="secondary-btn" [routerLink]="['/audits/groups', group.id]">Historique</button>
+
       <div class="info-grid">
         <div>
           <strong>Owner</strong>

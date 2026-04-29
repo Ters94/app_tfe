@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditService, Audit, Group } from '../../services/audit.service';
+import { ActivatedRoute, Router } from '@angular/router';
+
+
 
 @Component({
   selector: 'app-audits',
@@ -20,12 +23,46 @@ export class AuditsComponent implements OnInit {
   loading = false;
   errorMessage = '';
   groups: Group[] = [];
-  constructor(private auditService: AuditService) {}
+  isGroupMode : boolean = false;
+  constructor(
+    private auditService: AuditService,
+
+     private route: ActivatedRoute,
+      private router: Router
+   ) {}
 
   ngOnInit(): void {
-    this.loadGroups();
-  }
+  this.route.paramMap.subscribe(params => {
+    const groupId = params.get('groupId');
 
+    this.errorMessage = '';
+    this.filteredGroups = [];
+
+    if (groupId) {
+      this.isGroupMode = true;
+      this.loadGroupsAndSelect(groupId);
+      this.searchAudits(groupId);
+    } else {
+      this.isGroupMode = false;
+      this.selectedGroup = null;
+      this.groupSearch = '';
+      this.audits = [];
+      this.loadGroups();
+    }
+  });
+}
+
+loadGroupsAndSelect(groupId: string): void {
+  this.auditService.getGroups().subscribe({
+    next: (data) => {
+      this.groups = data;
+      this.selectedGroup = this.groups.find(group => group.id === groupId) || null;
+    },
+    error: () => {
+      this.selectedGroup = null;
+    }
+  });
+}
   loadGroups(): void {
     this.auditService.getGroups().subscribe({
       next: (data) => {
@@ -101,4 +138,7 @@ export class AuditsComponent implements OnInit {
     value: values[key]
   }));
 }
+goBack(): void {
+    this.router.navigate(['/groups']);
+  }
 }

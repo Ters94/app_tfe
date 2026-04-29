@@ -3,7 +3,7 @@ from typing import List
 from bson import ObjectId
 
 from backend.database import db
-from backend.security import get_current_admin
+from backend.security import get_current_admin, get_current_user
 from backend.models.audit import AuditPublic
 
 router = APIRouter(prefix="/audits", tags=["Audits"])
@@ -12,21 +12,46 @@ router = APIRouter(prefix="/audits", tags=["Audits"])
 @router.get("/groups/{group_id}", response_model=List[AuditPublic])
 def get_group_audits(
     group_id: str,
-    admin=Depends(get_current_admin)
+    current_user=Depends(get_current_user)
 ):
     if not ObjectId.is_valid(group_id):
         raise HTTPException(status_code=400, detail="Invalid group id")
+
+
+    if not ObjectId.is_valid(str(current_user)):
+        raise HTTPException(status_code=400, detail="Invalid user id")
+    
+
+
+    current_user_id = str(current_user)
+    user_doc = db.users.find_one({"_id": ObjectId(current_user_id)})
+    current_user_role = user_doc.get("role") if user_doc else None
+
+    group = db.groups.find_one({"_id": ObjectId(group_id)})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if current_user_role != "ADMIN":
+        membership = db.memberships.find_one({
+            "group_id": group_id,
+            "user_id": current_user_id
+        })
+
+        is_owner = str(group.get("owner_id")) == current_user_id
+
+        if not membership and not is_owner:
+            raise HTTPException(status_code=403, detail="Not authorized")
 
     audits = db.audits.find({"group_id": group_id}).sort("timestamp", -1)
 
     result = []
 
     for a in audits:
-        user = None
-        user_id = a.get("user_id", "")
+        audit_user = None
+        audit_user_id = a.get("user_id", "")
 
-        if user_id and ObjectId.is_valid(user_id):
-            user = db.users.find_one({"_id": ObjectId(user_id)})
+        if audit_user_id and ObjectId.is_valid(audit_user_id):
+            audit_user = db.users.find_one({"_id": ObjectId(audit_user_id)})
 
         result.append(
             AuditPublic(
@@ -38,11 +63,14 @@ def get_group_audits(
                 target_id=a.get("target_id", ""),
                 target_label=a.get("target_label"),
 
-                user_id=user_id,
-                username=user.get("username") if user else "Utilisateur inconnu",
+                user_id=audit_user_id,
+                username=(
+                    audit_user.get("username")
+                    or audit_user.get("name")
+                    if audit_user else "Utilisateur inconnu"
+                ),
 
                 group_id=a.get("group_id"),
-
                 old_values=a.get("old_values"),
                 new_values=a.get("new_values")
             )
