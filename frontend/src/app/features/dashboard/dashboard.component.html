@@ -1,8 +1,6 @@
 <div class="app-page">
 
 
-
-  <!-- CONTENU -->
   <main class="content">
 
     <h2>Tableau de bord</h2>
@@ -21,18 +19,18 @@
         <p>Gérer les groupes et les membres</p>
       </div>
 
-      <div class="card" routerLink="/queries">
-        <h3>Queries</h3>
-        <p>Créer et consulter les requêtes</p>
-      </div>
 
-      <!-- ADMIN ONLY -->
+
       <div class="card admin" *ngIf="role === 'ADMIN'" routerLink="/audits">
         <h3>Audit</h3>
         <p>Consulter les logs et activités</p>
       </div>
 
-      <!-- USER -->
+
+      <div *ngIf="role === 'USER'"  class="card" routerLink="/queries">
+        <h3>Queries</h3>
+        <p>Créer et consulter les requêtes</p>
+      </div>
       <div class="card user" *ngIf="role === 'USER'" [routerLink]="['/users', userId]">
         <h3>Mon profil</h3>
         <p>Consulter et modifier vos informations</p>

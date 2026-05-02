@@ -1,11 +1,15 @@
 import { Routes } from '@angular/router';
 import { AuditsComponent } from './features/audits/audits.component';
+import { QueriesComponent } from './features/queries/queries.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () =>
      import('./features/auth/login/login.component')
      .then(m => m.LoginComponent)
     },
+
+     { path: 'queries',
+       component: QueriesComponent },
     {
   path: 'audits',
   component: AuditsComponent

@@ -5,38 +5,13 @@
   color: #111827;
 }
 
-.topbar {
-  height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-}
+
 
 .brand {
   font-weight: 700;
   font-size: 15px;
 }
 
-nav {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-}
-
-nav button {
-  background: transparent;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  color: #111827;
-}
-
-nav button:hover {
-  text-decoration: underline;
-}
 
 .content {
   padding: 24px;

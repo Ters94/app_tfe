@@ -1,0 +1,114 @@
+<div class="queries-page">
+
+  <div class="page-header">
+    <div>
+      <h2>Gestion des queries</h2>
+      <p>Exécuter des requêtes pour filtrer les deals disponibles.</p>
+    </div>
+    <div class="actions">
+  <button class="create-btn" (click)="showCreateForm = !showCreateForm">
+     {{ showCreateForm ? 'Annuler' : 'Créer une query' }}
+  </button>
+</div>
+  </div>
+
+<section class="card">
+
+  <h3>Filtres</h3>
+
+  <div class="create-form" *ngIf="showCreateForm">
+
+    <input
+      type="text"
+      placeholder="Nom de la query"
+      [(ngModel)]="newQueryName"
+    />
+
+    <select class="actions" [(ngModel)]="newProduct">
+      <option value="">Produit</option>
+      <option value="GAS">GAS</option>
+      <option value="ELECTRICITY">ELECTRICITY</option>
+      <option value="OIL">OIL</option>
+    </select>
+
+    <select [(ngModel)]="newType">
+      <option value="">Type</option>
+      <option value="BUY">BUY</option>
+      <option value="SELL">SELL</option>
+    </select>
+
+    <select [(ngModel)]="selectedGroupId">
+  <option value="">Choisir un groupe</option>
+  <option *ngFor="let group of groups" [value]="group._id || group.id">
+    {{ group.name }}
+  </option>
+</select>
+
+    <button class="create-btn" (click)="createQuery()">
+      Créer
+    </button>
+
+  </div>
+
+</section>
+
+
+  <section class="card">
+    <h3>Liste des queries</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Nom</th>
+          <th>Groupe</th>
+          <th>Filtres</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let query of queries">
+          <td>{{ query.query_name }}</td>
+           <td>{{ getGroupName(query.group_id) }}</td>
+          <td>
+            <code>{{ query.filters | json }}</code>
+          </td>
+          <td class="actions" >
+            <button  (click)="executeQuery(query.id)">
+              Exécuter
+            </button>
+            <button (click)="editQuery(query)">Modifier</button>
+            <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" *ngIf="results.length > 0">
+    <h3>Résultats</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Type</th>
+          <th>Date livraison</th>
+          <th>Amount</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let deal of results">
+          <td>{{ deal.product }}</td>
+          <td>{{ deal.type }}</td>
+          <td>{{ deal.delivery_date }}</td>
+          <td>{{ deal.amount }}</td>
+          <td>{{ deal.volume }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>

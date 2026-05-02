@@ -5,7 +5,7 @@
     <button routerLink="/dashboard">Dashboard</button>
     <button routerLink="/users">Users</button>
     <button routerLink="/groups">Groups</button>
-    <button routerLink="/queries">Queries</button>
+    <button *ngIf="!isAdmin()" routerLink="/queries" >Queries</button>
     <button *ngIf="isAdmin()" routerLink="/audits">Audits</button>
 
     <button (click)="logout()">Logout</button>
