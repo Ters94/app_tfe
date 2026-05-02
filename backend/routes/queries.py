@@ -2,6 +2,8 @@ from http.client import HTTPException
 
 from fastapi import APIRouter, Depends
 from backend.database import db
+from backend.routes import groups, membership
+from backend.models import membership
 from backend.security import get_current_user
 from backend.models.query import Query, QueryCreate
 from datetime import datetime
@@ -33,13 +35,26 @@ def get_queries(current_user=Depends(get_current_user)):
     queries = []
 
     for query in db.queries.find():
+
+        group_id = query.get("group_id")
+
+        membership = db.memberships.find_one({
+            "user_id": ObjectId(current_user),
+            "group_id": group_id
+        })
+       
+
+        group = db.groups.find_one({"_id": group_id})
+        is_owner = group and str(group.get("owner_id")) == str(current_user)
+        is_member = membership is not None
         queries.append({
             "id": str(query["_id"]),
             "query_name": query.get("query_name"),
             "filters": query.get("filters", {}),
             "group_id": str(query.get("group_id")),
             "created_by": str(query.get("created_by")),
-            "created_at": query.get("created_at")
+            "created_at": query.get("created_at"),
+            "can_manage": is_owner or is_member
         })
 
     return queries
@@ -79,24 +94,63 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
         "results": results
     }
 
-@router.put("/{query_id}")
-def update_query(query_id: str, query: QueryCreate, current_user=Depends(get_current_user)):
-    existing = db.queries.find_one({"_id": ObjectId(query_id)})
+@router.get("/{query_id}")
+def get_query_by_id(query_id: str, current_user=Depends(get_current_user)):
+    query = db.queries.find_one({"_id": ObjectId(query_id)})
 
-    if not existing:
+    if not query:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    update_data = {
-        "query_name": query.query_name,
-        "filters": query.filters
+    group = db.groups.find_one({"_id": query.get("group_id")})
+
+    return {
+        "id": str(query["_id"]),
+        "query_name": query.get("query_name"),
+        "filters": query.get("filters", {}),
+        "group_id": str(query.get("group_id")),
+        "group_name": group.get("name") if group else "—",
+        "created_by": str(query.get("created_by"))
     }
 
-    db.queries.update_one(
+@router.put("/{query_id}")
+def update_query(query_id: str, query: QueryCreate, current_user=Depends(get_current_user)):
+    if not ObjectId.is_valid(query_id):
+        raise HTTPException(status_code=400, detail="Invalid query id")
+
+    result = db.queries.update_one(
         {"_id": ObjectId(query_id)},
-        {"$set": update_data}
+        {
+            "$set": {
+                "query_name": query.query_name,
+                "filters": query.filters,
+                "group_id": ObjectId(query.group_id)
+            }
+        }
     )
 
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Query not found")
+
     return {"message": "Query updated"}
+
+# @router.put("/{query_id}")
+# def update_query(query_id: str, query: QueryCreate, current_user=Depends(get_current_user)):
+#     existing = db.queries.find_one({"_id": ObjectId(query_id)})
+
+#     if not existing:
+#         raise HTTPException(status_code=404, detail="Query not found")
+
+#     update_data = {
+#         "query_name": query.query_name,
+#         "filters": query.filters
+#     }
+
+#     db.queries.update_one(
+#         {"_id": ObjectId(query_id)},
+#         {"$set": update_data}
+#     )
+
+#     return {"message": "Query updated"}
 
 
 @router.delete("/{query_id}")

@@ -1,0 +1,99 @@
+<div class="queries-execution-page">
+  <div class="page-header">
+    <div>
+      <h2>Gestion des queries</h2>
+      <p>Exécuter des requêtes pour filtrer les deals disponibles.</p>
+      <div *ngIf="query">
+        <h2>{{ query.query_name }}</h2>
+
+        <p><strong>Groupe :</strong> {{ query.group_name }}</p>
+
+        <p><strong>Filtres :</strong></p>
+        <code>{{ query.filters | json }}</code>
+
+        <br><br>
+
+        <div>
+  <button class="create-btn" (click)="executeQuery(query.id)">Exécuter</button>
+
+  <button class="create-btn"(click)="startEdit()">
+    Modifier
+  </button>
+
+  <button class="create-btn" (click)="deleteQuery(query.id)">
+    Supprimer
+  </button>
+</div>
+
+
+      </div>
+    </div>
+  </div>
+  <section class="card" *ngIf="results.length > 0">
+    <h3>Résultats</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Produit</th>
+          <th>Type</th>
+          <th>Date livraison</th>
+          <th>Amount</th>
+          <th>Volume</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let deal of results">
+          <td>{{ deal.product }}</td>
+          <td>{{ deal.type }}</td>
+          <td>{{ deal.delivery_date }}</td>
+          <td>{{ deal.amount }}</td>
+          <td>{{ deal.volume }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card" *ngIf="showCreateForm">
+
+    <h3>Filtres</h3>
+
+    <div class="create-form" >
+
+      <input
+      type="text"
+      placeholder="Nom de la query"
+      [(ngModel)]="newQueryName"
+    />
+
+    <select class="actions" [(ngModel)]="newProduct">
+      <option value="">Produit</option>
+      <option value="GAS">GAS</option>
+      <option value="ELECTRICITY">ELECTRICITY</option>
+      <option value="OIL">OIL</option>
+    </select>
+
+    <select [(ngModel)]="newType">
+      <option value="">Type</option>
+      <option value="BUY">BUY</option>
+      <option value="SELL">SELL</option>
+    </select>
+
+    <select [(ngModel)]="selectedGroupId">
+      <option value="">Choisir un groupe</option>
+      <option *ngFor="let group of groups" [value]="group._id || group.id">
+        {{ group.name }}
+      </option>
+    </select>
+
+    <button class="create-btn" (click)="updateQuery()">
+      Mettre à jour
+    </button>
+
+  </div>
+
+
+</section>
+
+

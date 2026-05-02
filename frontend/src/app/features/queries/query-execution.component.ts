@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import {FormsModule} from "@angular/forms";
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'app-queries',
+  selector: 'app-query-execution',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './queries.component.html',
-  styleUrls: ['./queries.component.css']
+ imports: [CommonModule, FormsModule],
+  templateUrl: './query-execution.component.html',
+  styleUrls: ['./query-execution.component.css']
 })
-export class QueriesComponent implements OnInit {
-queries: any[] = [];
+export class QueryExecutionComponent  implements OnInit {
+queryId: string ='';
+query: any = null;
 results: any[] = [];
 newQueryName: string = '';
 newProduct: string = '';
@@ -20,14 +22,16 @@ newType: string = '';
 groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
-editingQueryId: string | null = null;
 constructor(
   private http: HttpClient,
-  private router: Router) {}
+  private router: Router,
+  private route: ActivatedRoute) {}
+
 
   ngOnInit() {
-    this.loadQueries();
+    this.queryId = this.route.snapshot.paramMap.get('id') || '';
     this.loadGroups();
+    this.loadQuery();
   }
 
    getHeaders() {
@@ -44,31 +48,13 @@ constructor(
   return group ? group.name : '—';
 
 }
-selectedQueryId: string | null = null;
 
-toggleActions(queryId: string) {
-  this.selectedQueryId =
-    this.selectedQueryId === queryId ? null : queryId;
-}
-openQuery(queryId: string) {
-  this.router.navigate(['/queries', queryId]);
-}
-editQuery(query: any) {
-   this.router.navigate(['/queries', query.id]);
-  this.showCreateForm = true;
 
-  this.editingQueryId = query.id;
 
-  this.newQueryName = query.query_name;
-  this.newProduct = query.filters?.product || '';
-  this.newType = query.filters?.type || '';
-  this.selectedGroupId = query.group_id;
-}
-
-  deleteQuery(id: string) {
+deleteQuery(id: string) {
   this.http.delete(`http://127.0.0.1:8000/queries/${id}`, this.getHeaders())
     .subscribe(() => {
-      this.loadQueries();
+      this.router.navigate(['/queries']);
     });
 }
   loadGroups() {
@@ -82,18 +68,13 @@ editQuery(query: any) {
         }
       });
   }
-
-  loadQueries() {
-    this.http.get<any[]>('http://127.0.0.1:8000/queries/', this.getHeaders())
-      .subscribe({
-        next: (data) => {
-          this.queries = data;
-        },
-        error: (err) => {
-          console.error('Erreur chargement queries', err);
-        }
+   loadQuery() {
+    this.http.get<any>(`http://127.0.0.1:8000/queries/${this.queryId}`, this.getHeaders())
+      .subscribe(data => {
+        this.query = data;
       });
   }
+
   executeQuery(queryId: string) {
     this.http.get<any>(`http://127.0.0.1:8000/queries/${queryId}/execute`, this.getHeaders())
       .subscribe({
@@ -105,13 +86,17 @@ editQuery(query: any) {
         }
       });
   }
-  createQuery() {
-  const groupId = localStorage.getItem('group_id'); // ou à adapter
+  startEdit() {
+  this.showCreateForm = true;
 
-  if (!this.selectedGroupId) {
-  alert('Choisis un groupe avant de créer la query');
-  return;
+  this.newQueryName = this.query.query_name;
+  this.newProduct = this.query.filters?.product || '';
+  this.newType = this.query.filters?.type || '';
+  this.selectedGroupId = this.query.group_id;
+
+
 }
+updateQuery() {
   const body = {
     query_name: this.newQueryName,
     filters: {
@@ -121,18 +106,16 @@ editQuery(query: any) {
     group_id: this.selectedGroupId
   };
 
-  this.http.post('http://127.0.0.1:8000/queries/', body, this.getHeaders())
-    .subscribe({
-      next: () => {
-        this.showCreateForm = false;
-        this.newQueryName = '';
-        this.newProduct = '';
-        this.newType = '';
-        this.loadQueries();
-      },
-      error: (err) => {
-        console.error('Erreur création query', err.error.detail);
-      }
-    });
+  this.http.put(
+    `http://127.0.0.1:8000/queries/${this.queryId}`,
+    body,
+    this.getHeaders()
+  ).subscribe({
+    next: () => {
+      this.showCreateForm = false;
+      this.loadQuery();
+    },
+    error: (err) => console.error('Erreur modification query', err)
+  });
 }
 }

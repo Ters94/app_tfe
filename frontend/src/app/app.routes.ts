@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuditsComponent } from './features/audits/audits.component';
 import { QueriesComponent } from './features/queries/queries.component';
+import { QueryExecutionComponent } from './features/queries/query-execution.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () =>
@@ -8,8 +9,13 @@ export const routes: Routes = [
      .then(m => m.LoginComponent)
     },
 
+
+
      { path: 'queries',
        component: QueriesComponent },
+
+{ path: 'queries/:id',
+   component: QueryExecutionComponent },
     {
   path: 'audits',
   component: AuditsComponent
