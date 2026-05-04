@@ -1,12 +1,13 @@
 from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
-from backend.database import db, get_users_collection
+from backend.database import get_users_collection, get_groups_collection
 from backend.models import user
 from backend.models.user import UserCreate, UserInDB, UserPublic, UserUpdate
 from backend.security import get_password_hash
 from fastapi import Depends
 from backend.security import get_current_user, get_current_admin
+
 
 import re
 
@@ -125,9 +126,21 @@ def get_user_by_id(user_id: str,):
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: str, admin = Depends(get_current_admin)):
     users_collection = get_users_collection()
+    groups_collection = get_groups_collection()
 
     if not ObjectId.is_valid(user_id):
         raise HTTPException(status_code=400, detail="Invalid user ID")
+
+    owned_group = groups_collection.find_one({
+        "owner_id": user_id,  
+        "status": True
+    })
+
+    if owned_group:
+        raise HTTPException(
+            status_code=400,
+            detail="Impossible de supprimer cet utilisateur : il est propriétaire d’un groupe actif."
+        )
 
     result = users_collection.delete_one({"_id": ObjectId(user_id)})
 

@@ -133,25 +133,6 @@ def update_query(query_id: str, query: QueryCreate, current_user=Depends(get_cur
 
     return {"message": "Query updated"}
 
-# @router.put("/{query_id}")
-# def update_query(query_id: str, query: QueryCreate, current_user=Depends(get_current_user)):
-#     existing = db.queries.find_one({"_id": ObjectId(query_id)})
-
-#     if not existing:
-#         raise HTTPException(status_code=404, detail="Query not found")
-
-#     update_data = {
-#         "query_name": query.query_name,
-#         "filters": query.filters
-#     }
-
-#     db.queries.update_one(
-#         {"_id": ObjectId(query_id)},
-#         {"$set": update_data}
-#     )
-
-#     return {"message": "Query updated"}
-
 
 @router.delete("/{query_id}")
 def delete_query(query_id: str, current_user=Depends(get_current_user)):

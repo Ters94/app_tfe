@@ -23,7 +23,7 @@ export class UserDetailComponent implements OnInit {
   ngOnInit(): void {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-    const currentUserId = localStorage.getItem('userId');
+    const currentUserId = localStorage.getItem('user_id');
         const id = this.route.snapshot.paramMap.get('id');
 
 
@@ -72,7 +72,7 @@ export class UserDetailComponent implements OnInit {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    localStorage.removeItem('userId');
+    localStorage.removeItem('user_id');
     this.router.navigate(['/']);
   }
 }

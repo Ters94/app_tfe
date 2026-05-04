@@ -163,7 +163,7 @@ export class GroupFormComponent implements OnInit {
   }
 
   get currentUserId(): string {
-    return localStorage.getItem('userId') || '';
+    return localStorage.getItem('user_id') || '';
   }
 
   canManageMembers(group: any): boolean {
@@ -212,7 +212,7 @@ export class GroupFormComponent implements OnInit {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
-    localStorage.removeItem('userId');
+    localStorage.removeItem('user_id');
     this.router.navigate(['/']);
   }
 }

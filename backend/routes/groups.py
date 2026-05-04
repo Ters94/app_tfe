@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from bson import ObjectId
 
-from backend.database import db
+from backend.database import db, get_groups_collection
 from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdate
 from backend.security import get_current_user
 from backend.models.role import RoleEnum
@@ -152,7 +152,13 @@ def get_group_by_id(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
 
-    if group["owner_id"] != current_user and not is_admin(current_user):
+
+    membership = db.memberships.find_one({
+        "group_id": group_id,
+        "user_id": current_user
+    })
+
+    if group["owner_id"] != current_user and not membership and not is_admin(current_user):
         raise HTTPException(status_code=403, detail="Not authorized")
 
     owner = None
@@ -262,3 +268,56 @@ def desactivate_group(
     )
 
     return {"message": "Group desactivated"}
+
+@router.put("/{group_id}/transfer-owner")
+def transfer_owner(
+    group_id: str,
+    new_owner_id: str,
+    current_user=Depends(get_current_user)
+):
+    groups_collection = get_groups_collection()
+
+    if not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid group ID")
+
+    if not ObjectId.is_valid(new_owner_id):
+        raise HTTPException(status_code=400, detail="Invalid new owner ID")
+
+    group = groups_collection.find_one({"_id": ObjectId(group_id), "status": True})
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    if group["owner_id"] != current_user:
+        raise HTTPException(
+            status_code=403,
+            detail="Seul l’owner actuel peut transférer la propriété du groupe."
+        )
+
+    membership = db.memberships.find_one({
+        "group_id": group_id,
+        "user_id": new_owner_id
+    })
+
+    if not membership:
+        raise HTTPException(
+            status_code=400,
+            detail="Le nouvel owner doit être membre du groupe."
+        )
+
+    groups_collection.update_one(
+        {"_id": ObjectId(group_id)},
+        {"$set": {"owner_id": new_owner_id}}
+    )
+
+    db.memberships.update_many(
+    {"group_id": group_id, "role": "OWNER"},
+    {"$set": {"role": "MEMBER"}}
+)
+
+    db.memberships.update_one(
+    {"group_id": group_id, "user_id": new_owner_id},
+    {"$set": {"role": "OWNER"}}
+)
+
+    return {"message": "Ownership transféré avec succès"}

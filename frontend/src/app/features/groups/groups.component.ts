@@ -65,7 +65,7 @@ users: any[] = [];
   }
 
   get currentUserId(): string {
-  return localStorage.getItem('userId') || '';
+  return localStorage.getItem('user_id') || '';
   }
 
   get filteredGroups() {
@@ -234,7 +234,7 @@ loadUsers(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
-    localStorage.removeItem('userId');
+    localStorage.removeItem('user_id');
     this.router.navigate(['/']);
   }
 }

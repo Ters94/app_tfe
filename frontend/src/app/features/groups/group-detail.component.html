@@ -59,7 +59,7 @@
             <th>Username</th>
             <th>Email</th>
             <th>Rôle</th>
-            <th *ngIf="canManageMembers">Actions</th>
+          <th *ngIf="canManageMembers(group) && group.owner_id === currentUserId">Actions</th>
           </tr>
         </thead>
 
@@ -72,11 +72,18 @@
                 {{ member.role }}
               </span>
             </td>
-            <td *ngIf="canManageMembers">
+            <td *ngIf="canManageMembers(group) && group.owner_id === currentUserId">
 
                <button class="info-btn" (click)="viewUser(member)">
                   Consulter
                 </button>
+                <button
+                class="primary-btn"
+                *ngIf="member.role !== 'OWNER'"
+                (click)="transferOwner(member.user_id)"
+
+                >Transférer owner
+              </button>
               <button
                 class="danger"
                 *ngIf="member.role !== 'OWNER'"
@@ -84,7 +91,9 @@
               >
                 Supprimer
               </button>
+
             </td>
+
           </tr>
 
           <tr *ngIf="members.length === 0">

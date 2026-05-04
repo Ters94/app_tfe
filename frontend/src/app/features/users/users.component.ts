@@ -97,7 +97,7 @@ role: string = '';
  if (err.status === 401 || err.status === 403) {
         alert("Vous n'avez pas le droit de supprimer cet utilisateur.");
       } else {
-        alert("Erreur lors de la suppression.");
+        alert(err.error?.detail || "Erreur lors de la suppression.");
       }
       }
     });

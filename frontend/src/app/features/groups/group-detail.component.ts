@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -33,7 +33,7 @@ export class GroupDetailComponent implements OnInit {
   ngOnInit(): void {
     this.groupId = this.route.snapshot.paramMap.get('id');
     this.role = localStorage.getItem('role') || '';
-    this.currentUserId = localStorage.getItem('userId') || '';
+    this.currentUserId = localStorage.getItem('user_id') || '';
 
     if (!this.groupId) {
       this.router.navigate(['/groups']);
@@ -45,9 +45,20 @@ export class GroupDetailComponent implements OnInit {
     this.loadUsers();
   }
 
+  getHeaders() {
+  const token = localStorage.getItem('token');
+
+  return {
+    headers: new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    })
+  };
+}
+
   canManageMembers(group: any): boolean {
     return this.role === 'ADMIN' || this.group.owner_id === this.currentUserId;
   }
+
 
   loadGroup(): void {
     const token = localStorage.getItem('token');
@@ -159,6 +170,25 @@ editGroupPage(): void {
 
   this.router.navigate(['/users', member.user_id]);
 }
+
+transferOwner(newOwnerId: string) {
+  if (!confirm('Transférer le rôle d’owner à ce membre ?')) return;
+
+  this.http.put(
+    `http://127.0.0.1:8000/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`,
+    {},
+    this.getHeaders()
+  ).subscribe({
+    next: () => {
+      this.successMessage = 'Ownership transféré avec succès';
+      this.loadGroup();
+      this.loadMembers();
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.detail || 'Erreur transfert owner';
+    }
+  });
+}
   goBack(): void {
     this.router.navigate(['/groups']);
   }
@@ -166,7 +196,7 @@ editGroupPage(): void {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
   localStorage.removeItem('username');
-  localStorage.removeItem('userId');
+  localStorage.removeItem('user_id');
   this.router.navigate(['/']);
 }
 }

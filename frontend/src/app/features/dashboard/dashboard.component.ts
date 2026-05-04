@@ -12,7 +12,7 @@ import { Router, RouterModule } from '@angular/router';
 export class DashboardComponent implements OnInit {
   role: string = '';
   username: string = '';
-  userId: string = '';
+  user_id: string = '';
 
   constructor(private router: Router) {}
 
@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     const username = localStorage.getItem('username');
-    const userId = localStorage.getItem('userId') || '';
+    const user_id = localStorage.getItem('user_id') || '';
     if (!token) {
       alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
@@ -29,14 +29,14 @@ export class DashboardComponent implements OnInit {
 
     this.role = role || '';
     this.username = username || '';
-    this.userId = userId || '';
+    this.user_id = user_id || '';
   }
 
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
-    localStorage.removeItem('userId');
+    localStorage.removeItem('user_id');
     this.router.navigate(['/']);
   }
 }
