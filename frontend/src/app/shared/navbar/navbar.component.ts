@@ -13,6 +13,12 @@ export class NavbarComponent {
 
   constructor(private router: Router) {}
 
+  currentName: string = '';
+
+  ngOnInit(): void {
+    this.currentName = localStorage.getItem('name') || '';
+  }
+
   logout() {
     localStorage.clear();
     this.router.navigate(['/']);

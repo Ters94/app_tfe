@@ -54,3 +54,17 @@ h2 {
   margin-top: 6px;
   margin-bottom: 25px;
 }
+.current-user {
+  margin-left: auto;
+  margin-right: 18px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #374151;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.current-user span {
+  color: #1d4ed8;
+}
