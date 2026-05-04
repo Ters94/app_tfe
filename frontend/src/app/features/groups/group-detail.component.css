@@ -20,17 +20,7 @@
   font-size: 15px;
 }
 
-nav {
-  display: flex;
-  gap: 18px;
-}
 
-nav button {
-  background: transparent;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-}
 
 .content {
   padding: 24px;
@@ -43,7 +33,31 @@ nav button {
   margin-bottom: 16px;
   cursor: pointer;
 }
+.actions {
+  display: flex;
+  gap: 6px;
+}
 
+.actions button {
+  border: 1px solid #c7c7c7;
+  background: #ffffff;
+  padding: 6px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+.actions .danger {
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.actions .danger:hover {
+  background: #fee2e2;
+}
 .group-card,
 .form-card,
 .members-section {
@@ -240,6 +254,7 @@ td {
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
+  margin-left: 8px;
 }
 
 .secondary-btn:hover {

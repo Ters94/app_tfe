@@ -23,6 +23,7 @@ export class GroupDetailComponent implements OnInit {
   selectedUserId: string = '';
   errorMessage: string = '';
   successMessage: string = '';
+  groupQueries: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -59,7 +60,11 @@ export class GroupDetailComponent implements OnInit {
     return this.role === 'ADMIN' || this.group.owner_id === this.currentUserId;
   }
 
-
+goToCreateQuery() {
+  this.router.navigate(['/queries/create'], {
+    queryParams: { groupId: this.groupId }
+  });
+}
   loadGroup(): void {
     const token = localStorage.getItem('token');
 
@@ -171,6 +176,20 @@ editGroupPage(): void {
   this.router.navigate(['/users', member.user_id]);
 }
 
+loadGroupQueries() {
+  this.http.get<any[]>(
+    `http://127.0.0.1:8000/queries/group/${this.groupId}`,
+    this.getHeaders()
+  ).subscribe({
+    next: (data) => {
+      this.groupQueries = data;
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.detail || 'Erreur chargement queries';
+    }
+  });
+}
+
 transferOwner(newOwnerId: string) {
   if (!confirm('Transférer le rôle d’owner à ce membre ?')) return;
 
@@ -188,6 +207,23 @@ transferOwner(newOwnerId: string) {
       this.errorMessage = err.error?.detail || 'Erreur transfert owner';
     }
   });
+}
+executeQuery(queryId: string) {
+  this.router.navigate(['/queries', queryId]);
+}
+
+editQuery(queryId: string) {
+  this.router.navigate(['/queries', queryId]);
+}
+
+deleteQuery(queryId: string) {
+  if (!confirm('Supprimer cette query ?')) return;
+
+  this.http.delete(`http://127.0.0.1:8000/queries/${queryId}`, this.getHeaders())
+    .subscribe({
+      next: () => this.loadGroupQueries(),
+      error: (err) => this.errorMessage = err.error?.detail || 'Erreur suppression query'
+    });
 }
   goBack(): void {
     this.router.navigate(['/groups']);

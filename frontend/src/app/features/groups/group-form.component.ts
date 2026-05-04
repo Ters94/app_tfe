@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
   selector: 'app-group-form',
@@ -27,6 +27,7 @@ export class GroupFormComponent implements OnInit {
   users: any[] = [];
   members: any[] = [];
   selectedUserId: string = '';
+  groupQueries: any[] = [];
 
   constructor(
     private http: HttpClient,
@@ -45,8 +46,67 @@ export class GroupFormComponent implements OnInit {
     this.loadGroup();
     this.loadUsers();
     this.loadMembers();
+    this.loadGroupQueries();
   }
 
+ getHeaders() {
+   const token = localStorage.getItem('token');
+
+   return {
+     headers: new HttpHeaders({
+       Authorization: `Bearer ${token}`
+     })
+   };
+ }
+  loadGroupQueries() {
+  this.http.get<any[]>(
+    `http://127.0.0.1:8000/queries/group/${this.groupId}`,
+    this.getHeaders()
+  ).subscribe({
+    next: (data) => {
+      this.groupQueries = data;
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.detail || 'Erreur chargement queries';
+    }
+  });
+}
+
+transferOwner(newOwnerId: string) {
+  if (!confirm('Transférer le rôle d’owner à ce membre ?')) return;
+
+  this.http.put(
+    `http://127.0.0.1:8000/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`,
+    {},
+    this.getHeaders()
+  ).subscribe({
+    next: () => {
+      this.successMessage = 'Ownership transféré avec succès';
+      this.loadGroup();
+      this.loadMembers();
+    },
+    error: (err) => {
+      this.errorMessage = err.error?.detail || 'Erreur transfert owner';
+    }
+  });
+}
+executeQuery(queryId: string) {
+  this.router.navigate(['/queries', queryId]);
+}
+
+editQuery(queryId: string) {
+  this.router.navigate(['/queries', queryId]);
+}
+
+deleteQuery(queryId: string) {
+  if (!confirm('Supprimer cette query ?')) return;
+
+  this.http.delete(`http://127.0.0.1:8000/queries/${queryId}`, this.getHeaders())
+    .subscribe({
+      next: () => this.loadGroupQueries(),
+      error: (err) => this.errorMessage = err.error?.detail || 'Erreur suppression query'
+    });
+}
   loadGroup(): void {
     const token = localStorage.getItem('token');
 

@@ -1,0 +1,40 @@
+ <section class="card" *ngIf="showCreateForm">
+
+      <button class="back-btn" (click)="goBack()">← Retour</button>
+    <h3>Filtres</h3>
+
+    <div class="create-form" >
+
+      <input
+      type="text"
+      placeholder="Nom de la query"
+      [(ngModel)]="newQueryName"
+    />
+
+    <select class="actions" [(ngModel)]="newProduct">
+      <option value="">Produit</option>
+      <option value="GAS">GAS</option>
+      <option value="ELECTRICITY">ELECTRICITY</option>
+      <option value="OIL">OIL</option>
+    </select>
+
+    <select [(ngModel)]="newType">
+      <option value="">Type</option>
+      <option value="BUY">BUY</option>
+      <option value="SELL">SELL</option>
+    </select>
+
+      <div>
+        {{ group?.name }}
+      </div>
+
+
+    <button class="create-btn" (click)="createQuery()">
+      Creer
+    </button>
+
+  </div>
+
+
+</section>
+

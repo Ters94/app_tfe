@@ -1,6 +1,6 @@
 <div class="app-page">
 
-  
+
 
   <main class="content">
     <button class="back-btn" (click)="goBack()">← Retour</button>
@@ -103,6 +103,31 @@
       </table>
     </section>
 
+<section class="members-section" *ngIf="groupQueries.length > 0">
+  <h3>Queries du groupe</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Filtres</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let query of groupQueries">
+        <td>{{ query.query_name }}</td>
+        <td><code>{{ query.filters | json }}</code></td>
+        <td class="actions">
+  <button (click)="executeQuery(query.id)">Exécuter</button>
+  <button (click)="editQuery(query.id)">Modifier</button>
+  <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
 
   </main>
 </div>

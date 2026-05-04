@@ -142,3 +142,18 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Query not found")
 
     return {"message": "Query deleted"}
+
+@router.get("/group/{group_id}")
+def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
+    queries = []
+
+    for query in db.queries.find({"group_id": ObjectId(group_id)}):
+        queries.append({
+            "id": str(query["_id"]),
+            "query_name": query.get("query_name"),
+            "filters": query.get("filters", {}),
+            "group_id": str(query.get("group_id")),
+            "created_by": str(query.get("created_by"))
+        })
+
+    return queries

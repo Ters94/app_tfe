@@ -1,0 +1,135 @@
+.queries-page {
+  padding: 30px;
+  background: #f6f8fb;
+  min-height: 100vh;
+}
+
+.page-header {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 26px;
+  color: #111827;
+}
+
+.page-header p {
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: #f3f4f6;
+  color: #374151;
+  text-align: left;
+  padding: 12px;
+  font-weight: 600;
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+code {
+  background: #eef2ff;
+  padding: 6px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  color: #1e3a8a;
+}
+
+
+.actions {
+  margin-bottom: 15px;
+}
+
+.create-btn {
+  background: #faf8f0;
+  color: #374151;
+  border: none;
+  padding: 0px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 8px;
+   height: 42px;
+  align-self: center;
+   box-sizing: border-box;
+}
+
+.create-btn:hover {
+  background: #c1f7b8;
+}
+
+
+.actions button {
+  border: 1px solid #c7c7c7;
+  background: #ffffff;
+  padding: 6px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.actions button:hover {
+  background: #f3f4f6;
+}
+
+.actions .danger {
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.actions .danger:hover {
+  background: #fee2e2;
+}
+
+.create-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.create-form input,
+.create-form select {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+   box-sizing: border-box;
+}
+
+.create-form input:focus,
+.create-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+

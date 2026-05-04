@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { AuditsComponent } from './features/audits/audits.component';
 import { QueriesComponent } from './features/queries/queries.component';
 import { QueryExecutionComponent } from './features/queries/query-execution.component';
+import { QueryCreateComponent } from './features/queries/query-create.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () =>
@@ -14,21 +15,24 @@ export const routes: Routes = [
      { path: 'queries',
        component: QueriesComponent },
 
-{ path: 'queries/:id',
-   component: QueryExecutionComponent },
-    {
-  path: 'audits',
-  component: AuditsComponent
-},
-    {
-       path: 'audits/groups/:groupId',
+      { path: 'queries/query-create',
+        component: QueryCreateComponent },
+
+      { path: 'queries/:id',
+        component: QueryExecutionComponent },
+
+      {path: 'audits',
+        component: AuditsComponent},
+
+      {path: 'audits/groups/:groupId',
         component: AuditsComponent },
-    {
-    path: 'admin',
-    loadComponent: () =>
+
+      { path: 'admin',
+        loadComponent: () =>
       import('./features/admin/admin.component')
     .then(m => m.AdminComponent)
-  },
+      },
+
   {
   path: 'groups',
   loadComponent: () =>
