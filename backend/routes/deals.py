@@ -89,26 +89,32 @@ def search_deals(request: Request):
 
         if value == "":
             continue
-        # filtres texte simples
+        
         if key in allowed_filters:
             filter_query[key] = value
 
-        # filtres numériques
-        elif key == "price_min":
-            filter_query["price"] = filter_query.get("price", {})
-            filter_query["price"]["$gte"] = float(value)
+      
+        elif key == "price_min" and value not in ["", None]:
+            try:
+                filter_query["price"] = filter_query.get("price", {})
+                filter_query["price"]["$gte"] = float(value)
+            except:
+                raise HTTPException(status_code=400, detail=f"Invalid value for price_min: {value}")
 
-        elif key == "price_max":
-            filter_query["price"] = filter_query.get("price", {})
-            filter_query["price"]["$lte"] = float(value)
+        elif key == "price_max" and value not in ["", None]:
+            try:
+                filter_query["price"] = filter_query.get("price", {})
+                filter_query["price"]["$lte"] = float(value)
+            except:
+                raise HTTPException(status_code=400, detail=f"Invalid value for price_max: {value}")
 
             
 
-        elif key == "volume_min":
+        elif key == "volume_min" and value not in ["", None]:
             filter_query["volume"] = filter_query.get("volume", {})
             filter_query["volume"]["$gte"] = float(value)
 
-        elif key == "volume_max":
+        elif key == "volume_max" and value not in ["", None]:
             filter_query["volume"] = filter_query.get("volume", {})
             filter_query["volume"]["$lte"] = float(value)
 

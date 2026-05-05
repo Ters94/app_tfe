@@ -283,15 +283,27 @@ def transfer_owner(
     if not ObjectId.is_valid(new_owner_id):
         raise HTTPException(status_code=400, detail="Invalid new owner ID")
 
-    group = groups_collection.find_one({"_id": ObjectId(group_id), "status": True})
+    group = groups_collection.find_one({
+        "_id": ObjectId(group_id),
+        "status": True
+    })
 
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
+    
+    current_owner_id = group.get("owner_id")
 
-    if group["owner_id"] != current_user:
+    if current_owner_id != current_user and not is_admin(current_user):
         raise HTTPException(
             status_code=403,
-            detail="Seul l’owner actuel peut transférer la propriété du groupe."
+            detail="Seul l’owner actuel ou l'admin peut transférer la propriété du groupe."
+        )
+
+    new_owner = db.users.find_one({"_id": ObjectId(new_owner_id)})
+    if not new_owner:
+        raise HTTPException(
+            status_code=404,
+            detail="Le nouvel owner n'existe pas."
         )
 
     membership = db.memberships.find_one({
@@ -305,6 +317,15 @@ def transfer_owner(
             detail="Le nouvel owner doit être membre du groupe."
         )
 
+    old_values = {
+        "owner_id": current_owner_id
+    }
+
+    new_values = {
+        "owner_id": new_owner_id
+    }
+
+
     groups_collection.update_one(
         {"_id": ObjectId(group_id)},
         {"$set": {"owner_id": new_owner_id}}
@@ -316,8 +337,26 @@ def transfer_owner(
 )
 
     db.memberships.update_one(
-    {"group_id": group_id, "user_id": new_owner_id},
-    {"$set": {"role": "OWNER"}}
+    {
+        "group_id": group_id, 
+        "user_id": new_owner_id
+     },
+    {
+        "$set": {"role": "OWNER"}
+    }
 )
+    create_audit(
+        action="TRANSFER_OWNER",
+        current_user=current_user,
+        group_id=group_id,
+        target_label=group.get("name"),
+        old_values=old_values,
+        new_values=new_values
+    )
 
-    return {"message": "Ownership transféré avec succès"}
+
+    return {
+        "message": "Ownership transféré avec succès",
+        "group_id": group_id,
+        "old_owner_id": current_owner_id,
+        "new_owner_id": new_owner_id}

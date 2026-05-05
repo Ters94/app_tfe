@@ -151,14 +151,20 @@ loadFilterOptions(): void {
 }
 
 searchDeals(): void {
-     console.log('Bouton rechercher cliqué');
-  console.log('Filtres envoyés :', this.dealFilters);
+  const cleanFilters: any = {};
+
+Object.keys(this.dealFilters).forEach(key => {
+  const value = this.dealFilters[key];
+  if (value !== '' && value !== null) {
+    cleanFilters[key] = value;
+  }
+});
 
   this.http.get<any>(
     'http://127.0.0.1:8000/deals/search',
     {
       ...this.getHeaders(),
-      params: this.dealFilters
+      params: cleanFilters
     }
   ).subscribe({
     next: (response) => {

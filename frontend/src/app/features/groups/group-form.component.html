@@ -84,6 +84,12 @@
                <button class="info-btn" (click)="viewUser(member)">
                   Consulter
                 </button>
+                <button
+                  *ngIf="member.role === 'MEMBER'"
+                  class="info-btn"
+                  (click)="transferOwner(member.user_id)">
+                      Transférer owner
+              </button>
               <button
                 class="danger"
                 *ngIf="member.role !== 'OWNER'"
