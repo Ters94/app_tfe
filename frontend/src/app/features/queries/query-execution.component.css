@@ -25,11 +25,10 @@
 
 .card {
   background: white;
-  padding: 24px;
-  border-radius: 14px;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .card h3 {
@@ -62,6 +61,51 @@ code {
   border-radius: 6px;
   display: inline-block;
   color: #1e3a8a;
+}
+
+/* Filtres */
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+.filters-grid label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.filters-grid input,
+.filters-grid select {
+  width: 100%;
+  height: 38px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Data grid */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.data-grid label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.primary-btn {
+  margin-top: 15px;
+  padding: 10px 16px;
+  background: #005bbb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 
@@ -130,6 +174,14 @@ code {
   outline: none;
   border-color: #2563eb;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.back-btn {
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border: none;
+  background: #eee;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 

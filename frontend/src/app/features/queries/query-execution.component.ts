@@ -16,12 +16,97 @@ export class QueryExecutionComponent  implements OnInit {
 queryId: string ='';
 query: any = null;
 results: any[] = [];
+groupId: string = '';
 newQueryName: string = '';
 newProduct: string = '';
 newType: string = '';
 groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
+
+ dataFields: string[] = [
+  'Portfolio',
+  'PortfolioGOP',
+  'Folder',
+  'Activity',
+  'Desk',
+  'Direction',
+  'Entity',
+  'Quantity',
+  'CreationDate',
+  'DeliveryPoint',
+  'TransportCorridor',
+  'DeliveryType',
+  'DealId',
+  'QuantityUnit',
+  'TradeDate',
+  'DealType',
+  'TraderCode',
+  'Price',
+  'Cash',
+  'MarginCost',
+  'TotalMarginCost',
+  'OpenQuantity',
+  'BookingStatus',
+  'CommodityFixingSource',
+  'AverageType',
+  'AuctionType',
+  'BusinessUnit'
+];
+
+dealFilters: any = {
+  portfolio: '',
+  product: '',
+  deal_type: '',
+  trader_code: '',
+  price_min: '',
+  price_max: ''
+};
+
+dealsResults: any[] = [];
+dealsCount = 0;
+
+selectedDataFields: any = {
+  Portfolio: true,
+  PortfolioGOP: false,
+  Folder: false,
+  Activity: false,
+  Desk: false,
+  Direction: false,
+  Entity: false,
+  Quantity: true,
+  CreationDate: false,
+  DeliveryPoint: false,
+  TransportCorridor: false,
+  DeliveryType: false,
+  DealId: false,
+  QuantityUnit: false,
+  TradeDate: false,
+  DealType: false,
+  TraderCode: false,
+  Price: false,
+  Cash: false,
+  MarginCost: false,
+  TotalMarginCost: false,
+  OpenQuantity: false,
+  BookingStatus: false,
+  CommodityFixingSource: false,
+  AverageType: false,
+  AuctionType: false,
+  BusinessUnit: false
+};
+filterOptions: any = {
+  portfolio: [],
+  product: [],
+  deal_type: [],
+  trader_code: [],
+  counterparty_name: [],
+  business_unit: [],
+  delivery_point: [],
+  booking_status: []
+};
+
+
 constructor(
   private http: HttpClient,
   private router: Router,
@@ -31,6 +116,7 @@ constructor(
   ngOnInit() {
     this.queryId = this.route.snapshot.paramMap.get('id') || '';
     this.loadGroups();
+    this.loadFilterOptions();
     this.loadQuery();
   }
 
@@ -47,6 +133,42 @@ constructor(
   const group = this.groups.find(g => g._id === groupId || g.id === groupId);
   return group ? group.name : '—';
 
+}
+
+loadFilterOptions(): void {
+  this.http.get<any>(
+    'http://127.0.0.1:8000/deals/filter-options',
+    this.getHeaders()
+  ).subscribe({
+    next: (data) => {
+      console.log('FILTER OPTIONS EXECUTION =', data);
+      this.filterOptions = data;
+    },
+    error: (err) => {
+      console.error('Erreur chargement options filtres execution', err);
+    }
+  });
+}
+
+searchDeals(): void {
+     console.log('Bouton rechercher cliqué');
+  console.log('Filtres envoyés :', this.dealFilters);
+
+  this.http.get<any>(
+    'http://127.0.0.1:8000/deals/search',
+    {
+      ...this.getHeaders(),
+      params: this.dealFilters
+    }
+  ).subscribe({
+    next: (response) => {
+      this.dealsResults = response.results || [];
+      this.dealsCount = response.count || 0;
+    },
+    error: (err) => {
+      console.error('Erreur recherche deals', err);
+    }
+  });
 }
 
 
@@ -69,11 +191,25 @@ deleteQuery(id: string) {
       });
   }
    loadQuery() {
-    this.http.get<any>(`http://127.0.0.1:8000/queries/${this.queryId}`, this.getHeaders())
-      .subscribe(data => {
-        this.query = data;
-      });
-  }
+     this.http.get<any>(
+    `http://127.0.0.1:8000/queries/${this.queryId}`,
+    this.getHeaders()
+  ).subscribe({
+    next: (data) => {
+      this.query = data;
+
+      this.dealFilters = data.filters || this.dealFilters;
+      this.selectedGroupId = data.group_id;
+
+      if (data.selected_fields) {
+        this.selectedDataFields = data.selected_fields;
+      }
+    },
+    error: (err) => {
+      console.error('Erreur chargement query', err);
+    }
+  });
+}
 
   executeQuery(queryId: string) {
     this.http.get<any>(`http://127.0.0.1:8000/queries/${queryId}/execute`, this.getHeaders())
@@ -89,21 +225,21 @@ deleteQuery(id: string) {
   startEdit() {
   this.showCreateForm = true;
 
-  this.newQueryName = this.query.query_name;
-  this.newProduct = this.query.filters?.product || '';
-  this.newType = this.query.filters?.type || '';
+   this.newQueryName = this.query.query_name;
   this.selectedGroupId = this.query.group_id;
+  this.dealFilters = this.query.filters || this.dealFilters;
 
+  if (this.query.selected_fields) {
+    this.selectedDataFields = this.query.selected_fields;
+  }
 
 }
 updateQuery() {
   const body = {
     query_name: this.newQueryName,
-    filters: {
-      product: this.newProduct,
-      type: this.newType
-    },
-    group_id: this.selectedGroupId
+    filters: this.dealFilters,
+    group_id: this.selectedGroupId,
+    selected_fields: this.selectedDataFields
   };
 
   this.http.put(
@@ -118,4 +254,7 @@ updateQuery() {
     error: (err) => console.error('Erreur modification query', err)
   });
 }
+ goBack(): void {
+    this.router.navigate(['/groups',this.groupId]);
+  }
 }

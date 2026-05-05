@@ -3,6 +3,7 @@ import { AuditsComponent } from './features/audits/audits.component';
 import { QueriesComponent } from './features/queries/queries.component';
 import { QueryExecutionComponent } from './features/queries/query-execution.component';
 import { QueryCreateComponent } from './features/queries/query-create.component';
+import { DealsComponent } from './features/deals/deals.component';
 
 export const routes: Routes = [
   { path: '', loadComponent: () =>
@@ -26,6 +27,9 @@ export const routes: Routes = [
 
       {path: 'audits/groups/:groupId',
         component: AuditsComponent },
+
+      {path: 'deals',
+        component: DealsComponent},
 
       { path: 'admin',
         loadComponent: () =>

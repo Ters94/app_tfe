@@ -21,6 +21,7 @@ groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
 editingQueryId: string | null = null;
+
 constructor(
   private http: HttpClient,
   private router: Router) {}
@@ -46,6 +47,9 @@ constructor(
 }
 selectedQueryId: string | null = null;
 
+goToCreateQuery(): void {
+  this.router.navigate(['/queries/query-create']);
+}
 toggleActions(queryId: string) {
   this.selectedQueryId =
     this.selectedQueryId === queryId ? null : queryId;

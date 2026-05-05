@@ -27,7 +27,9 @@ def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
         "query_name": query_dict["query_name"],
         "filters": query_dict["filters"],
         "group_id": str(query_dict["group_id"]),
-        "created_by": str(query_dict["created_by"])
+        "created_by": str(query_dict["created_by"]),
+        "created_at": query_dict["created_at"],
+        "data_fields": query_dict.get("data_fields", [])
     }
 
 @router.get("/")
