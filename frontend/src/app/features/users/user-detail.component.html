@@ -38,6 +38,42 @@
         </div>
       </div>
 
+      <section class="form-card">
+  <h2>Groupes liés à cet utilisateur</h2>
+
+  <div *ngIf="ownedGroups.length > 0">
+    <h3>Owner du groupe:</h3>
+
+    <ul>
+  <li *ngFor="let group of ownedGroups">
+  <a
+    class="group-link"
+    [routerLink]="['/groups/group-form', group.id]">
+    {{ group.name }}
+  </a>— {{ group.description }}
+  </li>
+    </ul>
+  </div>
+
+  <div *ngIf="memberGroups.length > 0">
+    <h3>Membre du groupe: </h3>
+
+    <ul>
+     <li *ngFor="let group of memberGroups">
+  <a
+    class="group-link"
+    [routerLink]="['/groups/group-form', group.id]">
+    {{ group.name }}
+  </a>— {{ group.description }}
+</li>
+    </ul>
+  </div>
+
+  <p *ngIf="ownedGroups.length === 0 && memberGroups.length === 0">
+    Cet utilisateur n’appartient à aucun groupe.
+  </p>
+</section>
+
       <div class="actions">
         <button *ngIf="isAdmin" class="primary-btn" (click)="editUser()">
           Modifier

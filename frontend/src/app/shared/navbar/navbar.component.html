@@ -2,6 +2,9 @@
   <div class="brand">ENGIE Queries</div>
  <div class="current-user">
   Bonjour, <span>{{ currentName }}</span>
+  <span *ngIf="isAdmin()" class="admin-badge">
+    ADMIN
+  </span>
 </div>
 
   <nav>

@@ -1,7 +1,7 @@
 from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
-from backend.database import get_users_collection, get_groups_collection
+from backend.database import db, get_users_collection, get_groups_collection
 from backend.models import user
 from backend.models.user import UserCreate, UserInDB, UserPublic, UserUpdate
 from backend.security import get_password_hash
@@ -25,6 +25,10 @@ def clean_phone(phone):
     return None
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
+def is_admin(user_id: str) -> bool:
+    user = db.users.find_one({"_id": ObjectId(user_id)})
+    return user is not None and user.get("role") == "ADMIN"
 
 
 @router.post("/", response_model=UserPublic)
@@ -122,7 +126,76 @@ def get_user_by_id(user_id: str,):
         role=user.get("role")
     )
 
+@router.get("/{user_id}/groups")
+def get_user_groups(
+    user_id: str,
+    current_user: str = Depends(get_current_user)
+):
+    
+    if not ObjectId.is_valid(user_id):
+        raise HTTPException(status_code=400, detail="Invalid user id")
 
+    if current_user != user_id and not is_admin(current_user):
+        raise HTTPException(
+        status_code=403,
+        detail="Not authorized"
+    )
+
+    user = db.users.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    owned_groups = list(db.groups.find({
+        "owner_id": user_id,
+        "status": True
+    }))
+
+    memberships = list(db.memberships.find({
+        "user_id": user_id
+    }))
+
+    member_groups = []
+
+    for membership in memberships:
+        group_id = membership.get("group_id")
+
+        if not group_id or not ObjectId.is_valid(group_id):
+            continue
+
+        group = db.groups.find_one({
+            "_id": ObjectId(group_id),
+            "status": True
+        })
+
+        if group and group.get("owner_id") != user_id:
+            member_groups.append(group)
+
+    return {
+        "owned_groups": [
+        {
+            "id": str(g["_id"]),
+            "name": g.get("name"),
+            "description": g.get("description"),
+            "owner_username": user.get("username"),
+            "role": "OWNER"
+        }
+            for g in owned_groups
+        ],
+
+        "member_groups": [
+        {
+            "id": str(g["_id"]),
+            "name": g.get("name"),
+            "description": g.get("description"),
+            "owner_username": (
+                db.users.find_one({"_id": ObjectId(g.get("owner_id"))}) or {}
+            ).get("username", "-"),
+            "role": "MEMBER"
+        }
+            for g in member_groups
+        ]
+    }
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: str, admin = Depends(get_current_admin)):
     users_collection = get_users_collection()

@@ -13,6 +13,11 @@ import { HttpClient } from '@angular/common/http';
 })
 export class GroupsComponent implements OnInit {
   groups: any[] = [];
+  users: any[] = [];
+
+  myOwnedGroups: any[] = [];
+  myMemberGroups: any[] = [];
+
   searchTerm: string = '';
   errorMessage: string = '';
   successMessage: string = '';
@@ -20,12 +25,15 @@ export class GroupsComponent implements OnInit {
   showForm: boolean = false;
   isEdit: boolean = false;
   selectedGroupId: string | null = null;
-users: any[] = [];
+
+  showMyGroups: boolean = false;
+  selectedGroupRole: 'OWNER' | 'MEMBER' = 'OWNER';
+
   group: any = {
     name: '',
-    description: ''
+    description: '',
+    owner_id: ''
   };
-
 
   constructor(
     private http: HttpClient,
@@ -34,7 +42,22 @@ users: any[] = [];
 
   ngOnInit(): void {
     this.loadGroups();
-    this.loadUsers();
+
+    if (this.isAdmin()) {
+      this.loadUsers();
+    }
+  }
+
+  get role(): string {
+    return localStorage.getItem('role') || '';
+  }
+
+  get currentUserId(): string {
+    return localStorage.getItem('user_id') || '';
+  }
+
+  isAdmin(): boolean {
+    return this.role === 'ADMIN';
   }
 
   loadGroups(): void {
@@ -60,39 +83,97 @@ users: any[] = [];
     });
   }
 
-  get role(): string {
-  return localStorage.getItem('role') || '';
+  loadMyGroups(): void {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('user_id');
+
+    if (!token || !userId) {
+      alert('Session expirée');
+      this.router.navigate(['/']);
+      return;
+    }
+
+    this.http.get<any>(
+      `http://127.0.0.1:8000/users/${userId}/groups`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    ).subscribe({
+      next: (res) => {
+        this.myOwnedGroups = res.owned_groups || [];
+        this.myMemberGroups = res.member_groups || [];
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err.error?.detail || 'Erreur lors du chargement de mes groupes';
+      }
+    });
   }
 
-  get currentUserId(): string {
-  return localStorage.getItem('user_id') || '';
+  showAllGroups(): void {
+    this.showMyGroups = false;
+    this.clearMessages();
   }
 
-  get filteredGroups() {
-    return this.groups.filter(group =>
-      (group.name || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      (group.description || '').toLowerCase().includes(this.searchTerm.toLowerCase())
+  showMyOwnedGroups(): void {
+    this.showMyGroups = true;
+    this.selectedGroupRole = 'OWNER';
+    this.clearMessages();
+    this.loadMyGroups();
+  }
+
+  showMyMemberGroups(): void {
+    this.showMyGroups = true;
+    this.selectedGroupRole = 'MEMBER';
+    this.clearMessages();
+    this.loadMyGroups();
+  }
+
+  get displayedGroups(): any[] {
+    if (!this.showMyGroups) {
+      return this.groups;
+    }
+
+    return this.selectedGroupRole === 'OWNER'
+      ? this.myOwnedGroups
+      : this.myMemberGroups;
+  }
+
+  get filteredDisplayedGroups(): any[] {
+    const term = this.searchTerm.toLowerCase().trim();
+
+    if (!term) {
+      return this.displayedGroups;
+    }
+
+    return this.displayedGroups.filter(group =>
+      (group.name || '').toLowerCase().includes(term) ||
+      (group.description || '').toLowerCase().includes(term) ||
+      (group.owner_username || '').toLowerCase().includes(term) ||
+      (group.owner_id || '').toLowerCase().includes(term)
     );
-
   }
-    isAdmin(): boolean {
-    return localStorage.getItem('role') === 'ADMIN';
+
+  canEdit(group: any): boolean {
+    return this.role === 'ADMIN' || group.owner_id === this.currentUserId;
   }
 
   openCreateForm(): void {
     this.showForm = true;
     this.isEdit = false;
     this.selectedGroupId = null;
+
     this.group = {
       name: '',
-      description: ''
+      description: '',
+      owner_id: ''
     };
+
     this.clearMessages();
   }
 
-  canEdit(group: any): boolean {
-  return this.role === 'ADMIN' || group.owner_id === this.currentUserId;
-}
   openEditForm(group: any): void {
     this.showForm = true;
     this.isEdit = true;
@@ -101,7 +182,7 @@ users: any[] = [];
     this.group = {
       name: group.name,
       description: group.description || '',
-      owner_id: group.owner_id || null
+      owner_id: group.owner_id || ''
     };
 
     this.clearMessages();
@@ -123,9 +204,10 @@ users: any[] = [];
     }
 
     if (!this.isEdit && this.isAdmin() && !this.group.owner_id) {
-  this.errorMessage = 'Veuillez sélectionner un owner';
-  return;
-}
+      this.errorMessage = 'Veuillez sélectionner un owner';
+      return;
+    }
+
     const payload = {
       name: this.group.name,
       description: this.group.description,
@@ -142,6 +224,7 @@ users: any[] = [];
           this.successMessage = 'Groupe modifié avec succès';
           this.showForm = false;
           this.loadGroups();
+          this.loadMyGroups();
         },
         error: (err) => {
           console.error(err);
@@ -158,6 +241,7 @@ users: any[] = [];
           this.successMessage = 'Groupe créé avec succès';
           this.showForm = false;
           this.loadGroups();
+          this.loadMyGroups();
         },
         error: (err) => {
           console.error(err);
@@ -188,6 +272,7 @@ users: any[] = [];
       next: () => {
         this.successMessage = 'Groupe désactivé avec succès';
         this.loadGroups();
+        this.loadMyGroups();
       },
       error: (err) => {
         console.error(err);
@@ -195,33 +280,43 @@ users: any[] = [];
       }
     });
   }
-loadUsers(): void {
-  const token = localStorage.getItem('token');
 
-  this.http.get('http://localhost:8000/users/', {
-    headers: { Authorization: `Bearer ${token}` }
-  }).subscribe({
-    next: (res: any) => {
-      this.users = res;
-    },
-    error: () => {
-      this.users = [];
+  loadUsers(): void {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      return;
     }
-  });
-}
+
+    this.http.get('http://localhost:8000/users/', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).subscribe({
+      next: (res: any) => {
+        this.users = res;
+      },
+      error: () => {
+        this.users = [];
+      }
+    });
+  }
 
   viewGroup(group: any): void {
-     this.router.navigate(['/groups', group.id]);
+    this.router.navigate(['/groups', group.id]);
   }
 
   cancelForm(): void {
     this.showForm = false;
     this.isEdit = false;
     this.selectedGroupId = null;
+
     this.group = {
       name: '',
-      description: ''
+      description: '',
+      owner_id: ''
     };
+
     this.clearMessages();
   }
 
@@ -234,6 +329,7 @@ loadUsers(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
+    localStorage.removeItem('name');
     localStorage.removeItem('user_id');
     this.router.navigate(['/']);
   }

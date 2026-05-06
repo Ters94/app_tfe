@@ -68,67 +68,87 @@
       </div>
     </section>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Nom</th>
-          <th>Description</th>
-          <th>Owner</th>
-          <th>Statut</th>
-          <th class="actions-col">Actions</th>
-        </tr>
-      </thead>
+    <div class="groups-actions">
+ <button
+  class="filter-btn"
+  [class.active-filter]="!showMyGroups"
+  (click)="showAllGroups()">
+  Tous les groupes
+  </button>
 
-      <tbody>
-        <tr *ngFor="let group of filteredGroups" [class.disabled-row]="group.status === false">
-          <td>{{ group.name || '-' }}</td>
-          <td>{{ group.description || '-' }}</td>
-          <td>{{ group.owner_username || group.owner_id || '-' }}</td>
+  <button
+  class="filter-btn"
+  [class.active-filter]="showMyGroups && selectedGroupRole === 'OWNER'"
+  (click)="showMyOwnedGroups()">
+  Je suis owner
+  </button>
 
-          <td>
-            <span class="badge" [class.inactive]="group.status === false">
-              {{ group.status === false ? 'Clôturé' : 'Actif' }}
-            </span>
-          </td>
+  <button
+  class="filter-btn"
+  [class.active-filter]="showMyGroups && selectedGroupRole === 'MEMBER'"
+  (click)="showMyMemberGroups()">
+  Je suis membre
+  </button>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+      <th>Owner</th>
+      <th>Statut</th>
+      <th class="actions-col">Actions</th>
+    </tr>
+  </thead>
 
-          <td class="actions">
-            <button (click)="viewGroup(group)">
-              Consulter
-            </button>
+  <tbody>
+    <tr *ngFor="let group of filteredDisplayedGroups" [class.disabled-row]="group.status === false">
+      <td>{{ group.name || '-' }}</td>
+      <td>{{ group.description || '-' }}</td>
+      <td>{{ group.owner_username || group.owner_id || '-' }}</td>
 
-            <button
-  *ngIf="canEdit(group)"
-  [routerLink]="['/groups/group-form', group.id]"
->
-  Modifier
-</button>
+      <td>
+        <span class="badge" [class.inactive]="group.status === false">
+          {{ group.status === false ? 'Clôturé' : 'Actif' }}
+        </span>
+      </td>
 
+      <td class="actions">
+        <button (click)="viewGroup(group)">
+          Consulter
+        </button>
 
-            <button
-              class="danger"
-              *ngIf="canEdit(group) && group.status !== false"
-              (click)="deleteGroup(group.id)"
-            >
-              Désactiver
-            </button>
+        <button
+          *ngIf="canEdit(group)"
+          [routerLink]="['/groups/group-form', group.id]"
+        >
+          Modifier
+        </button>
 
-            <button
-              class="disabled-btn"
-              *ngIf="group.status === false"
-              disabled
-            >
-              Désactivé
-            </button>
-          </td>
-        </tr>
+        <button
+          class="danger"
+          *ngIf="canEdit(group) && group.status !== false"
+          (click)="deleteGroup(group.id)"
+        >
+          Désactiver
+        </button>
 
-        <tr *ngIf="filteredGroups.length === 0">
-          <td colspan="5" class="empty-message">
-            Aucun groupe trouvé.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <button
+          class="disabled-btn"
+          *ngIf="group.status === false"
+          disabled
+        >
+          Désactivé
+        </button>
+      </td>
+    </tr>
 
+    <tr *ngIf="filteredDisplayedGroups.length === 0">
+      <td colspan="5" class="empty-message">
+        Aucun groupe trouvé.
+      </td>
+    </tr>
+  </tbody>
+</table>
   </main>
 </div>

@@ -5,35 +5,11 @@
   color: #111827;
 }
 
-.topbar {
-  height: 56px;
-  background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 22px;
-}
+
 
 .brand {
   font-weight: 700;
   font-size: 15px;
-}
-
-nav {
-  display: flex;
-  gap: 18px;
-}
-
-nav button {
-  background: transparent;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-nav button:hover {
-  text-decoration: underline;
 }
 
 .content {
@@ -143,4 +119,14 @@ nav button:hover {
   margin-top: 12px;
   border-radius: 5px;
   font-weight: 700;
+}
+
+.group-link {
+  font-weight: 700;
+  color: #001b44;
+  text-decoration: none;
+}
+
+.group-link:hover {
+  text-decoration: underline;
 }

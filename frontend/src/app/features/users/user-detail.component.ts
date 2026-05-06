@@ -13,6 +13,8 @@ import { HttpClient } from '@angular/common/http';
 export class UserDetailComponent implements OnInit {
   user: any = {};
   errorMessage: string = '';
+  ownedGroups: any[] = [];
+  memberGroups: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -24,14 +26,20 @@ export class UserDetailComponent implements OnInit {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     const currentUserId = localStorage.getItem('user_id');
-        const id = this.route.snapshot.paramMap.get('id');
-
+    const id = this.route.snapshot.paramMap.get('id');
 
     if (!token) {
       alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
       return;
     }
+
+    if (!id) {
+      alert('ID utilisateur introuvable');
+      this.router.navigate(['/users']);
+      return;
+    }
+
     if (role !== 'ADMIN' && id !== currentUserId) {
   alert('Accès refusé');
   this.router.navigate(['/dashboard']);
@@ -47,6 +55,10 @@ export class UserDetailComponent implements OnInit {
     }).subscribe({
       next: (res: any) => {
         this.user = res;
+
+        if (role === 'ADMIN') {
+          this.loadUserGroups(id);
+        }
       },
       error: (err) => {
         console.error(err);
@@ -61,6 +73,29 @@ export class UserDetailComponent implements OnInit {
   }
   get isAdmin(): boolean {
   return localStorage.getItem('role') === 'ADMIN';
+
+}
+loadUserGroups(userId: string) {
+  const token = localStorage.getItem('token');
+
+  const headers = {
+    Authorization: `Bearer ${token}`
+  };
+
+  this.http.get<any>(
+    `http://127.0.0.1:8000/users/${userId}/groups`,
+    { headers }
+  ).subscribe({
+    next: (res) => {
+      this.ownedGroups = res.owned_groups || [];
+      this.memberGroups = res.member_groups || [];
+    },
+    error: (err) => {
+      console.error(err);
+      this.ownedGroups = [];
+      this.memberGroups = [];
+    }
+  });
 }
   goBack(): void {
     this.router.navigate(['/users']);
