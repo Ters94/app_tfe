@@ -18,12 +18,10 @@ query: any = null;
 results: any[] = [];
 groupId: string = '';
 newQueryName: string = '';
-newProduct: string = '';
-newType: string = '';
 groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
-
+statistics: any = null;
  dataFields: string[] = [
   'Portfolio',
   'PortfolioGOP',
@@ -59,6 +57,8 @@ dealFilters: any = {
   product: '',
   deal_type: '',
   trader_code: '',
+   start_date: '',
+  end_date: '',
   price_min: '',
   price_max: ''
 };
@@ -218,16 +218,27 @@ deleteQuery(id: string) {
 }
 
   executeQuery(queryId: string) {
-    this.http.get<any>(`http://127.0.0.1:8000/queries/${queryId}/execute`, this.getHeaders())
-      .subscribe({
-        next: (res) => {
-          this.results = res.results;
-        },
-        error: (err) => {
-          console.error('Erreur exécution query', err);
-        }
-      });
-  }
+  this.http.get<any>(
+    `http://127.0.0.1:8000/queries/${queryId}/execute`,
+    this.getHeaders()
+  ).subscribe({
+    next: (res) => {
+      this.results = res.results || [];
+
+      this.statistics = {
+        results_count: res.results_count,
+        total_volume: res.total_volume,
+        total_amount: res.total_amount,
+        average_price: res.average_price
+      };
+
+      console.log('Résultat exécution query:', res);
+    },
+    error: (err) => {
+      console.error('Erreur exécution query', err);
+    }
+  });
+}
   startEdit() {
   this.showCreateForm = true;
 
@@ -241,9 +252,19 @@ deleteQuery(id: string) {
 
 }
 updateQuery() {
+  const cleanFilters: any = {};
+
+  Object.keys(this.dealFilters).forEach(key => {
+    const value = this.dealFilters[key];
+
+    if (value !== null && value !== '') {
+      cleanFilters[key] = value;
+    }
+  });
+
   const body = {
-    query_name: this.newQueryName,
-    filters: this.dealFilters,
+    query_name: this.newQueryName.trim(),
+    filters: cleanFilters,
     group_id: this.selectedGroupId,
     selected_fields: this.selectedDataFields
   };
@@ -261,6 +282,7 @@ updateQuery() {
   });
 }
  goBack(): void {
-    this.router.navigate(['/groups',this.groupId]);
-  }
+  const groupId = this.query?.group_id || this.selectedGroupId;
+  this.router.navigate(['/groups', groupId]);
+}
 }

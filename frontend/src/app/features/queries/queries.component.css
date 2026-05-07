@@ -20,10 +20,10 @@
   margin-bottom: 18px;
 }
 
-.header-actions h3 {
+.header-actions h2 {
   margin: 0;
   color: #111827;
-  font-size: 22px;
+  font-size: 24px;
 }
 
 .create-btn {
@@ -57,34 +57,125 @@ th {
 td {
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
+  vertical-align: top;
 }
 
 code {
   background: #eef2ff;
-  padding: 6px 8px;
-  border-radius: 6px;
+  padding: 8px 10px;
+  border-radius: 8px;
   display: inline-block;
   color: #1e3a8a;
+  max-width: 520px;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.actions button {
+.actions {
+  min-width: 150px;
+}
+
+.actions button,
+.action-menu button {
   border: 1px solid #c7c7c7;
   background: #ffffff;
-  padding: 6px 9px;
-  border-radius: 4px;
+  padding: 7px 11px;
+  border-radius: 6px;
   cursor: pointer;
-  margin-left: 8px;
+  margin: 4px;
+  font-weight: 500;
 }
 
-.actions button:hover {
+.actions button:hover,
+.action-menu button:hover {
   background: #f3f4f6;
 }
 
-.actions .danger {
+.action-menu {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.action-menu .danger {
   color: #b91c1c;
   border-color: #fca5a5;
 }
 
-.actions .danger:hover {
+.action-menu .danger:hover {
   background: #fee2e2;
+}
+
+.readonly {
+  color: #6b7280;
+  font-style: italic;
+}
+
+.execution-result {
+  margin: 10px 0;
+  padding: 22px;
+  background: #f8fbff;
+  border: 1px solid #dbe7f5;
+  border-radius: 14px;
+}
+
+.execution-result h3 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.summary-grid div {
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+}
+
+.summary-grid strong {
+  display: block;
+  font-size: 13px;
+  color: #667085;
+  margin-bottom: 6px;
+}
+
+.summary-grid span {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.results-table th {
+  background: #eef2f7;
+  text-align: left;
+  padding: 12px;
+}
+
+.results-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+@media (max-width: 900px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  code {
+    max-width: 300px;
+  }
 }

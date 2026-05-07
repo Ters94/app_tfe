@@ -1,15 +1,13 @@
-
 <div class="queries-page">
-
 
   <section class="card">
     <div class="header-actions">
-  <h2>Liste des queries</h2>
+      <h2>Liste des queries</h2>
 
-  <button class="create-btn" (click)="goToCreateQuery()">
-    + Créer une requête
-  </button>
-</div>
+      <button class="create-btn" (click)="goToCreateQuery()">
+        + Créer une requête
+      </button>
+    </div>
 
     <table>
       <thead>
@@ -22,59 +20,101 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let query of queries">
-          <td>{{ query.query_name }}</td>
-           <td>{{ getGroupName(query.group_id) }}</td>
-          <td>
-    <code>{{ query.filters | json }}</code>
-  </td>
 
- <td class="actions">
-  <ng-container *ngIf="query.can_manage; else noAction">
+        <ng-container *ngFor="let query of queries">
 
-    <button (click)="toggleActions(query.id)">
-      Gérer
-    </button>
+          <tr>
+            <td>{{ query.query_name }}</td>
 
-    <div *ngIf="selectedQueryId === query.id" class="action-menu">
-      <button (click)="executeQuery(query.id)">Exécuter</button>
-      <button (click)="editQuery(query)">Modifier</button>
-      <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
-    </div>
+            <td>{{ getGroupName(query.group_id) }}</td>
 
-  </ng-container>
+            <td>
+              <code>{{ query.filters | json }}</code>
+            </td>
 
-  <ng-template #noAction>
-    <span class="readonly">Lecture seule</span>
-  </ng-template>
-</td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+            <td class="actions">
+              <ng-container *ngIf="query.can_manage; else noAction">
 
-  <section class="card" *ngIf="results.length > 0">
-    <h3>Résultats</h3>
+                <button (click)="toggleActions(query.id)">
+                  Gérer
+                </button>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Produit</th>
-          <th>Type</th>
-          <th>Date livraison</th>
-          <th>Amount</th>
-          <th>Volume</th>
-        </tr>
-      </thead>
+                <div *ngIf="selectedQueryId === query.id" class="action-menu">
+                  <button (click)="executeQuery(query.id)">Exécuter</button>
+                  <button (click)="editQuery(query)">Modifier</button>
+                  <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
+                </div>
 
-      <tbody>
-        <tr *ngFor="let deal of results">
-          <td>{{ deal.product }}</td>
-          <td>{{ deal.type }}</td>
-          <td>{{ deal.delivery_date }}</td>
-          <td>{{ deal.amount }}</td>
-          <td>{{ deal.volume }}</td>
-        </tr>
+              </ng-container>
+
+              <ng-template #noAction>
+                <span class="readonly">Lecture seule</span>
+              </ng-template>
+            </td>
+          </tr>
+
+          <tr *ngIf="executedQueryId === query.id">
+            <td colspan="4">
+
+              <section class="execution-result">
+
+                <h3>Résumé de l’exécution</h3>
+
+                <div class="summary-grid">
+                  <div>
+                    <strong>Deals</strong>
+                    <span>{{ queryStatistics?.results_count }}</span>
+                  </div>
+
+                  <div>
+                    <strong>Quantité totale</strong>
+                    <span>{{ queryStatistics?.total_volume }} MWh</span>
+                  </div>
+
+                  <div>
+                    <strong>Montant total</strong>
+                    <span>{{ queryStatistics?.total_amount }} €</span>
+                  </div>
+
+                  <div>
+                    <strong>Prix moyen pondéré</strong>
+                    <span>{{ queryStatistics?.average_price }} €/MWh</span>
+                  </div>
+                </div>
+
+                <table class="results-table" *ngIf="queryResults.length > 0">
+                  <thead>
+                    <tr>
+                      <th>Produit</th>
+                      <th>Type</th>
+                      <th>Date livraison</th>
+                      <th>Amount</th>
+                      <th>Volume</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr *ngFor="let deal of queryResults">
+                      <td>{{ deal.product }}</td>
+                      <td>{{ deal.deal_type }}</td>
+                      <td>{{ deal.delivery_date }}</td>
+                      <td>{{ deal.amount }}</td>
+                      <td>{{ deal.volume }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p *ngIf="queryResults.length === 0">
+                  Aucun résultat trouvé.
+                </p>
+
+              </section>
+
+            </td>
+          </tr>
+
+        </ng-container>
+
       </tbody>
     </table>
   </section>

@@ -21,6 +21,9 @@ groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
 editingQueryId: string | null = null;
+executedQueryId: string | null = null;
+queryResults: any[] = [];
+queryStatistics: any = null;
 
 constructor(
   private http: HttpClient,
@@ -99,10 +102,21 @@ editQuery(query: any) {
       });
   }
   executeQuery(queryId: string) {
-    this.http.get<any>(`http://127.0.0.1:8000/queries/${queryId}/execute`, this.getHeaders())
+    this.executedQueryId = queryId;
+
+    this.http.get<any>(
+      `http://127.0.0.1:8000/queries/${queryId}/execute`,
+       this.getHeaders())
       .subscribe({
         next: (res) => {
-          this.results = res.results;
+
+          this.queryResults = res.results || [];
+          this.queryStatistics = {
+            results_count: res.results_count,
+            total_volume: res.total_volume,
+            total_amount: res.total_amount,
+            average_price: res.average_price
+          };
         },
         error: (err) => {
           console.error('Erreur exécution query', err);

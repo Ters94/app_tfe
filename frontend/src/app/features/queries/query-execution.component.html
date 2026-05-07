@@ -30,6 +30,18 @@
       </div>
     </div>
   </div>
+  <section class="card" *ngIf="statistics">
+  <h3>Résumé de l'exécution</h3>
+
+  <p><strong>Nombre de deals :</strong> {{ statistics.results_count }}</p>
+  <p><strong>Quantité totale :</strong> {{ statistics.total_volume }} MWh</p>
+  <p><strong>Montant total :</strong> {{ statistics.total_amount }} €</p>
+  <p>
+  <strong>Prix moyen pondéré :</strong>
+  {{ statistics.average_price }} €/MWh
+  soit {{ statistics.average_price / 1000 | number:'1.4-4' }} €/kWh
+</p>
+</section>
   <section class="card" *ngIf="results.length > 0">
     <h3>Résultats</h3>
 
@@ -61,8 +73,28 @@
 <div class="filters-grid">
 
   <div>
+  <label>Product</label>
+  <select [(ngModel)]="dealFilters.product" name="product">
+    <option value="">Tous</option>
+    <option *ngFor="let p of filterOptions.product" [value]="p">
+      {{ p }}
+    </option>
+  </select>
+</div>
+
+<div>
+  <label>Deal type</label>
+  <select [(ngModel)]="dealFilters.deal_type" name="deal_type">
+    <option value="">Tous</option>
+    <option *ngFor="let d of filterOptions.deal_type" [value]="d">
+      {{ d }}
+    </option>
+  </select>
+</div>
+
+  <div>
     <label>Portfolio</label>
-  <select [(ngModel)]="dealFilters.portfolio">
+  <select [(ngModel)]="dealFilters.portfolio" name="portfolio">
   <option value="">Tous</option>
   <option *ngFor="let p of filterOptions.portfolio" [value]="p">
     {{ p }}
@@ -90,15 +122,31 @@
 </select>
   </div>
 
+ <div>
+  <label>Date début</label>
+  <input
+    type="date"
+    name="start_date"
+    [(ngModel)]="dealFilters.start_date">
+</div>
+
+<div>
+  <label>Date fin</label>
+  <input
+    type="date"
+    name="end_date"
+    [(ngModel)]="dealFilters.end_date">
+</div>
   <div>
     <label>Prix min</label>
-    <input type="number" [(ngModel)]="dealFilters.price_min">
+    <input type="number" name="price_min" [(ngModel)]="dealFilters.price_min">
   </div>
 
   <div>
     <label>Prix max</label>
-    <input type="number" [(ngModel)]="dealFilters.price_max">
+    <input type="number" name="price_max" [(ngModel)]="dealFilters.price_max">
   </div>
+
 
 </div>
 

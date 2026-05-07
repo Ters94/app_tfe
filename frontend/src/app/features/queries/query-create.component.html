@@ -80,13 +80,29 @@
   </div>
 
   <div>
+  <label>Date début</label>
+  <input
+    type="date"
+    name="start_date"
+    [(ngModel)]="dealFilters.start_date">
+</div>
+
+<div>
+  <label>Date fin</label>
+  <input
+    type="date"
+    name="end_date"
+    [(ngModel)]="dealFilters.end_date">
+</div>
+
+  <div>
     <label>Prix min</label>
-    <input type="number" [(ngModel)]="dealFilters.price_min">
+    <input type="number" name="price_min" [(ngModel)]="dealFilters.price_min">
   </div>
 
   <div>
     <label>Prix max</label>
-    <input type="number" [(ngModel)]="dealFilters.price_max">
+    <input type="number" name="price_max" [(ngModel)]="dealFilters.price_max">
   </div>
 
 </div>

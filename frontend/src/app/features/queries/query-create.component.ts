@@ -57,6 +57,8 @@ dealFilters: any = {
   product: '',
   deal_type: '',
   trader_code: '',
+  start_date: '',
+  end_date: '',
   price_min: '',
   price_max: ''
 };
@@ -176,15 +178,27 @@ loadMyGroups(): void {
     }
   });
 }
-  searchDeals(): void {
-     console.log('Bouton rechercher cliqué');
-  console.log('Filtres envoyés :', this.dealFilters);
+ searchDeals(): void {
+  console.log('Bouton rechercher cliqué');
+  console.log('Filtres avant nettoyage :', this.dealFilters);
+
+  const cleanFilters: any = {};
+
+  Object.keys(this.dealFilters).forEach(key => {
+    const value = this.dealFilters[key];
+
+    if (value !== null && value !== '') {
+      cleanFilters[key] = value;
+    }
+  });
+
+  console.log('Filtres envoyés :', cleanFilters);
 
   this.http.get<any>(
     'http://127.0.0.1:8000/deals/search',
     {
       ...this.getHeaders(),
-      params: this.dealFilters
+      params: cleanFilters
     }
   ).subscribe({
     next: (response) => {
@@ -196,11 +210,10 @@ loadMyGroups(): void {
     }
   });
 }
-
  createQuery() {
-   const finalGroupId = this.isGroupFixed ? this.groupId : this.selectedGroupId;
+  const finalGroupId = this.isGroupFixed ? this.groupId : this.selectedGroupId;
 
-    if (!this.newQueryName || this.newQueryName.trim() === '') {
+  if (!this.newQueryName || this.newQueryName.trim() === '') {
     alert('Le nom de la query est obligatoire.');
     return;
   }
@@ -210,9 +223,19 @@ loadMyGroups(): void {
     return;
   }
 
+  const cleanFilters: any = {};
+
+  Object.keys(this.dealFilters).forEach(key => {
+    const value = this.dealFilters[key];
+
+    if (value !== null && value !== '') {
+      cleanFilters[key] = value;
+    }
+  });
+
   const body = {
     query_name: this.newQueryName.trim(),
-    filters: this.dealFilters,
+    filters: cleanFilters,
     group_id: finalGroupId,
     selected_fields: this.selectedDataFields
   };
