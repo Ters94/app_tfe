@@ -139,6 +139,54 @@ def get_groups(
     return result
 
 
+@router.get("/my-groups", response_model=List[GroupPublic])
+def get_my_groups(current_user: str = Depends(get_current_user)):
+    user = db.users.find_one({"_id": ObjectId(current_user)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user.get("role") == "ADMIN":
+        groups = db.groups.find({"status": True})
+    else:
+        memberships = db.memberships.find({"user_id": current_user})
+
+        group_ids = []
+
+        for membership in memberships:
+            group_id = membership.get("group_id")
+
+            if ObjectId.is_valid(group_id):
+                group_ids.append(ObjectId(group_id))
+
+        groups = db.groups.find({
+            "_id": {"$in": group_ids},
+            "status": True
+        })
+
+    result = []
+
+    for g in groups:
+        owner = None
+
+        if ObjectId.is_valid(g.get("owner_id", "")):
+            owner = db.users.find_one({"_id": ObjectId(g["owner_id"])})
+
+        result.append(
+            GroupPublic(
+                id=str(g["_id"]),
+                name=g.get("name", ""),
+                description=g.get("description"),
+                owner_id=g.get("owner_id", ""),
+                owner_username=owner.get("username") if owner else None,
+                status=g.get("status", True),
+                created_at=g.get("created_at")
+            )
+        )
+
+    return result
+
+
 @router.get("/{group_id}", response_model=GroupPublic)
 def get_group_by_id(
     group_id: str,

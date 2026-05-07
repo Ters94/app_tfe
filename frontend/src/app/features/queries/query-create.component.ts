@@ -167,14 +167,15 @@ filterOptions: any = {
 
 loadMyGroups(): void {
   this.http.get<any[]>(
-    'http://127.0.0.1:8000/groups/',
+    'http://127.0.0.1:8000/groups/my-groups',
     this.getHeaders()
   ).subscribe({
     next: (data) => {
+      console.log('MY GROUPS =', data);
       this.groups = data;
     },
     error: (err) => {
-      console.error('Erreur chargement groupes', err);
+      console.error('Erreur chargement groupes utilisateur', err);
     }
   });
 }
