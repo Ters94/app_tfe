@@ -61,6 +61,44 @@ def get_queries(current_user=Depends(get_current_user)):
 
     return queries
 
+
+
+def build_deal_filter(filters: dict):
+    mongo_filter = {}
+
+    for key, value in filters.items():
+        if value in [None, ""]:
+            continue
+
+        if key == "start_date":
+            mongo_filter["delivery_date"] = mongo_filter.get("delivery_date", {})
+            mongo_filter["delivery_date"]["$gte"] = value + "T00:00:00Z"
+
+        elif key == "end_date":
+            mongo_filter["delivery_date"] = mongo_filter.get("delivery_date", {})
+            mongo_filter["delivery_date"]["$lte"] = value + "T23:59:59Z"
+
+        elif key == "price_min":
+            mongo_filter["price"] = mongo_filter.get("price", {})
+            mongo_filter["price"]["$gte"] = float(value)
+
+        elif key == "price_max":
+            mongo_filter["price"] = mongo_filter.get("price", {})
+            mongo_filter["price"]["$lte"] = float(value)
+
+        elif key == "volume_min":
+            mongo_filter["volume"] = mongo_filter.get("volume", {})
+            mongo_filter["volume"]["$gte"] = float(value)
+
+        elif key == "volume_max":
+            mongo_filter["volume"] = mongo_filter.get("volume", {})
+            mongo_filter["volume"]["$lte"] = float(value)
+
+        else:
+            mongo_filter[key] = value
+
+    return mongo_filter
+
 @router.get("/{query_id}/execute")
 def execute_query(query_id: str, current_user=Depends(get_current_user)):
 
@@ -73,26 +111,61 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Query not found")
 
     filters = query.get("filters", {})
+    mongo_filter = build_deal_filter(filters)
 
-    deals_cursor = db.deals.find(filters)
+    deals_cursor = db.deals.find(mongo_filter)
 
     results = []
 
+    total_volume = 0
+    total_amount = 0
+
     for deal in deals_cursor:
+        volume = deal.get("volume", 0) or 0
+        amount = deal.get("amount", 0) or 0
+
+        total_volume += volume
+        total_amount += amount
+
         results.append({
             "id": str(deal["_id"]),
-            "type": deal.get("type"),
+            "deal_type": deal.get("deal_type"),
             "product": deal.get("product"),
+            "portfolio": deal.get("portfolio"),
+            "desk": deal.get("desk"),
+            "trader_code": deal.get("trader_code"),
+            "counterparty_name": deal.get("counterparty_name"),
+            "business_unit": deal.get("business_unit"),
+            "trade_date": deal.get("trade_date"),
             "delivery_date": deal.get("delivery_date"),
-            "amount": deal.get("amount"),
-            "volume": deal.get("volume")
+            "volume": volume,
+            "quantity_unit": deal.get("quantity_unit"),
+            "amount": amount,
+            "price": deal.get("price"),
+            "open_quantity": deal.get("open_quantity"),
+            "cash": deal.get("cash"),
+            "margin_cost": deal.get("margin_cost"),
+            "total_margin_cost": deal.get("total_margin_cost"),
+            "delivery_point": deal.get("delivery_point"),
+            "delivery_type": deal.get("delivery_type"),
+            "transport_corridor": deal.get("transport_corridor"),
+            "booking_status": deal.get("booking_status")
         })
+
+    average_price = 0
+
+    if total_volume > 0:
+        average_price = round(total_amount / total_volume, 2)
 
     return {
         "query_id": str(query["_id"]),
         "query_name": query.get("query_name"),
         "filters": filters,
+        "filters_used": mongo_filter,
         "results_count": len(results),
+        "total_volume": total_volume,
+        "total_amount": total_amount,
+        "average_price": average_price,
         "results": results
     }
 

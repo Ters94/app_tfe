@@ -68,55 +68,83 @@ def get_filter_options(current_user=Depends(get_current_user)):
 
 
 @router.get("/search")
-def search_deals(request: Request):
-    allowed_filters = [
-        "deal_type",
-        "product",
-        "portfolio",
-        "desk",
-        "trader_code",
-        "counterparty_name",
-        "business_unit",
-        "delivery_point",
-        "delivery_type",
-        "transport_corridor",
-        "booking_status",
-    ]
-
+def search_deals(
+    product: str = None,
+    deal_type: str = None,
+    portfolio: str = None,
+    desk: str = None,
+    trader_code: str = None,
+    counterparty_name: str = None,
+    business_unit: str = None,
+    delivery_point: str = None,
+    delivery_type: str = None,
+    transport_corridor: str = None,
+    booking_status: str = None,
+    start_date: str = None,
+    end_date: str = None,
+    price_min: float = None,
+    price_max: float = None,
+    volume_min: float = None,
+    volume_max: float = None,
+):
     filter_query = {}
 
-    for key, value in request.query_params.items():
+    if product:
+        filter_query["product"] = product
 
-        if value == "":
-            continue
-        
-        if key in allowed_filters:
-            filter_query[key] = value
+    if deal_type:
+        filter_query["deal_type"] = deal_type
 
-      
-        elif key == "price_min" and value not in ["", None]:
-            try:
-                filter_query["price"] = filter_query.get("price", {})
-                filter_query["price"]["$gte"] = float(value)
-            except:
-                raise HTTPException(status_code=400, detail=f"Invalid value for price_min: {value}")
+    if portfolio:
+        filter_query["portfolio"] = portfolio
 
-        elif key == "price_max" and value not in ["", None]:
-            try:
-                filter_query["price"] = filter_query.get("price", {})
-                filter_query["price"]["$lte"] = float(value)
-            except:
-                raise HTTPException(status_code=400, detail=f"Invalid value for price_max: {value}")
+    if desk:
+        filter_query["desk"] = desk
 
-            
+    if trader_code:
+        filter_query["trader_code"] = trader_code
 
-        elif key == "volume_min" and value not in ["", None]:
-            filter_query["volume"] = filter_query.get("volume", {})
-            filter_query["volume"]["$gte"] = float(value)
+    if counterparty_name:
+        filter_query["counterparty_name"] = counterparty_name
 
-        elif key == "volume_max" and value not in ["", None]:
-            filter_query["volume"] = filter_query.get("volume", {})
-            filter_query["volume"]["$lte"] = float(value)
+    if business_unit:
+        filter_query["business_unit"] = business_unit
+
+    if delivery_point:
+        filter_query["delivery_point"] = delivery_point
+
+    if delivery_type:
+        filter_query["delivery_type"] = delivery_type
+
+    if transport_corridor:
+        filter_query["transport_corridor"] = transport_corridor
+
+    if booking_status:
+        filter_query["booking_status"] = booking_status
+
+    if start_date:
+        filter_query["delivery_date"] = filter_query.get("delivery_date", {})
+        filter_query["delivery_date"]["$gte"] = start_date + "T00:00:00Z"
+
+    if end_date:
+        filter_query["delivery_date"] = filter_query.get("delivery_date", {})
+        filter_query["delivery_date"]["$lte"] = end_date + "T23:59:59Z"
+
+    if price_min is not None:
+        filter_query["price"] = filter_query.get("price", {})
+        filter_query["price"]["$gte"] = price_min
+
+    if price_max is not None:
+        filter_query["price"] = filter_query.get("price", {})
+        filter_query["price"]["$lte"] = price_max
+
+    if volume_min is not None:
+        filter_query["volume"] = filter_query.get("volume", {})
+        filter_query["volume"]["$gte"] = volume_min
+
+    if volume_max is not None:
+        filter_query["volume"] = filter_query.get("volume", {})
+        filter_query["volume"]["$lte"] = volume_max
 
     deals = list(db.deals.find(filter_query))
 
@@ -130,6 +158,67 @@ def search_deals(request: Request):
         "results": deals
     }
 
+@router.get("/statistics")
+def get_deal_statistics(
+    product: str,
+    deal_type: str,
+    start_date: str,
+    end_date: str
+):
+    pipeline = [
+        {
+            "$match": {
+                "product": product,
+                "deal_type": deal_type,
+                "delivery_date": {
+                    "$gte": start_date,
+                    "$lte": end_date
+                }
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "product": "$product",
+                    "deal_type": "$deal_type"
+                },
+                "total_volume": {"$sum": "$volume"},
+                "total_amount": {"$sum": "$amount"},
+                "number_of_deals": {"$sum": 1}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "product": "$_id.product",
+                "deal_type": "$_id.deal_type",
+                "total_volume": 1,
+                "total_amount": 1,
+                "number_of_deals": 1,
+                "average_price": {
+                    "$round": [
+                        {"$divide": ["$total_amount", "$total_volume"]},
+                        2
+                    ]
+                }
+            }
+        }
+    ]
+    result = list(db.deals.aggregate(pipeline))
+
+    if not result:
+        return {
+            "product": product,
+            "deal_type": deal_type,
+            "start_date": start_date,
+            "end_date": end_date,
+            "number_of_deals": 0,
+            "total_volume": 0,
+            "total_amount": 0,
+            "average_price": 0
+        }
+
+    return result[0]
 
 @router.get("/{deal_id}", response_model=DealPublic)
 def get_deal_by_id(deal_id: str, current_user=Depends(get_current_user)):
@@ -151,3 +240,4 @@ def get_deal_by_id(deal_id: str, current_user=Depends(get_current_user)):
         "volume": deal["volume"],
         "created_at": deal.get("created_at")
     }
+
