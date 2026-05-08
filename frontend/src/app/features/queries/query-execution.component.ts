@@ -301,7 +301,17 @@ updateQuery() {
       this.showCreateForm = false;
       this.loadQuery();
     },
-    error: (err) => console.error('Erreur modification query', err)
+    error: (err) => {
+  console.error('Erreur modification query', err);
+
+  if (err.error?.detail) {
+    alert('Erreur : ' + err.error.detail);
+  } else if (err.status === 0) {
+    alert('Backend inaccessible ou problème CORS.');
+  } else {
+    alert('Erreur inconnue lors de la modification.');
+  }
+    }
   });
 }
  goBack(): void {

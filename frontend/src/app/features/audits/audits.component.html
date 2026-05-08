@@ -63,7 +63,7 @@
   <div *ngIf="formatValues(audit.old_values).length > 0; else noOldValues">
     <div class="value-line" *ngFor="let item of formatValues(audit.old_values)">
       <span class="value-key">{{ item.key }}</span>
-      <span class="value-value">{{ item.value }}</span>
+      <pre class="value-value">{{ formatAuditValue(item.value) }}</pre>
     </div>
   </div>
 
@@ -76,7 +76,7 @@
   <div *ngIf="formatValues(audit.new_values).length > 0; else noNewValues">
     <div class="value-line" *ngFor="let item of formatValues(audit.new_values)">
       <span class="value-key">{{ item.key }}</span>
-      <span class="value-value">{{ item.value }}</span>
+      <pre class="value-value">{{ formatAuditValue(item.value) }}</pre>
     </div>
   </div>
 

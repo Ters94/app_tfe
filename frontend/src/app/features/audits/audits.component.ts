@@ -76,6 +76,18 @@ loadGroupsAndSelect(groupId: string): void {
     });
   }
 
+  formatAuditValue(value: any): string {
+  if (value === null || value === undefined) {
+    return 'Aucune';
+  }
+
+  if (typeof value === 'object') {
+    return JSON.stringify(value, null, 2);
+  }
+
+  return value.toString();
+}
+
    onSearchChange(): void {
     this.selectedGroup = null;
     this.audits = [];
