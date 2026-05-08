@@ -4,6 +4,12 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
+const PRODUCT_PORTFOLIO_MAP: Record<string, string[]> = {
+  CO2:         ['CO2_BE', 'CO2_EU'],
+  GAS:         ['Gas_BE', 'Gas_FR', 'Gas_NL'],
+  OIL:         ['Oil_BE', 'Oil_FR'],
+  ELECTRICITY: ['Elec_BE', 'Elec_FR', 'Elec_NL'],
+};
 @Component({
   selector: 'app-query-create',
   standalone: true,
@@ -13,42 +19,37 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class QueryCreateComponent implements OnInit {
 
+
   newQueryName: string = '';
   showCreateForm: boolean = true;
-
   groupId: string = '';
   group: any = null;
   groups: any[] = [];
 selectedGroupId: string = '';
 isGroupFixed: boolean = false;
+today: string = new Date().toISOString().split('T')[0];
 
-  dataFields: string[] = [
+ dataFields: string[] = [
+
+   'TradeDate',
+  'DealId',
   'Portfolio',
-  'PortfolioGOP',
-  'Folder',
-  'Activity',
   'Desk',
-  'Direction',
   'Entity',
+  'Direction',
   'Quantity',
-  'CreationDate',
+  'QuantityUnit',
   'DeliveryPoint',
   'TransportCorridor',
   'DeliveryType',
-  'DealId',
-  'QuantityUnit',
-  'TradeDate',
   'DealType',
   'TraderCode',
   'Price',
   'Cash',
-  'MarginCost',
-  'TotalMarginCost',
   'OpenQuantity',
   'BookingStatus',
-  'CommodityFixingSource',
-  'AverageType',
-  'AuctionType',
+  'MarginCost',
+  'TotalMarginCost',
   'BusinessUnit'
 ];
 
@@ -67,32 +68,25 @@ dealsResults: any[] = [];
 dealsCount = 0;
 
 selectedDataFields: any = {
+  DealId: true,
+  TradeDate: true,
   Portfolio: true,
-  PortfolioGOP: false,
-  Folder: false,
-  Activity: false,
   Desk: false,
+  Entity: true,
   Direction: false,
-  Entity: false,
   Quantity: true,
-  CreationDate: false,
+  QuantityUnit: false,
   DeliveryPoint: false,
   TransportCorridor: false,
   DeliveryType: false,
-  DealId: false,
-  QuantityUnit: false,
-  TradeDate: false,
-  DealType: false,
+  DealType: true,
   TraderCode: false,
-  Price: false,
+  Price: true,
   Cash: false,
-  MarginCost: false,
-  TotalMarginCost: false,
   OpenQuantity: false,
   BookingStatus: false,
-  CommodityFixingSource: false,
-  AverageType: false,
-  AuctionType: false,
+  MarginCost: false,
+  TotalMarginCost: false,
   BusinessUnit: false
 };
 filterOptions: any = {
@@ -106,6 +100,11 @@ filterOptions: any = {
   booking_status: []
 };
 
+get filteredPortfolios(): string[] {
+    const product = this.dealFilters.product;
+    if (!product) return this.filterOptions.portfolio || [];
+    return PRODUCT_PORTFOLIO_MAP[product] || [];
+  }
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -134,6 +133,13 @@ filterOptions: any = {
         Authorization: `Bearer ${token}`
       })
     };
+  }
+
+  onProductChange(): void {
+    const allowed = this.filteredPortfolios;
+    if (this.dealFilters.portfolio && !allowed.includes(this.dealFilters.portfolio)) {
+      this.dealFilters.portfolio = '';
+    }
   }
 
   loadFilterOptions(): void {
@@ -167,14 +173,15 @@ filterOptions: any = {
 
 loadMyGroups(): void {
   this.http.get<any[]>(
-    'http://127.0.0.1:8000/groups/',
+    'http://127.0.0.1:8000/groups/my-groups',
     this.getHeaders()
   ).subscribe({
     next: (data) => {
+      console.log('MY GROUPS =', data);
       this.groups = data;
     },
     error: (err) => {
-      console.error('Erreur chargement groupes', err);
+      console.error('Erreur chargement groupes utilisateur', err);
     }
   });
 }
@@ -202,8 +209,15 @@ loadMyGroups(): void {
     }
   ).subscribe({
     next: (response) => {
-      this.dealsResults = response.results || [];
-      this.dealsCount = response.count || 0;
+   const results = response.results || [];
+      results.sort((a: any, b: any) => {
+        const da = a.trade_date || '';
+        const db = b.trade_date || '';
+        if (da === db) return 0;
+        return da < db ? -1 : 1;
+      });
+      this.dealsResults = results;
+      this.dealsCount = response.count || results.length;
     },
     error: (err) => {
       console.error('Erreur recherche deals', err);

@@ -28,7 +28,7 @@
   </select>
 </div>
 
-      <select [(ngModel)]="dealFilters.product">
+      <select [(ngModel)]="dealFilters.product" (ngModelChange)="onProductChange()">
         <option value="">Produit</option>
         <option value="GAS">GAS</option>
         <option value="ELECTRICITY">ELECTRICITY</option>
@@ -51,9 +51,9 @@
 
  <div>
     <label>Portfolio</label>
-  <select [(ngModel)]="dealFilters.portfolio">
+  <select [(ngModel)]="dealFilters.portfolio" >
   <option value="">Tous</option>
-  <option *ngFor="let p of filterOptions.portfolio" [value]="p">
+  <option *ngFor="let p of filteredPortfolios" [value]="p">
     {{ p }}
   </option>
 </select>
@@ -61,7 +61,7 @@
 
 <div>
 <label>TraderCode</label>
- <select [(ngModel)]="dealFilters.trader_code">
+ <select [(ngModel)]="dealFilters.trader_code" >
   <option value="">Trader Code</option>
   <option *ngFor="let t of filterOptions.trader_code" [value]="t">
     {{ t }}
@@ -84,7 +84,8 @@
   <input
     type="date"
     name="start_date"
-    [(ngModel)]="dealFilters.start_date">
+    [(ngModel)]="dealFilters.start_date"
+    [max]="today">
 </div>
 
 <div>
@@ -92,7 +93,9 @@
   <input
     type="date"
     name="end_date"
-    [(ngModel)]="dealFilters.end_date">
+    [(ngModel)]="dealFilters.end_date"
+    [min]="dealFilters.start_date"
+    [max]="today">
 </div>
 
   <div>
@@ -117,13 +120,16 @@
     <h3>Data</h3>
 
     <div class="data-grid">
-      <label *ngFor="let field of dataFields">
-        <input
-          type="checkbox"
-          [(ngModel)]="selectedDataFields[field]"
-        >
-        {{ field }}
-      </label>
+      <ng-container *ngFor="let field of dataFields">
+  <label *ngIf="field === 'TradeDate'" style="font-weight:700; color:#1d4ed8;">
+    <input type="checkbox" [checked]="true" disabled>
+    {{ field }} <span style="font-size:11px;color:#6b7280">(obligatoire)</span>
+  </label>
+  <label *ngIf="field !== 'TradeDate'">
+    <input type="checkbox" [(ngModel)]="selectedDataFields[field]">
+    {{ field }}
+  </label>
+</ng-container>
     </div>
   </section>
 
@@ -131,37 +137,57 @@
   <section class="card" *ngIf="dealsResults.length > 0">
     <h3>Résultats trouvés : {{ dealsCount }}</h3>
 
-    <table>
-      <thead>
-        <tr>
-          <th *ngIf="selectedDataFields.Portfolio">Portfolio</th>
-          <th *ngIf="selectedDataFields.Quantity">Quantity</th>
-          <th *ngIf="selectedDataFields.DealType">DealType</th>
-          <th *ngIf="selectedDataFields.TraderCode">TraderCode</th>
-          <th *ngIf="selectedDataFields.Price">Price</th>
-          <th *ngIf="selectedDataFields.Cash">Cash</th>
-          <th *ngIf="selectedDataFields.OpenQuantity">OpenQuantity</th>
-          <th *ngIf="selectedDataFields.BookingStatus">BookingStatus</th>
-          <th *ngIf="selectedDataFields.BusinessUnit">BusinessUnit</th>
-          <th *ngIf="selectedDataFields.DeliveryPoint">DeliveryPoint</th>
-        </tr>
-      </thead>
+  <table>
+  <thead>
+    <tr>
+      <th>TradeDate</th>
+      <th *ngIf="selectedDataFields.DealId">DealId</th>
+      <th *ngIf="selectedDataFields.Portfolio">Portfolio</th>
+      <th *ngIf="selectedDataFields.Desk">Desk</th>
+      <th *ngIf="selectedDataFields.Entity">Entity</th>
+      <th *ngIf="selectedDataFields.Direction">Direction</th>
+      <th *ngIf="selectedDataFields.Quantity">Quantity</th>
+      <th *ngIf="selectedDataFields.QuantityUnit">QuantityUnit</th>
+      <th *ngIf="selectedDataFields.DeliveryPoint">DeliveryPoint</th>
+      <th *ngIf="selectedDataFields.TransportCorridor">TransportCorridor</th>
+      <th *ngIf="selectedDataFields.DeliveryType">DeliveryType</th>
+      <th *ngIf="selectedDataFields.DealType">DealType</th>
+      <th *ngIf="selectedDataFields.TraderCode">TraderCode</th>
+      <th *ngIf="selectedDataFields.Price">Price</th>
+      <th *ngIf="selectedDataFields.Cash">Cash</th>
+      <th *ngIf="selectedDataFields.OpenQuantity">OpenQuantity</th>
+      <th *ngIf="selectedDataFields.BookingStatus">BookingStatus</th>
+      <th *ngIf="selectedDataFields.MarginCost">MarginCost</th>
+      <th *ngIf="selectedDataFields.TotalMarginCost">TotalMarginCost</th>
+      <th *ngIf="selectedDataFields.BusinessUnit">BusinessUnit</th>
+    </tr>
+  </thead>
 
-      <tbody>
-        <tr *ngFor="let deal of dealsResults">
-          <td *ngIf="selectedDataFields.Portfolio">{{ deal.portfolio }}</td>
-          <td *ngIf="selectedDataFields.Quantity">{{ deal.volume }}</td>
-          <td *ngIf="selectedDataFields.DealType">{{ deal.deal_type }}</td>
-          <td *ngIf="selectedDataFields.TraderCode">{{ deal.trader_code }}</td>
-          <td *ngIf="selectedDataFields.Price">{{ deal.price }}</td>
-          <td *ngIf="selectedDataFields.Cash">{{ deal.cash }}</td>
-          <td *ngIf="selectedDataFields.OpenQuantity">{{ deal.open_quantity }}</td>
-          <td *ngIf="selectedDataFields.BookingStatus">{{ deal.booking_status }}</td>
-          <td *ngIf="selectedDataFields.BusinessUnit">{{ deal.business_unit }}</td>
-          <td *ngIf="selectedDataFields.DeliveryPoint">{{ deal.delivery_point }}</td>
-        </tr>
-      </tbody>
-    </table>
+  <tbody>
+    <tr *ngFor="let deal of dealsResults">
+      <td>{{ deal.trade_date || '—' }}</td>
+      <td *ngIf="selectedDataFields.DealId">{{ deal.deal_id }}</td>
+      <td *ngIf="selectedDataFields.Portfolio">{{ deal.portfolio }}</td>
+      <td *ngIf="selectedDataFields.Desk">{{ deal.desk }}</td>
+      <td *ngIf="selectedDataFields.Entity">{{ deal.entity }}</td>
+      <td *ngIf="selectedDataFields.Direction">{{ deal.direction }}</td>
+      <td *ngIf="selectedDataFields.Quantity">{{ deal.volume }}</td>
+      <td *ngIf="selectedDataFields.QuantityUnit">{{ deal.quantity_unit }}</td>
+      <td *ngIf="selectedDataFields.DeliveryPoint">{{ deal.delivery_point }}</td>
+      <td *ngIf="selectedDataFields.TransportCorridor">{{ deal.transport_corridor }}</td>
+      <td *ngIf="selectedDataFields.DeliveryType">{{ deal.delivery_type }}</td>
+      <td *ngIf="selectedDataFields.DealType">{{ deal.deal_type }}</td>
+      <td *ngIf="selectedDataFields.TraderCode">{{ deal.trader_code }}</td>
+      <td *ngIf="selectedDataFields.Price">{{ deal.price }}</td>
+      <td *ngIf="selectedDataFields.Cash">{{ deal.cash }}</td>
+      <td *ngIf="selectedDataFields.OpenQuantity">{{ deal.open_quantity }}</td>
+      <td *ngIf="selectedDataFields.BookingStatus">{{ deal.booking_status }}</td>
+      <td *ngIf="selectedDataFields.MarginCost">{{ deal.margin_cost }}</td>
+      <td *ngIf="selectedDataFields.TotalMarginCost">{{ deal.total_margin_cost }}</td>
+      <td *ngIf="selectedDataFields.BusinessUnit">{{ deal.business_unit }}</td>
+    </tr>
+  </tbody>
+</table>
   </section>
 
   <button class="create-btn" (click)="createQuery()">
