@@ -59,26 +59,6 @@
 </select>
   </div>
 
-<div>
-<label>TraderCode</label>
- <select [(ngModel)]="dealFilters.trader_code" >
-  <option value="">Trader Code</option>
-  <option *ngFor="let t of filterOptions.trader_code" [value]="t">
-    {{ t }}
-  </option>
-</select>
-</div>
-
-  <div>
-    <label>Counterparty</label>
-<select [(ngModel)]="dealFilters.counterparty_name">
-  <option value="">Tous</option>
-  <option *ngFor="let c of filterOptions.counterparty_name" [value]="c">
-    {{ c }}
-  </option>
-</select>
-  </div>
-
   <div>
   <label>Date début</label>
   <input
@@ -133,10 +113,11 @@
     </div>
   </section>
 
-  <!-- 4. Résultats -->
+
   <section class="card" *ngIf="dealsResults.length > 0">
     <h3>Résultats trouvés : {{ dealsCount }}</h3>
 
+    <div class="table-wrapper">
   <table>
   <thead>
     <tr>
@@ -149,6 +130,7 @@
       <th *ngIf="selectedDataFields.Quantity">Quantity</th>
       <th *ngIf="selectedDataFields.QuantityUnit">QuantityUnit</th>
       <th *ngIf="selectedDataFields.DeliveryPoint">DeliveryPoint</th>
+      <th *ngIf="selectedDataFields.CounterpartyName">CounterpartyName</th>
       <th *ngIf="selectedDataFields.TransportCorridor">TransportCorridor</th>
       <th *ngIf="selectedDataFields.DeliveryType">DeliveryType</th>
       <th *ngIf="selectedDataFields.DealType">DealType</th>
@@ -174,6 +156,7 @@
       <td *ngIf="selectedDataFields.Quantity">{{ deal.volume }}</td>
       <td *ngIf="selectedDataFields.QuantityUnit">{{ deal.quantity_unit }}</td>
       <td *ngIf="selectedDataFields.DeliveryPoint">{{ deal.delivery_point }}</td>
+      <td *ngIf="selectedDataFields.CounterpartyName">{{ deal.counterparty_name }}</td>
       <td *ngIf="selectedDataFields.TransportCorridor">{{ deal.transport_corridor }}</td>
       <td *ngIf="selectedDataFields.DeliveryType">{{ deal.delivery_type }}</td>
       <td *ngIf="selectedDataFields.DealType">{{ deal.deal_type }}</td>
@@ -188,6 +171,7 @@
     </tr>
   </tbody>
 </table>
+</div>
   </section>
 
   <button class="create-btn" (click)="createQuery()">

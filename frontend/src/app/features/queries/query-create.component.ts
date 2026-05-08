@@ -40,6 +40,7 @@ today: string = new Date().toISOString().split('T')[0];
   'Quantity',
   'QuantityUnit',
   'DeliveryPoint',
+  'CounterpartyName',
   'TransportCorridor',
   'DeliveryType',
   'DealType',
@@ -77,6 +78,7 @@ selectedDataFields: any = {
   Quantity: true,
   QuantityUnit: false,
   DeliveryPoint: false,
+  CounterpartyName: true,
   TransportCorridor: false,
   DeliveryType: false,
   DealType: true,
@@ -112,6 +114,8 @@ get filteredPortfolios(): string[] {
   ) {}
 
   ngOnInit() {
+      console.log('QueryCreate chargé');
+      console.log('TOKEN =', localStorage.getItem('token'));
     this.groupId = this.route.snapshot.queryParamMap.get('groupId') || '';
      if (this.groupId) {
     this.isGroupFixed = true;

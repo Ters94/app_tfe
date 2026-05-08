@@ -98,3 +98,61 @@ h3 {
   border-radius: 6px;
   cursor: pointer;
 }
+/* Wrapper scrollable */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  background: white;
+  font-size: 13px;
+}
+
+thead {
+  background: #f3f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+td {
+  padding: 10px 12px;
+  white-space: nowrap;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* TradeDate : colonne sticky à gauche */
+th:first-child,
+td:first-child {
+  position: sticky;
+  left: 0;
+  background: #f3f4f6;
+  z-index: 2;
+  font-weight: 600;
+  color: #1d4ed8;
+  border-right: 2px solid #e5e7eb;
+}
+
+tbody td:first-child {
+  background: #ffffff;
+}
