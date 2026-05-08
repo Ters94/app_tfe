@@ -7,6 +7,7 @@ from backend.database import db, get_groups_collection
 from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdate
 from backend.security import get_current_user
 from backend.models.role import RoleEnum
+from backend.services.audit_service import create_audit
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
 

@@ -1,107 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from backend.database import db
 from backend.security import get_current_user
-from backend.models.query import Query, QueryCreate
+from backend.models.query import QueryCreate
+from backend.services.audit_service import create_audit
 from datetime import datetime
 from bson import ObjectId
 
 router = APIRouter(prefix="/queries", tags=["Queries"])
-def create_query_audit(
-    action: str,
-    current_user: str,
-    query_id: str,
-    group_id: str,
-    target_label: str | None = None,
-    old_values: dict | None = None,
-    new_values: dict | None = None
-):
-    db.audits.insert_one({
-        "action": action,
-        "timestamp": datetime.utcnow(),
-
-        "target_type": "QUERY",
-        "target_id": query_id,
-        "target_label": target_label,
-
-        "user_id": current_user,
-        "group_id": group_id,
-
-        "old_values": old_values,
-        "new_values": new_values
-    })
 
 
-@router.post("/")
-def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
-
-    query_dict = query.model_dump()
-    query_dict["created_by"] = ObjectId(current_user)
-    query_dict["group_id"] = ObjectId(query.group_id)
-    query_dict["created_at"] = datetime.utcnow()
-
-    result = db.queries.insert_one(query_dict)
-
-    query_id = str(result.inserted_id)
-
-    group = db.groups.find_one({
-        "_id": ObjectId(query.group_id)
-    })
-
-    selected_fields = query_dict.get("selected_fields", {})
-
-    create_query_audit(
-        action="CREATE_QUERY",
-        current_user=current_user,
-        query_id=query_id,
-        group_id=query.group_id,
-        target_label=query.query_name,
-        old_values=None,
-        new_values={
-            "query_name": query.query_name,
-            "filters": query.filters,
-            "group_name": group.get("name") if group else "Unknown",
-            "selected_fields": selected_fields
-        }
-    )
-
-    return {
-        "id": query_id,
-        "query_name": query_dict["query_name"],
-        "filters": query_dict["filters"],
-        "group_id": str(query_dict["group_id"]),
-        "created_by": str(query_dict["created_by"]),
-        "created_at": query_dict["created_at"],
-        "selected_fields": selected_fields
-    }
-@router.get("/")
-def get_queries(current_user=Depends(get_current_user)):
-    queries = []
-
-    for query in db.queries.find():
-
-        group_id = query.get("group_id")
-
-        membership = db.memberships.find_one({
-            "user_id": ObjectId(current_user),
-            "group_id": group_id
-        })
-       
-
-        group = db.groups.find_one({"_id": group_id})
-        is_owner = group and str(group.get("owner_id")) == str(current_user)
-        is_member = membership is not None
-        queries.append({
-            "id": str(query["_id"]),
-            "query_name": query.get("query_name"),
-            "filters": query.get("filters", {}),
-            "group_id": str(query.get("group_id")),
-            "created_by": str(query.get("created_by")),
-            "created_at": query.get("created_at"),
-            "can_manage": is_owner or is_member
-        })
-
-    return queries
-
+def is_admin(user_id: str) -> bool:
+    user = db.users.find_one({"_id": ObjectId(user_id)})
+    return user is not None and user.get("role") == "ADMIN"
 
 
 def build_deal_filter(filters: dict):
@@ -140,9 +50,117 @@ def build_deal_filter(filters: dict):
 
     return mongo_filter
 
+
+@router.post("/")
+def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
+    if not ObjectId.is_valid(query.group_id):
+        raise HTTPException(status_code=400, detail="Invalid group id")
+
+    group = db.groups.find_one({"_id": ObjectId(query.group_id), "status": True})
+
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+
+    membership = db.memberships.find_one({
+        "group_id": query.group_id,
+        "user_id": current_user
+    })
+
+    if not membership and not is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Vous devez être membre du groupe pour créer une query."
+        )
+
+    query_dict = query.model_dump()
+    query_dict["created_by"] = ObjectId(current_user)
+    query_dict["group_id"] = ObjectId(query.group_id)
+    query_dict["created_at"] = datetime.utcnow()
+
+    selected_fields = query_dict.get("selected_fields", {})
+
+    result = db.queries.insert_one(query_dict)
+    query_id = str(result.inserted_id)
+
+    create_audit(
+        action="CREATE_QUERY",
+        target_type="QUERY",
+        current_user=current_user,
+        group_id=query.group_id,
+        target_id=query_id,
+        target_label=query.query_name,
+        old_values=None,
+        new_values={
+            "query_name": query.query_name,
+            "filters": query.filters,
+            "group_name": group.get("name"),
+            "selected_fields": selected_fields
+        }
+    )
+
+    return {
+        "id": query_id,
+        "query_name": query_dict["query_name"],
+        "filters": query_dict["filters"],
+        "group_id": str(query_dict["group_id"]),
+        "created_by": str(query_dict["created_by"]),
+        "created_at": query_dict["created_at"],
+        "selected_fields": selected_fields
+    }
+
+
+@router.get("/")
+def get_queries(current_user=Depends(get_current_user)):
+    queries = []
+
+    for query in db.queries.find():
+        group_id = query.get("group_id")
+
+        membership = db.memberships.find_one({
+            "user_id": current_user,
+            "group_id": str(group_id)
+        })
+
+        group = db.groups.find_one({"_id": group_id})
+
+        is_owner = group and str(group.get("owner_id")) == str(current_user)
+        is_member = membership is not None
+
+        queries.append({
+            "id": str(query["_id"]),
+            "query_name": query.get("query_name"),
+            "filters": query.get("filters", {}),
+            "group_id": str(group_id),
+            "created_by": str(query.get("created_by")),
+            "created_at": query.get("created_at"),
+            "can_manage": is_owner or is_member or is_admin(current_user)
+        })
+
+    return queries
+
+
+@router.get("/group/{group_id}")
+def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
+    if not ObjectId.is_valid(group_id):
+        raise HTTPException(status_code=400, detail="Invalid group id")
+
+    queries = []
+
+    for query in db.queries.find({"group_id": ObjectId(group_id)}):
+        queries.append({
+            "id": str(query["_id"]),
+            "query_name": query.get("query_name"),
+            "filters": query.get("filters", {}),
+            "group_id": str(query.get("group_id")),
+            "created_by": str(query.get("created_by")),
+            "selected_fields": query.get("selected_fields", {})
+        })
+
+    return queries
+
+
 @router.get("/{query_id}/execute")
 def execute_query(query_id: str, current_user=Depends(get_current_user)):
-
     if not ObjectId.is_valid(query_id):
         raise HTTPException(status_code=400, detail="Invalid query id")
 
@@ -151,13 +169,29 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
     if not query:
         raise HTTPException(status_code=404, detail="Query not found")
 
+    group_id = str(query.get("group_id"))
+
+    membership = db.memberships.find_one({
+        "group_id": group_id,
+        "user_id": current_user
+    })
+
+    if not membership and not is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Vous devez être membre du groupe pour exécuter cette query."
+        )
+
     filters = query.get("filters", {})
     mongo_filter = build_deal_filter(filters)
 
-    deals_cursor = db.deals.find(mongo_filter)
+    deals_cursor = db.deals.find(mongo_filter).sort([
+        ("trade_date", 1),
+        ("delivery_date", 1),
+        ("deal_id", 1)
+    ])
 
     results = []
-
     total_volume = 0
     total_amount = 0
 
@@ -170,10 +204,13 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
 
         results.append({
             "id": str(deal["_id"]),
+            "deal_id": deal.get("deal_id"),
             "deal_type": deal.get("deal_type"),
             "product": deal.get("product"),
             "portfolio": deal.get("portfolio"),
             "desk": deal.get("desk"),
+            "entity": deal.get("entity"),
+            "direction": deal.get("direction"),
             "trader_code": deal.get("trader_code"),
             "counterparty_name": deal.get("counterparty_name"),
             "business_unit": deal.get("business_unit"),
@@ -210,23 +247,12 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
         "results": results
     }
 
-@router.get("/group/{group_id}")
-def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
-    queries = []
-
-    for query in db.queries.find({"group_id": ObjectId(group_id)}):
-        queries.append({
-            "id": str(query["_id"]),
-            "query_name": query.get("query_name"),
-            "filters": query.get("filters", {}),
-            "group_id": str(query.get("group_id")),
-            "created_by": str(query.get("created_by"))
-        })
-
-    return queries
 
 @router.get("/{query_id}")
 def get_query_by_id(query_id: str, current_user=Depends(get_current_user)):
+    if not ObjectId.is_valid(query_id):
+        raise HTTPException(status_code=400, detail="Invalid query id")
+
     query = db.queries.find_one({"_id": ObjectId(query_id)})
 
     if not query:
@@ -240,8 +266,10 @@ def get_query_by_id(query_id: str, current_user=Depends(get_current_user)):
         "filters": query.get("filters", {}),
         "group_id": str(query.get("group_id")),
         "group_name": group.get("name") if group else "—",
-        "created_by": str(query.get("created_by"))
+        "created_by": str(query.get("created_by")),
+        "selected_fields": query.get("selected_fields", {})
     }
+
 
 @router.put("/{query_id}")
 def update_query(
@@ -250,26 +278,40 @@ def update_query(
     current_user=Depends(get_current_user)
 ):
     if not ObjectId.is_valid(query_id):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid query id"
-        )
+        raise HTTPException(status_code=400, detail="Invalid query id")
 
-    old_query = db.queries.find_one({
-        "_id": ObjectId(query_id)
-    })
+    old_query = db.queries.find_one({"_id": ObjectId(query_id)})
 
     if not old_query:
+        raise HTTPException(status_code=404, detail="Query not found")
+
+    old_group_id = old_query.get("group_id")
+    old_group_id_str = str(old_group_id)
+
+    group = db.groups.find_one({"_id": old_group_id})
+
+    membership = db.memberships.find_one({
+        "group_id": old_group_id_str,
+        "user_id": current_user
+    })
+
+    if not membership and not is_admin(current_user):
         raise HTTPException(
-            status_code=404,
-            detail="Query not found"
+            status_code=403,
+            detail="Vous devez être membre du groupe pour modifier cette query."
+        )
+
+    old_product = old_query.get("filters", {}).get("product")
+    new_product = query.filters.get("product")
+
+    if old_product and new_product and old_product != new_product:
+        raise HTTPException(
+            status_code=400,
+            detail="Le produit d'une query ne peut pas être modifié."
         )
 
     selected_fields = query.selected_fields or {}
 
-    group = db.groups.find_one({
-    "_id": ObjectId(query.group_id)
-    })
     old_values = {
         "query_name": old_query.get("query_name"),
         "filters": old_query.get("filters"),
@@ -290,17 +332,17 @@ def update_query(
             "$set": {
                 "query_name": query.query_name,
                 "filters": query.filters,
-                "group_id": ObjectId(query.group_id),
                 "selected_fields": selected_fields
             }
         }
     )
 
-    create_query_audit(
+    create_audit(
         action="UPDATE_QUERY",
+        target_type="QUERY",
         current_user=current_user,
-        query_id=query_id,
-        group_id=query.group_id,
+        group_id=old_group_id_str,
+        target_id=query_id,
         target_label=query.query_name,
         old_values=old_values,
         new_values=new_values
@@ -309,6 +351,8 @@ def update_query(
     return {
         "message": "Query updated successfully"
     }
+
+
 @router.delete("/{query_id}")
 def delete_query(query_id: str, current_user=Depends(get_current_user)):
     if not ObjectId.is_valid(query_id):
@@ -319,14 +363,27 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
     if not old_query:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    group = db.groups.find_one({
-    "_id": old_query.get("group_id")
+    old_group_id = old_query.get("group_id")
+    old_group_id_str = str(old_group_id)
+
+    group = db.groups.find_one({"_id": old_group_id})
+
+    membership = db.memberships.find_one({
+        "group_id": old_group_id_str,
+        "user_id": current_user
     })
+
+    if not membership and not is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Vous devez être membre du groupe pour supprimer cette query."
+        )
+
     old_values = {
         "query_name": old_query.get("query_name"),
         "filters": old_query.get("filters"),
         "group_name": group.get("name") if group else "Unknown",
-        "selected_fields": old_query.get("selected_fields")
+        "selected_fields": old_query.get("selected_fields", {})
     }
 
     result = db.queries.delete_one({"_id": ObjectId(query_id)})
@@ -334,15 +391,17 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    create_query_audit(
+    create_audit(
         action="DELETE_QUERY",
+        target_type="QUERY",
         current_user=current_user,
-        query_id=query_id,
-        group_id=str(old_query.get("group_id")),
+        group_id=old_group_id_str,
+        target_id=query_id,
         target_label=old_query.get("query_name"),
         old_values=old_values,
         new_values=None
     )
 
-    return {"message": "Query deleted"}
-
+    return {
+        "message": "Query deleted"
+    }

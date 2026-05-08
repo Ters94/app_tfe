@@ -3,8 +3,11 @@ from typing import List
 from bson import ObjectId
 
 from backend.database import db
+from backend.models import user
+from backend.models import membership
 from backend.security import get_current_user
 from backend.models.membership import MembershipCreate, MembershipPublic
+from backend.services.audit_service import create_audit
 
 
 router = APIRouter(prefix="/groups", tags=["Memberships"])
@@ -116,6 +119,22 @@ def add_member_to_group(
 
     result = db.memberships.insert_one(membership_doc)
 
+    create_audit(
+    action="ADD_MEMBER",
+    target_type="MEMBERSHIP",
+    current_user=current_user,
+    group_id=group_id,
+    target_id=str(result.inserted_id),
+    target_label=user.get("username"),
+    old_values=None,
+    new_values={
+        "group_name": group.get("name"),
+        "member_username": user.get("username"),
+        "member_email": user.get("email"),
+        "role": membership.role
+    }
+)
+
     return MembershipPublic(
         id=str(result.inserted_id),
         group_id=group_id,
@@ -160,6 +179,25 @@ def remove_member_from_group(
     if membership.get("role") == "OWNER":
         raise HTTPException(status_code=400, detail="Cannot remove OWNER")
 
+    user = db.users.find_one({
+      "_id": ObjectId(membership.get("user_id"))
+    })
+
+    create_audit(
+        action="REMOVE_MEMBER",
+        target_type="MEMBERSHIP",
+        current_user=current_user,
+        group_id=group_id,
+        target_id=membership_id,
+        target_label=user.get("username") if user else "Unknown",
+        old_values={
+            "group_name": group.get("name"),
+            "member_username": user.get("username") if user else "Unknown",
+            "member_email": user.get("email") if user else "Unknown",
+            "role": membership.get("role")
+        },
+        new_values=None
+    )
     db.memberships.delete_one({"_id": ObjectId(membership_id)})
 
     return {"message": "Member removed"}
