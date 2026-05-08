@@ -5,6 +5,13 @@ import {FormsModule} from "@angular/forms";
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 
+const PRODUCT_PORTFOLIO_MAP: Record<string, string[]> = {
+  CO2:         ['CO2_BE', 'CO2_EU'],
+  GAS:         ['Gas_BE', 'Gas_FR', 'Gas_NL'],
+  OIL:         ['Oil_BE', 'Oil_FR'],
+  ELECTRICITY: ['Elec_BE', 'Elec_FR', 'Elec_NL'],
+};
+
 @Component({
   selector: 'app-query-execution',
   standalone: true,
@@ -23,33 +30,27 @@ selectedGroupId: string = '';
 showCreateForm: boolean = false;
 statistics: any = null;
  dataFields: string[] = [
+  'TradeDate',
+  'DealId',
   'Portfolio',
-  'PortfolioGOP',
-  'Folder',
-  'Activity',
   'Desk',
-  'Direction',
   'Entity',
+  'Direction',
   'Quantity',
-  'CreationDate',
+  'QuantityUnit',
   'DeliveryPoint',
   'TransportCorridor',
   'DeliveryType',
-  'DealId',
-  'QuantityUnit',
-  'TradeDate',
   'DealType',
   'TraderCode',
   'Price',
   'Cash',
-  'MarginCost',
-  'TotalMarginCost',
   'OpenQuantity',
   'BookingStatus',
-  'CommodityFixingSource',
-  'AverageType',
-  'AuctionType',
-  'BusinessUnit'
+  'MarginCost',
+  'TotalMarginCost',
+  'BusinessUnit',
+  'CounterpartyName'
 ];
 
 dealFilters: any = {
@@ -67,33 +68,27 @@ dealsResults: any[] = [];
 dealsCount = 0;
 
 selectedDataFields: any = {
-  Portfolio: true,
-  PortfolioGOP: false,
-  Folder: false,
-  Activity: false,
-  Desk: false,
-  Direction: false,
-  Entity: false,
-  Quantity: true,
-  CreationDate: false,
-  DeliveryPoint: false,
+  TradeDate:         true,
+  DealId:            true,
+  Portfolio:         true,
+  Desk:              false,
+  Entity:            true,
+  Direction:         false,
+  Quantity:          true,
+  QuantityUnit:      false,
+  DeliveryPoint:     false,
   TransportCorridor: false,
-  DeliveryType: false,
-  DealId: false,
-  QuantityUnit: false,
-  TradeDate: false,
-  DealType: false,
-  TraderCode: false,
-  Price: false,
-  Cash: false,
-  MarginCost: false,
-  TotalMarginCost: false,
-  OpenQuantity: false,
-  BookingStatus: false,
-  CommodityFixingSource: false,
-  AverageType: false,
-  AuctionType: false,
-  BusinessUnit: false
+  DeliveryType:      false,
+  DealType:          true,
+  TraderCode:        false,
+  Price:             true,
+  Cash:              false,
+  OpenQuantity:      false,
+  BookingStatus:     false,
+  MarginCost:        false,
+  TotalMarginCost:   false,
+  BusinessUnit:      false,
+  CounterpartyName:  true
 };
 filterOptions: any = {
   portfolio: [],
@@ -106,6 +101,14 @@ filterOptions: any = {
   booking_status: []
 };
 
+today: string = new Date().toISOString().split('T')[0];
+originalProduct: string = '';
+
+get filteredPortfolios(): string[] {
+  const product = this.originalProduct || this.dealFilters.product;
+  if (!product) return this.filterOptions.portfolio || [];
+  return PRODUCT_PORTFOLIO_MAP[product] || [];
+}
 
 constructor(
   private http: HttpClient,
@@ -134,6 +137,8 @@ constructor(
   return group ? group.name : '—';
 
 }
+
+
 
 loadFilterOptions(): void {
   this.http.get<any>(
@@ -168,7 +173,14 @@ Object.keys(this.dealFilters).forEach(key => {
     }
   ).subscribe({
     next: (response) => {
-      this.dealsResults = response.results || [];
+      const results = response.results || [];
+results.sort((a: any, b: any) => {
+  const da = a.trade_date || '';
+  const db = b.trade_date || '';
+  if (da !== db) return da < db ? -1 : 1;
+  return (a.deal_id || '') < (b.deal_id || '') ? -1 : 1;
+});
+this.dealsResults = results;
       this.dealsCount = response.count || 0;
     },
     error: (err) => {
@@ -204,12 +216,13 @@ deleteQuery(id: string) {
     next: (data) => {
       this.query = data;
 
-      this.dealFilters = data.filters || this.dealFilters;
-      this.selectedGroupId = data.group_id;
-
-      if (data.selected_fields) {
-        this.selectedDataFields = data.selected_fields;
-      }
+    this.dealFilters = { ...this.dealFilters, ...(data.filters || {}) };
+    this.selectedGroupId = data.group_id;
+    this.originalProduct = data.filters?.product || '';
+    if (data.selected_fields) {
+      this.selectedDataFields = data.selected_fields;
+    }
+    this.selectedDataFields['TradeDate'] = true;
     },
     error: (err) => {
       console.error('Erreur chargement query', err);
@@ -223,7 +236,14 @@ deleteQuery(id: string) {
     this.getHeaders()
   ).subscribe({
     next: (res) => {
-      this.results = res.results || [];
+      const results = res.results || [];
+    results.sort((a: any, b: any) => {
+  const da = a.trade_date || '';
+  const db = b.trade_date || '';
+  if (da !== db) return da < db ? -1 : 1;
+  return (a.deal_id || '') < (b.deal_id || '') ? -1 : 1;
+    });
+  this.results = results;
 
       this.statistics = {
         results_count: res.results_count,
@@ -249,10 +269,13 @@ deleteQuery(id: string) {
   if (this.query.selected_fields) {
     this.selectedDataFields = this.query.selected_fields;
   }
+  this.originalProduct = this.query.filters?.product || '';
+  this.selectedDataFields['TradeDate'] = true;
 
 }
 updateQuery() {
   const cleanFilters: any = {};
+  if (this.originalProduct) cleanFilters['product'] = this.originalProduct;
 
   Object.keys(this.dealFilters).forEach(key => {
     const value = this.dealFilters[key];
