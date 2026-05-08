@@ -89,38 +89,23 @@ def search_deals(
 ):
     filter_query = {}
 
-    if product:
-        filter_query["product"] = product
+    simple_filters = {
+        "product": product,
+        "deal_type": deal_type,
+        "portfolio": portfolio,
+        "desk": desk,
+        "trader_code": trader_code,
+        "counterparty_name": counterparty_name,
+        "business_unit": business_unit,
+        "delivery_point": delivery_point,
+        "delivery_type": delivery_type,
+        "transport_corridor": transport_corridor,
+        "booking_status": booking_status,
+    }
 
-    if deal_type:
-        filter_query["deal_type"] = deal_type
-
-    if portfolio:
-        filter_query["portfolio"] = portfolio
-
-    if desk:
-        filter_query["desk"] = desk
-
-    if trader_code:
-        filter_query["trader_code"] = trader_code
-
-    if counterparty_name:
-        filter_query["counterparty_name"] = counterparty_name
-
-    if business_unit:
-        filter_query["business_unit"] = business_unit
-
-    if delivery_point:
-        filter_query["delivery_point"] = delivery_point
-
-    if delivery_type:
-        filter_query["delivery_type"] = delivery_type
-
-    if transport_corridor:
-        filter_query["transport_corridor"] = transport_corridor
-
-    if booking_status:
-        filter_query["booking_status"] = booking_status
+    for key, value in simple_filters.items():
+        if value:
+            filter_query[key] = value
 
     if start_date:
         filter_query["delivery_date"] = filter_query.get("delivery_date", {})

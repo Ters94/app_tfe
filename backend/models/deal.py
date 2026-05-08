@@ -25,8 +25,11 @@ class DealBase(BaseModel):
     product: ProductType
 
     # Champs métier dynamiques
+    deal_id: str
     portfolio: str
     desk: Optional[str] = None
+    direction: Optional[str] = None
+    entity: Optional[str] = None
     trader_code: Optional[str] = None
     counterparty_name: Optional[str] = None
     business_unit: Optional[str] = None

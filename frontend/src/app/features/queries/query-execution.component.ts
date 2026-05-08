@@ -23,32 +23,25 @@ selectedGroupId: string = '';
 showCreateForm: boolean = false;
 statistics: any = null;
  dataFields: string[] = [
+  'DealId',
   'Portfolio',
-  'PortfolioGOP',
-  'Folder',
-  'Activity',
   'Desk',
-  'Direction',
   'Entity',
+  'Direction',
   'Quantity',
-  'CreationDate',
+  'QuantityUnit',
+  'TradeDate',
   'DeliveryPoint',
   'TransportCorridor',
   'DeliveryType',
-  'DealId',
-  'QuantityUnit',
-  'TradeDate',
   'DealType',
   'TraderCode',
   'Price',
   'Cash',
-  'MarginCost',
-  'TotalMarginCost',
   'OpenQuantity',
   'BookingStatus',
-  'CommodityFixingSource',
-  'AverageType',
-  'AuctionType',
+  'MarginCost',
+  'TotalMarginCost',
   'BusinessUnit'
 ];
 
@@ -67,32 +60,25 @@ dealsResults: any[] = [];
 dealsCount = 0;
 
 selectedDataFields: any = {
+  DealId: true,
   Portfolio: true,
-  PortfolioGOP: false,
-  Folder: false,
-  Activity: false,
   Desk: false,
+  Entity: true,
   Direction: false,
-  Entity: false,
   Quantity: true,
-  CreationDate: false,
+  QuantityUnit: false,
+  TradeDate: false,
   DeliveryPoint: false,
   TransportCorridor: false,
   DeliveryType: false,
-  DealId: false,
-  QuantityUnit: false,
-  TradeDate: false,
-  DealType: false,
+  DealType: true,
   TraderCode: false,
-  Price: false,
+  Price: true,
   Cash: false,
-  MarginCost: false,
-  TotalMarginCost: false,
   OpenQuantity: false,
   BookingStatus: false,
-  CommodityFixingSource: false,
-  AverageType: false,
-  AuctionType: false,
+  MarginCost: false,
+  TotalMarginCost: false,
   BusinessUnit: false
 };
 filterOptions: any = {
@@ -105,6 +91,7 @@ filterOptions: any = {
   delivery_point: [],
   booking_status: []
 };
+noResult: boolean = false;
 
 
 constructor(
@@ -151,14 +138,19 @@ loadFilterOptions(): void {
 }
 
 searchDeals(): void {
+  this.dealsResults = [];
+  this.dealsCount = 0;
+  this.noResult = false;
+
   const cleanFilters: any = {};
 
-Object.keys(this.dealFilters).forEach(key => {
-  const value = this.dealFilters[key];
-  if (value !== '' && value !== null) {
-    cleanFilters[key] = value;
-  }
-});
+  Object.keys(this.dealFilters).forEach(key => {
+    const value = this.dealFilters[key];
+
+    if (value !== '' && value !== null && value !== undefined) {
+      cleanFilters[key] = value;
+    }
+  });
 
   this.http.get<any>(
     'http://127.0.0.1:8000/deals/search',
@@ -169,14 +161,20 @@ Object.keys(this.dealFilters).forEach(key => {
   ).subscribe({
     next: (response) => {
       this.dealsResults = response.results || [];
-      this.dealsCount = response.count || 0;
+      this.dealsCount = response.count || this.dealsResults.length;
+
+      if (this.dealsResults.length === 0) {
+        this.noResult = true;
+      }
     },
     error: (err) => {
       console.error('Erreur recherche deals', err);
+      this.dealsResults = [];
+      this.dealsCount = 0;
+      this.noResult = true;
     }
   });
 }
-
 
 
 deleteQuery(id: string) {

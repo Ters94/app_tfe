@@ -22,33 +22,26 @@ export class QueryCreateComponent implements OnInit {
 selectedGroupId: string = '';
 isGroupFixed: boolean = false;
 
-  dataFields: string[] = [
+ dataFields: string[] = [
+  'DealId',
   'Portfolio',
-  'PortfolioGOP',
-  'Folder',
-  'Activity',
   'Desk',
-  'Direction',
   'Entity',
+  'Direction',
   'Quantity',
-  'CreationDate',
+  'QuantityUnit',
+  'TradeDate',
   'DeliveryPoint',
   'TransportCorridor',
   'DeliveryType',
-  'DealId',
-  'QuantityUnit',
-  'TradeDate',
   'DealType',
   'TraderCode',
   'Price',
   'Cash',
-  'MarginCost',
-  'TotalMarginCost',
   'OpenQuantity',
   'BookingStatus',
-  'CommodityFixingSource',
-  'AverageType',
-  'AuctionType',
+  'MarginCost',
+  'TotalMarginCost',
   'BusinessUnit'
 ];
 
@@ -67,32 +60,25 @@ dealsResults: any[] = [];
 dealsCount = 0;
 
 selectedDataFields: any = {
+  DealId: true,
   Portfolio: true,
-  PortfolioGOP: false,
-  Folder: false,
-  Activity: false,
   Desk: false,
+  Entity: true,
   Direction: false,
-  Entity: false,
   Quantity: true,
-  CreationDate: false,
+  QuantityUnit: false,
+  TradeDate: false,
   DeliveryPoint: false,
   TransportCorridor: false,
   DeliveryType: false,
-  DealId: false,
-  QuantityUnit: false,
-  TradeDate: false,
-  DealType: false,
+  DealType: true,
   TraderCode: false,
-  Price: false,
+  Price: true,
   Cash: false,
-  MarginCost: false,
-  TotalMarginCost: false,
   OpenQuantity: false,
   BookingStatus: false,
-  CommodityFixingSource: false,
-  AverageType: false,
-  AuctionType: false,
+  MarginCost: false,
+  TotalMarginCost: false,
   BusinessUnit: false
 };
 filterOptions: any = {

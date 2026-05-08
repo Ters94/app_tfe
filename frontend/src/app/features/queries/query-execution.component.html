@@ -173,6 +173,9 @@
   <!-- 4. Résultats -->
   <section class="card" *ngIf="dealsResults.length > 0">
     <h3>Résultats trouvés : {{ dealsCount }}</h3>
+    <p *ngIf="noResult" class="error-message">
+  Aucun résultat trouvé pour ces filtres.
+</p>
 
     <table>
       <thead>
