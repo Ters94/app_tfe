@@ -4,6 +4,7 @@ from typing import List
 from bson import ObjectId
 
 from backend.database import db, get_groups_collection
+from backend.models import group
 from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdate
 from backend.security import get_current_user
 from backend.models.role import RoleEnum
@@ -364,12 +365,21 @@ def transfer_owner(
             detail="Le nouvel owner doit être membre du groupe."
         )
 
+    old_owner = db.users.find_one({"_id": ObjectId(current_owner_id)})
+    new_owner = db.users.find_one({"_id": ObjectId(new_owner_id)})
+
     old_values = {
-        "owner_id": current_owner_id
+        "group_name": group.get("name"),
+        "old_owner_username": old_owner.get("username") if old_owner else "Unknown",
+        "old_owner_email": old_owner.get("email") if old_owner else "Unknown",
+        "old_owner_id": current_owner_id
     }
 
     new_values = {
-        "owner_id": new_owner_id
+        "group_name": group.get("name"),
+        "new_owner_username": new_owner.get("username") if new_owner else "Unknown",
+        "new_owner_email": new_owner.get("email") if new_owner else "Unknown",
+        "new_owner_id": new_owner_id
     }
 
 
@@ -393,13 +403,13 @@ def transfer_owner(
     }
 )
     create_audit(
-        action="TRANSFER_OWNER",
-        current_user=current_user,
-        group_id=group_id,
-        target_label=group.get("name"),
-        old_values=old_values,
-        new_values=new_values
-    )
+    action="TRANSFER_OWNER",
+    current_user=current_user,
+    group_id=group_id,
+    target_label=group.get("name"),
+    old_values=old_values,
+    new_values=new_values
+)
 
 
     return {
