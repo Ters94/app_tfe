@@ -21,3 +21,4 @@ class MembershipPublic(BaseModel):
     email: str | None = None
 
     role: str
+    

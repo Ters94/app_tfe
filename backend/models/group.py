@@ -29,3 +29,4 @@ class GroupPublic(GroupBase):
 class GroupUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    

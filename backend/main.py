@@ -9,16 +9,20 @@ from backend.routes.membership import router as membership_router
 from backend.routes.audits import router as audits_router
 from backend.routes import deals
 from backend.routes import queries
+from backend.services.audit_scheduler import start_scheduler
+from backend.routes.test_audit import router as test_audit_router
 
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
+   scheduler = start_scheduler()
+   try:
         client.admin.command("ping")
         print("Connected to MongoDB")
         yield
-    finally:
+   finally:
+        scheduler.shutdown()
         client.close()
         print("MongoDB connection closed")
 
@@ -44,6 +48,7 @@ app.include_router(membership_router)
 app.include_router(audits_router)
 app.include_router(deals.router)
 app.include_router(queries.router)
+app.include_router(test_audit_router)
 @app.get("/")
 def root():
     return {"message": "API is running correctly"}
