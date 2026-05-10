@@ -2,6 +2,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from bson import ObjectId
+import logging
 
 from backend.database import db, get_groups_collection
 from backend.models import group
@@ -9,8 +10,10 @@ from backend.models.group import GroupCreate, GroupPublic, GroupInDB, GroupUpdat
 from backend.security import get_current_user
 from backend.models.role import RoleEnum
 from backend.services.audit_service import create_audit
+from backend.services.audit_scheduler import generate_audit_pdf, send_audit_email
 
 router = APIRouter(prefix="/groups", tags=["Groups"])
+logger = logging.getLogger(__name__)
 
 
 def is_admin(user_id: str) -> bool:
@@ -29,14 +32,11 @@ def create_audit(
     db.audits.insert_one({
         "action": action,
         "timestamp": datetime.utcnow(),
-
         "target_type": "GROUP",
         "target_id": group_id,
         "target_label": target_label,
-
         "user_id": current_user,
         "group_id": group_id,
-
         "old_values": old_values,
         "new_values": new_values
     })
@@ -140,6 +140,7 @@ def get_groups(
 
     return result
 
+
 @router.get("/my-groups", response_model=List[GroupPublic])
 def get_my_groups(current_user: str = Depends(get_current_user)):
     user = db.users.find_one({"_id": ObjectId(current_user)})
@@ -187,6 +188,7 @@ def get_my_groups(current_user: str = Depends(get_current_user)):
 
     return result
 
+
 @router.get("/{group_id}", response_model=GroupPublic)
 def get_group_by_id(
     group_id: str,
@@ -199,7 +201,6 @@ def get_group_by_id(
 
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-
 
     membership = db.memberships.find_one({
         "group_id": group_id,
@@ -315,7 +316,61 @@ def desactivate_group(
         new_values={"status": False}
     )
 
+    try:
+        owner = db.users.find_one({"_id": ObjectId(group["owner_id"])})
+
+        if owner and owner.get("email"):
+            group_name  = group.get("name", "")
+            owner_email = owner.get("email")
+            owner_name  = f"{owner.get('name', '')} {owner.get('lastname', '')}".strip() or owner.get("username", "")
+            now         = datetime.utcnow()
+            month_label = f"Suppression du groupe — {now.strftime('%d/%m/%Y')}"
+
+            audit_docs = list(db.audits.find(
+                {"group_id": group_id}
+            ).sort("timestamp", -1))
+
+            enriched   = []
+            user_cache = {}
+
+            for a in audit_docs:
+                uid = a.get("user_id", "")
+                if uid and uid not in user_cache:
+                    u = db.users.find_one({"_id": ObjectId(uid)}, {"username": 1})
+                    user_cache[uid] = u.get("username", "") if u else ""
+
+                enriched.append({
+                    "timestamp":    a.get("timestamp"),
+                    "action":       a.get("action", ""),
+                    "target_type":  a.get("target_type", ""),
+                    "target_label": a.get("target_label", ""),
+                    "user_id":      uid,
+                    "username":     user_cache.get(uid, ""),
+                    "old_values":   a.get("old_values"),
+                    "new_values":   a.get("new_values"),
+                })
+
+            pdf_bytes = generate_audit_pdf(
+                group_name  = group_name,
+                audits      = enriched,
+                month_label = month_label,
+            )
+
+            safe_name = group_name.replace(" ", "_").replace("/", "-")
+            filename  = f"audit_final_{safe_name}_{now.strftime('%d-%m-%Y')}.pdf"
+
+            send_audit_email(
+                owner_email = owner_email,
+                owner_name  = owner_name,
+                month_label = month_label,
+                attachments = [(filename, pdf_bytes)],
+                custom_note =f"Ce journal d'audit vous est envoyé suite à la suppression du groupe '{group_name}' le {now.strftime('%d/%m/%Y')}. Vous trouverez ci-joint l'historique complet des audits pour ce groupe.",
+            )
+    except Exception as e:
+        logger.error(f"Erreur envoi email suppression groupe : {e}")
+
     return {"message": "Group desactivated"}
+
 
 @router.put("/{group_id}/transfer-owner")
 def transfer_owner(
@@ -338,21 +393,18 @@ def transfer_owner(
 
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    
+
     current_owner_id = group.get("owner_id")
 
     if current_owner_id != current_user and not is_admin(current_user):
         raise HTTPException(
             status_code=403,
-            detail="Seul l’owner actuel ou l'admin peut transférer la propriété du groupe."
+            detail="Seul l'owner actuel ou l'admin peut transférer la propriété du groupe."
         )
 
     new_owner = db.users.find_one({"_id": ObjectId(new_owner_id)})
     if not new_owner:
-        raise HTTPException(
-            status_code=404,
-            detail="Le nouvel owner n'existe pas."
-        )
+        raise HTTPException(status_code=404, detail="Le nouvel owner n'existe pas.")
 
     membership = db.memberships.find_one({
         "group_id": group_id,
@@ -369,19 +421,18 @@ def transfer_owner(
     new_owner = db.users.find_one({"_id": ObjectId(new_owner_id)})
 
     old_values = {
-        "group_name": group.get("name"),
+        "group_name":         group.get("name"),
         "old_owner_username": old_owner.get("username") if old_owner else "Unknown",
-        "old_owner_email": old_owner.get("email") if old_owner else "Unknown",
-        "old_owner_id": current_owner_id
+        "old_owner_email":    old_owner.get("email")    if old_owner else "Unknown",
+        "old_owner_id":       current_owner_id
     }
 
     new_values = {
-        "group_name": group.get("name"),
+        "group_name":         group.get("name"),
         "new_owner_username": new_owner.get("username") if new_owner else "Unknown",
-        "new_owner_email": new_owner.get("email") if new_owner else "Unknown",
-        "new_owner_id": new_owner_id
+        "new_owner_email":    new_owner.get("email")    if new_owner else "Unknown",
+        "new_owner_id":       new_owner_id
     }
-
 
     groups_collection.update_one(
         {"_id": ObjectId(group_id)},
@@ -389,31 +440,27 @@ def transfer_owner(
     )
 
     db.memberships.update_many(
-    {"group_id": group_id, "role": "OWNER"},
-    {"$set": {"role": "MEMBER"}}
-)
+        {"group_id": group_id, "role": "OWNER"},
+        {"$set": {"role": "MEMBER"}}
+    )
 
     db.memberships.update_one(
-    {
-        "group_id": group_id, 
-        "user_id": new_owner_id
-     },
-    {
-        "$set": {"role": "OWNER"}
-    }
-)
-    create_audit(
-    action="TRANSFER_OWNER",
-    current_user=current_user,
-    group_id=group_id,
-    target_label=group.get("name"),
-    old_values=old_values,
-    new_values=new_values
-)
+        {"group_id": group_id, "user_id": new_owner_id},
+        {"$set": {"role": "OWNER"}}
+    )
 
+    create_audit(
+        action="TRANSFER_OWNER",
+        current_user=current_user,
+        group_id=group_id,
+        target_label=group.get("name"),
+        old_values=old_values,
+        new_values=new_values
+    )
 
     return {
-        "message": "Ownership transféré avec succès",
-        "group_id": group_id,
+        "message":      "Ownership transféré avec succès",
+        "group_id":     group_id,
         "old_owner_id": current_owner_id,
-        "new_owner_id": new_owner_id}
+        "new_owner_id": new_owner_id
+    }
