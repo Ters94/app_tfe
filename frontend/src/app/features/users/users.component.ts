@@ -16,13 +16,16 @@ export class UsersComponent implements OnInit {
   users: any[] = [];
   searchTerm: string = '';
   errorMessage: string = '';
+  successMessage: string = '';
+  role: string = '';
+  confirmDeleteId: string | null = null;
 
   constructor(
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute
   ) {}
-role: string = '';
+
   ngOnInit(): void {
     const token = localStorage.getItem('token');
     this.role = localStorage.getItem('role') || '';
@@ -67,42 +70,47 @@ role: string = '';
 }
   }
 
-  deleteUser(id: string): void {
-    const token = localStorage.getItem('token');
+    askDeleteUser(id: string): void {
+    if (!this.isAdmin) {
+      this.errorMessage = 'Accès refusé';
+      return;
+    }
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.confirmDeleteId = id;
+  }
 
+  cancelDelete(): void {
+    this.confirmDeleteId = null;
+  }
+
+  confirmDelete(): void {
+    if (!this.confirmDeleteId) return;
+
+    const token = localStorage.getItem('token');
     if (!token) {
-      alert('Session expirée, reconnecte-toi');
       this.router.navigate(['/']);
       return;
     }
-    if (!this.isAdmin) {
-    this.errorMessage = "Accès refusé";
-    return;
-    }
 
-    const confirmed = confirm('Voulez-vous vraiment supprimer cet utilisateur ?');
-    if (!confirmed) return;
-
-    this.http.delete(`http://localhost:8000/users/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    this.http.delete(`http://localhost:8000/users/${this.confirmDeleteId}`, {
+      headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: () => {
-        this.users = this.users.filter(u => u.id !== id);
-         alert('Utilisateur supprimé');
+        this.users = this.users.filter(u => u.id !== this.confirmDeleteId);
+        this.confirmDeleteId = null;
+        this.successMessage = 'Utilisateur supprimé avec succès.';
       },
       error: (err) => {
-        console.error(err);
- if (err.status === 401 || err.status === 403) {
-        alert("Vous n'avez pas le droit de supprimer cet utilisateur.");
-      } else {
-        alert(err.error?.detail || "Erreur lors de la suppression.");
-      }
+        this.confirmDeleteId = null;
+        if (err.status === 401 || err.status === 403) {
+          this.errorMessage = "Vous n'avez pas le droit de supprimer cet utilisateur.";
+        } else {
+          this.errorMessage = err.error?.detail || 'Erreur lors de la suppression.';
+        }
       }
     });
   }
-
   createUser(): void {
     this.router.navigate(['/users/create']);
   }
