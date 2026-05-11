@@ -25,6 +25,7 @@ export class UserFormComponent implements OnInit {
   isEdit: boolean = false;
   userId: string | null = null;
   errorMessage: string = '';
+  successMessage: string = '';
   fieldErrors: any = {};
   submitted: boolean = false;
 
@@ -78,8 +79,7 @@ export class UserFormComponent implements OnInit {
         };
       },
       error: (err: any) => {
-        console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors du chargement de l’utilisateur';
+        this.errorMessage = err?.error?.detail || "Erreur lors du chargement de l'utilisateur";
       }
     });
   }
@@ -231,11 +231,10 @@ export class UserFormComponent implements OnInit {
         }
       }).subscribe({
         next: () => {
-          alert('Utilisateur modifié');
-          this.router.navigate(['/users']);
+          this.successMessage = 'Utilisateur modifié avec succès.';
+          setTimeout(() => this.router.navigate(['/users']), 1200);
         },
         error: (err: any) => {
-          console.error(err);
           this.handleBackendErrors(err);
         }
       });
@@ -251,11 +250,10 @@ export class UserFormComponent implements OnInit {
         }
       }).subscribe({
         next: () => {
-          alert('Utilisateur créé');
-          this.router.navigate(['/users']);
+          this.successMessage = 'Utilisateur créé avec succès.';
+          setTimeout(() => this.router.navigate(['/users']), 1200);
         },
         error: (err: any) => {
-          console.error(err);
           this.handleBackendErrors(err);
         }
       });

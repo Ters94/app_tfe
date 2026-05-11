@@ -1,4 +1,7 @@
 <div class="queries-execution-page">
+  <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="success-box">{{ successMessage }}</div>
+
 
   <div class="page-header">
     <button class="back-btn" (click)="goBack()">← Retour</button>

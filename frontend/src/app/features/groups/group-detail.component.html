@@ -118,10 +118,9 @@
 </button>
 <br>
 <br>
-<section class="members-section" *ngIf="groupQueries.length > 0">
+<section class="queries-section" *ngIf="groupQueries.length > 0">
   <h3>Queries du groupe</h3>
-
-  <table>
+  <table class="queries-table">
     <thead>
       <tr>
         <th>Nom</th>
@@ -134,9 +133,9 @@
       <tr *ngFor="let query of groupQueries">
         <td>{{ query.query_name }}</td>
         <td><code>{{ query.filters | json }}</code></td>
-        <td class="actions">
-  <button (click)="executeQuery(query.id)">Exécuter</button>
-  <button (click)="editQuery(query.id)">Modifier</button>
+        <td class="query-actions">
+  <button class="info-btn" (click)="executeQuery(query.id)">Exécuter</button>
+  <button class="info-btn" (click)="editQuery(query.id)">Modifier</button>
   <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
 </td>
       </tr>

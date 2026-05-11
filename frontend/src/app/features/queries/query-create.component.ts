@@ -27,6 +27,10 @@ export class QueryCreateComponent implements OnInit {
   groups: any[] = [];
 selectedGroupId: string = '';
 isGroupFixed: boolean = false;
+searchDone   = false;
+totalVolume  = 0;
+totalAmount  = 0;
+averagePrice = 0;
 today: string = new Date().toISOString().split('T')[0];
 
  dataFields: string[] = [
@@ -213,7 +217,7 @@ loadMyGroups(): void {
     }
   ).subscribe({
     next: (response) => {
-   const results = response.results || [];
+      const results = response.results || [];
       results.sort((a: any, b: any) => {
         const da = a.trade_date || '';
         const db = b.trade_date || '';
@@ -221,14 +225,21 @@ loadMyGroups(): void {
         return da < db ? -1 : 1;
       });
       this.dealsResults = results;
-      this.dealsCount = response.count || results.length;
+      this.dealsCount   = response.count || results.length;
+      this.searchDone   = true;
+      this.totalVolume  = results.reduce((sum: number, d: any) => sum + (d.volume || 0), 0);
+      this.totalAmount  = results.reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
+      this.averagePrice = this.totalVolume > 0
+        ? Math.round((this.totalAmount / this.totalVolume) * 100) / 100
+        : 0;
     },
     error: (err) => {
       console.error('Erreur recherche deals', err);
-    }
+      this.searchDone = true;
+  }
   });
 }
- createQuery() {
+  createQuery() {
   const finalGroupId = this.isGroupFixed ? this.groupId : this.selectedGroupId;
 
   if (!this.newQueryName || this.newQueryName.trim() === '') {

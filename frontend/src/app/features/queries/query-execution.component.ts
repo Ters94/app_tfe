@@ -29,6 +29,8 @@ groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
 statistics: any = null;
+ errorMessage: string = '';
+  successMessage: string = '';
  dataFields: string[] = [
   'TradeDate',
   'DealId',
@@ -125,7 +127,6 @@ constructor(
 
    getHeaders() {
     const token = localStorage.getItem('token');
-    console.log('TOKEN:', localStorage.getItem('token'));
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${token}`
@@ -146,12 +147,11 @@ loadFilterOptions(): void {
     this.getHeaders()
   ).subscribe({
     next: (data) => {
-      console.log('FILTER OPTIONS EXECUTION =', data);
       this.filterOptions = data;
     },
-    error: (err) => {
-      console.error('Erreur chargement options filtres execution', err);
-    }
+    error: () => {
+          this.errorMessage = 'Erreur lors du chargement des options de filtres.';
+        }
   });
 }
 
@@ -183,8 +183,8 @@ results.sort((a: any, b: any) => {
 this.dealsResults = results;
       this.dealsCount = response.count || 0;
     },
-    error: (err) => {
-      console.error('Erreur recherche deals', err);
+    error: () => {
+      this.errorMessage = 'Erreur lors de la recherche des deals.';
     }
   });
 }
@@ -203,8 +203,8 @@ deleteQuery(id: string) {
         next: (data) => {
           this.groups = data;
         },
-        error: (err) => {
-          console.error('Erreur chargement groups', err);
+        error: () => {
+          this.errorMessage = 'Erreur lors du chargement des groupes.';
         }
       });
   }
@@ -225,7 +225,7 @@ deleteQuery(id: string) {
     this.selectedDataFields['TradeDate'] = true;
     },
     error: (err) => {
-      console.error('Erreur chargement query', err);
+      this.errorMessage = 'Erreur lors du chargement de la requête.';
     }
   });
 }
@@ -251,11 +251,9 @@ deleteQuery(id: string) {
         total_amount: res.total_amount,
         average_price: res.average_price
       };
-
-      console.log('Résultat exécution query:', res);
     },
-    error: (err) => {
-      console.error('Erreur exécution query', err);
+    error: () => {
+      this.errorMessage = 'Erreur lors de l’exécution de la requête.';
     }
   });
 }
@@ -292,6 +290,9 @@ updateQuery() {
     selected_fields: this.selectedDataFields
   };
 
+
+    this.errorMessage = '';
+    this.successMessage = '';
   this.http.put(
     `http://127.0.0.1:8000/queries/${this.queryId}`,
     body,
@@ -301,19 +302,15 @@ updateQuery() {
       this.showCreateForm = false;
       this.loadQuery();
     },
-    error: (err) => {
-  console.error('Erreur modification query', err);
-
-  if (err.error?.detail) {
-    alert('Erreur : ' + err.error.detail);
-  } else if (err.status === 0) {
-    alert('Backend inaccessible ou problème CORS.');
-  } else {
-    alert('Erreur inconnue lors de la modification.');
+   error: (err) => {
+          if (err.status === 0) {
+            this.errorMessage = 'Backend inaccessible ou problème CORS.';
+          } else {
+            this.errorMessage = err.error?.detail || 'Erreur lors de la modification.';
+          }
+        }
+      });
   }
-    }
-  });
-}
  goBack(): void {
   const groupId = this.query?.group_id || this.selectedGroupId;
   this.router.navigate(['/groups', groupId]);

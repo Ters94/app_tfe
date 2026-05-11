@@ -61,7 +61,6 @@ export class UserDetailComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error(err);
         this.errorMessage = err?.error?.detail || 'Erreur lors du chargement';
 
         if (err.status === 401) {
@@ -91,7 +90,6 @@ loadUserGroups(userId: string) {
       this.memberGroups = res.member_groups || [];
     },
     error: (err) => {
-      console.error(err);
       this.ownedGroups = [];
       this.memberGroups = [];
     }

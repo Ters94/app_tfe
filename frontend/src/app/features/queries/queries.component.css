@@ -179,3 +179,11 @@ code {
     max-width: 300px;
   }
 }
+.error-box {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 4px;
+  font-weight: 600;
+}

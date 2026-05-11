@@ -115,6 +115,23 @@
 
 
   <section class="card" *ngIf="dealsResults.length > 0">
+     <div class="results-header">
+    <h3>Résultats trouvés : {{ dealsCount }}</h3>
+    <div class="results-stats">
+      <div class="stat-chip">
+        <span class="stat-label">Volume total</span>
+        <span class="stat-value">{{ totalVolume | number:'1.0-0' }} MWh</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Montant total</span>
+        <span class="stat-value">{{ totalAmount | number:'1.2-2' }} €</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Prix moyen pondéré</span>
+        <span class="stat-value">{{ averagePrice | number:'1.2-2' }} €/MWh</span>
+      </div>
+    </div>
+  </div>
     <h3>Résultats trouvés : {{ dealsCount }}</h3>
 
     <div class="table-wrapper">
@@ -173,9 +190,22 @@
 </table>
 </div>
   </section>
+  <section class="card empty-state" *ngIf="searchDone && dealsResults.length === 0">
+  <span class="empty-icon">🔍</span>
+  <p>Aucun deal trouvé pour ces filtres.</p>
+</section>
 
-  <button class="create-btn" (click)="createQuery()">
-    Créer la Query
+  <!-- MODIFIÉ : SAVE au lieu de CRÉER -->
+<div class="actions-row">
+  <button class="save-btn" (click)="createQuery()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Save
   </button>
+  <button class="cancel-btn" (click)="goBack()">Annuler</button>
+</div>
 
 </div>

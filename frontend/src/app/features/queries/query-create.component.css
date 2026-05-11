@@ -57,7 +57,6 @@ h3 {
   box-sizing: border-box;
 }
 
-/* Data grid */
 .data-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -70,7 +69,6 @@ h3 {
   gap: 6px;
 }
 
-/* Boutons */
 .primary-btn {
   margin-top: 15px;
   padding: 10px 16px;
@@ -98,7 +96,7 @@ h3 {
   border-radius: 6px;
   cursor: pointer;
 }
-/* Wrapper scrollable */
+
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -141,7 +139,6 @@ tbody tr:hover {
   background: #f9fafb;
 }
 
-/* TradeDate : colonne sticky à gauche */
 th:first-child,
 td:first-child {
   position: sticky;
@@ -156,3 +153,105 @@ td:first-child {
 tbody td:first-child {
   background: #ffffff;
 }
+
+
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.results-header h3 { margin: 0; }
+
+.results-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-width: 130px;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 2px;
+}
+
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem;
+  color: #9ca3af;
+  gap: 8px;
+}
+
+.empty-icon { font-size: 2rem; }
+.empty-state p { font-size: 0.9rem; margin: 0; }
+
+
+.actions-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 1.25rem;
+  height: 40px;
+  background: #111827;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.save-btn:hover { background: #374151; }
+.save-btn:active { transform: scale(0.97); }
+
+.cancel-btn {
+  padding: 0 1.25rem;
+  height: 40px;
+  background: transparent;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.cancel-btn:hover { background: #f3f4f6; }

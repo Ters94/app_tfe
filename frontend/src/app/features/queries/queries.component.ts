@@ -24,6 +24,7 @@ editingQueryId: string | null = null;
 executedQueryId: string | null = null;
 queryResults: any[] = [];
 queryStatistics: any = null;
+errorMessage: string = '';
 
 constructor(
   private http: HttpClient,
@@ -36,7 +37,6 @@ constructor(
 
    getHeaders() {
     const token = localStorage.getItem('token');
-    console.log('TOKEN:', localStorage.getItem('token'));
     return {
       headers: new HttpHeaders({
         Authorization: `Bearer ${token}`
@@ -84,8 +84,8 @@ editQuery(query: any) {
         next: (data) => {
           this.groups = data;
         },
-        error: (err) => {
-          console.error('Erreur chargement groups', err);
+        error: () => {
+     this.errorMessage = 'Erreur lors du chargement des requêtes.';
         }
       });
   }
@@ -97,7 +97,7 @@ editQuery(query: any) {
           this.queries = data;
         },
         error: (err) => {
-          console.error('Erreur chargement queries', err);
+ this.errorMessage = 'Erreur lors du chargement des requêtes.';
         }
       });
   }
@@ -118,8 +118,8 @@ editQuery(query: any) {
             average_price: res.average_price
           };
         },
-        error: (err) => {
-          console.error('Erreur exécution query', err);
+        error: () => {
+          this.errorMessage = 'Erreur lors de l’exécution de la requête.';
         }
       });
   }
@@ -148,8 +148,8 @@ editQuery(query: any) {
         this.newType = '';
         this.loadQueries();
       },
-      error: (err) => {
-        console.error('Erreur création query', err.error.detail);
+      error: () => {
+        this.errorMessage = 'Erreur lors de la création de la requête.';
       }
     });
 }
