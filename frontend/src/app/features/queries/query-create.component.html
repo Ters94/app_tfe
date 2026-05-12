@@ -101,7 +101,7 @@
 
     <div class="data-grid">
       <ng-container *ngFor="let field of dataFields">
-  <label *ngIf="field === 'TradeDate'" style="font-weight:700; color:#1d4ed8;">
+  <label *ngIf="field === 'TradeDate'" style="font-weight:700; color:var(--color-text-muted);">
     <input type="checkbox" [checked]="true" disabled>
     {{ field }} <span style="font-size:11px;color:#6b7280">(obligatoire)</span>
   </label>
