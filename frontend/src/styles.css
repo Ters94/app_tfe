@@ -1,1 +1,32 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --color-primary:       #111827;
+  --color-primary-hover: #374151;
+  --color-accent:        #1d4ed8;
+  --color-bg:            #f5f6f8;
+  --color-surface:       #ffffff;
+  --color-border:        #e5e7eb;
+  --color-border-light:  #d1d5db;
+  --color-text:          #111827;
+  --color-text-muted:    #6b7280;
+  --color-danger:        #b91c1c;
+  --color-danger-hover:  #991b1b;
+  --color-danger-bg:     #fee2e2;
+  --color-danger-light:  #fca5a5;
+  --color-success:       #166534;
+  --color-success-bg:    #dcfce7;
+  --color-header-bg:     #eef0f4;
+  --color-row-hover:     #f9fafb;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
