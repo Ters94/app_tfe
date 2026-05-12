@@ -265,3 +265,16 @@
   color: #9ca3af;
   font-style: italic;
 }
+.audit-page {
+  color: var(--color-text);
+}
+
+.autocomplete input {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-light);
+}
+
+.audit-table thead tr {
+  background: var(--color-row-hover);
+}
