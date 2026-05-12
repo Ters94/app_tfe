@@ -10,7 +10,6 @@
           <h2>{{ user.lastname }} {{ user.name }}</h2>
           <p>{{ user.email }}</p>
         </div>
-
         <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
           {{ user.role }}
         </span>
@@ -21,73 +20,63 @@
           <strong>Username</strong>
           <span>{{ user.username || '-' }}</span>
         </div>
-
         <div>
           <strong>Téléphone</strong>
           <span>{{ user.phone || '-' }}</span>
         </div>
-
         <div>
           <strong>Adresse</strong>
           <span>{{ user.address || '-' }}</span>
         </div>
-
         <div>
           <strong>Email</strong>
           <span>{{ user.email || '-' }}</span>
         </div>
       </div>
 
-      <section class="form-card">
-  <h2>Groupes liés à cet utilisateur</h2>
+      <section class="groups-section">
+        <h3 class="groups-title">Groupes liés à cet utilisateur</h3>
 
-  <div *ngIf="ownedGroups.length > 0">
-    <h3>Owner du groupe:</h3>
+        <div *ngIf="ownedGroups.length > 0" class="group-block">
+          <div class="group-block-header owner">Owner</div>
+          <ul class="group-list">
+            <li *ngFor="let group of ownedGroups">
+              <a class="group-link" [routerLink]="['/groups/group-form', group.id]">
+                {{ group.name }}
+              </a>
+              <span class="group-desc">{{ group.description }}</span>
+            </li>
+          </ul>
+        </div>
 
-    <ul>
-  <li *ngFor="let group of ownedGroups">
-  <a
-    class="group-link"
-    [routerLink]="['/groups/group-form', group.id]">
-    {{ group.name }}
-  </a>— {{ group.description }}
-  </li>
-    </ul>
-  </div>
+        <div *ngIf="memberGroups.length > 0" class="group-block">
+          <div class="group-block-header member">Membre</div>
+          <ul class="group-list">
+            <li *ngFor="let group of memberGroups">
+              <a class="group-link" [routerLink]="['/groups/group-form', group.id]">
+                {{ group.name }}
+              </a>
+              <span class="group-desc">{{ group.description }}</span>
+            </li>
+          </ul>
+        </div>
 
-  <div *ngIf="memberGroups.length > 0">
-    <h3>Membre du groupe: </h3>
-
-    <ul>
-     <li *ngFor="let group of memberGroups">
-  <a
-    class="group-link"
-    [routerLink]="['/groups/group-form', group.id]">
-    {{ group.name }}
-  </a>— {{ group.description }}
-</li>
-    </ul>
-  </div>
-
-  <p *ngIf="ownedGroups.length === 0 && memberGroups.length === 0">
-    Cet utilisateur n’appartient à aucun groupe.
-  </p>
-</section>
+        <p *ngIf="ownedGroups.length === 0 && memberGroups.length === 0" class="no-groups">
+          Cet utilisateur n'appartient à aucun groupe.
+        </p>
+      </section>
 
       <div class="actions">
         <button *ngIf="isAdmin" class="primary-btn" (click)="editUser()">
           Modifier
         </button>
-
         <button class="secondary-btn" (click)="goBack()">
           Annuler
         </button>
       </div>
     </section>
 
-    <div *ngIf="errorMessage" class="error-box">
-      {{ errorMessage }}
-    </div>
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
 
   </main>
 

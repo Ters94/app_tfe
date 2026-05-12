@@ -1,11 +1,9 @@
 .app-page {
   min-height: 100vh;
-  background: #f5f6f8;
+  background: var(--color-bg);
   font-family: Arial, sans-serif;
-  color: #111827;
+  color: var(--color-text);
 }
-
-
 
 .brand {
   font-weight: 700;
@@ -25,8 +23,8 @@
 }
 
 .user-card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   padding: 24px;
   max-width: 900px;
@@ -46,7 +44,7 @@
 
 .user-header p {
   margin-top: 8px;
-  color: #6b7280;
+  color: var(--color-text-muted);
 }
 
 .info-grid {
@@ -57,8 +55,8 @@
 }
 
 .info-grid div {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
+  background: var(--color-row-hover);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 14px;
 }
@@ -66,25 +64,25 @@
 .info-grid strong {
   display: block;
   margin-bottom: 6px;
-  color: #374151;
+  color: var(--color-primary-hover);
 }
 
 .info-grid span {
-  color: #111827;
+  color: var(--color-text);
 }
 
 .role-badge {
   display: inline-block;
   padding: 5px 11px;
   border-radius: 999px;
-  background: #e5e7eb;
+  background: var(--color-border);
   font-size: 12px;
   font-weight: 700;
 }
 
 .role-badge.admin {
   background: #dbeafe;
-  color: #1d4ed8;
+  color: var(--color-accent);
 }
 
 .actions {
@@ -93,8 +91,8 @@
 }
 
 .primary-btn {
-  background: #111827;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-surface);
   border: none;
   padding: 10px 14px;
   border-radius: 5px;
@@ -103,8 +101,8 @@
 }
 
 .secondary-btn {
-  background: #e5e7eb;
-  color: #111827;
+  background: var(--color-border);
+  color: var(--color-text);
   border: none;
   padding: 10px 14px;
   border-radius: 5px;
@@ -113,8 +111,8 @@
 }
 
 .error-box {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--color-danger-bg);
+  color: var(--color-danger-hover);
   padding: 10px;
   margin-top: 12px;
   border-radius: 5px;
@@ -123,10 +121,69 @@
 
 .group-link {
   font-weight: 700;
-  color: #001b44;
+  color: var(--color-primary);
   text-decoration: none;
 }
 
 .group-link:hover {
   text-decoration: underline;
+}
+
+.groups-section {
+  margin: 24px 0;
+}
+
+.groups-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: var(--color-text);
+}
+
+.group-block {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.group-block-header {
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+}
+
+.group-block-header.owner {
+  background: #dbeafe;
+  color: var(--color-accent);
+}
+
+.group-block-header.member {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.group-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.group-desc {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.no-groups {
+  color: var(--color-text-muted);
+  font-style: italic;
 }
