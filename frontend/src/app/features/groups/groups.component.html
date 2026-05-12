@@ -128,7 +128,7 @@
         <button
           class="danger"
           *ngIf="canEdit(group) && group.status !== false"
-          (click)="deleteGroup(group.id)"
+          (click)="askDeleteGroup(group.id)"
         >
           Désactiver
         </button>
@@ -151,4 +151,13 @@
   </tbody>
 </table>
   </main>
+   <div *ngIf="confirmDeleteGroupId" class="modal-overlay">
+    <div class="modal-box">
+      <p>Voulez-vous vraiment désactiver ce groupe ?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" (click)="cancelDeleteGroup()">Annuler</button>
+        <button class="modal-confirm" (click)="confirmDeleteGroup()">Désactiver</button>
+      </div>
+    </div>
+  </div>
 </div>

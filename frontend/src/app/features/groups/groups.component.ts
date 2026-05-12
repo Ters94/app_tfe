@@ -29,6 +29,7 @@ export class GroupsComponent implements OnInit {
   showMyGroups: boolean = false;
   selectedGroupRole: 'OWNER' | 'MEMBER' = 'OWNER';
 
+  confirmDeleteGroupId: string | null = null;
   group: any = {
     name: '',
     description: '',
@@ -77,7 +78,6 @@ export class GroupsComponent implements OnInit {
         this.groups = res;
       },
       error: (err) => {
-        console.error(err);
         this.errorMessage = 'Erreur lors du chargement des groupes';
       }
     });
@@ -106,7 +106,6 @@ export class GroupsComponent implements OnInit {
         this.myMemberGroups = res.member_groups || [];
       },
       error: (err) => {
-        console.error(err);
         this.errorMessage = err.error?.detail || 'Erreur lors du chargement de mes groupes';
       }
     });
@@ -227,7 +226,6 @@ export class GroupsComponent implements OnInit {
           this.loadMyGroups();
         },
         error: (err) => {
-          console.error(err);
           this.errorMessage = err?.error?.detail || 'Erreur lors de la modification du groupe';
         }
       });
@@ -244,38 +242,41 @@ export class GroupsComponent implements OnInit {
           this.loadMyGroups();
         },
         error: (err) => {
-          console.error(err);
           this.errorMessage = err?.error?.detail || 'Erreur lors de la création du groupe';
         }
       });
     }
   }
 
-  deleteGroup(groupId: string): void {
-    const token = localStorage.getItem('token');
+  askDeleteGroup(groupId: string): void {
+    this.clearMessages();
+    this.confirmDeleteGroupId = groupId;
+  }
 
+  cancelDeleteGroup(): void {
+    this.confirmDeleteGroupId = null;
+  }
+
+  confirmDeleteGroup(): void {
+    if (!this.confirmDeleteGroupId) return;
+
+    const token = localStorage.getItem('token');
     if (!token) {
       this.router.navigate(['/']);
       return;
     }
 
-    const confirmed = confirm('Voulez-vous vraiment désactiver ce groupe ?');
-    if (!confirmed) return;
-
-    this.clearMessages();
-
-    this.http.delete(`http://localhost:8000/groups/${groupId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+    this.http.delete(`http://localhost:8000/groups/${this.confirmDeleteGroupId}`, {
+      headers: { Authorization: `Bearer ${token}` }
     }).subscribe({
       next: () => {
+        this.confirmDeleteGroupId = null;
         this.successMessage = 'Groupe désactivé avec succès';
         this.loadGroups();
         this.loadMyGroups();
       },
       error: (err) => {
-        console.error(err);
+        this.confirmDeleteGroupId = null;
         this.errorMessage = err?.error?.detail || 'Erreur lors de la désactivation du groupe';
       }
     });
