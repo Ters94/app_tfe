@@ -74,11 +74,12 @@
             </td>
             <td *ngIf="canManageMembers(group) && group.owner_id === currentUserId">
 
+               <div class="member-actions">
                <button class="info-btn" (click)="viewUser(member)">
                   Consulter
                 </button>
                 <button
-                class="primary-btn"
+                class="transfer-btn"
                 *ngIf="member.role !== 'OWNER'"
                 (click)="transferOwner(member.user_id)"
 
@@ -91,7 +92,7 @@
               >
                 Supprimer
               </button>
-
+            </div>
             </td>
 
           </tr>
