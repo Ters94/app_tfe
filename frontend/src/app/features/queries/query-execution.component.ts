@@ -29,8 +29,9 @@ groups: any[] = [];
 selectedGroupId: string = '';
 showCreateForm: boolean = false;
 statistics: any = null;
- errorMessage: string = '';
-  successMessage: string = '';
+errorMessage: string = '';
+successMessage: string = '';
+isAdmin: boolean = localStorage.getItem('role') === 'ADMIN';
  dataFields: string[] = [
   'TradeDate',
   'DealId',
@@ -119,6 +120,10 @@ constructor(
 
 
   ngOnInit() {
+    if (this.isAdmin) {
+      this.router.navigate(['/queries']);
+      return;
+    }
     this.queryId = this.route.snapshot.paramMap.get('id') || '';
     this.loadGroups();
     this.loadFilterOptions();
