@@ -5,7 +5,7 @@
     <div class="header-actions">
       <h2>Liste des queries</h2>
 
-      <button class="create-btn" (click)="goToCreateQuery()">
+      <button class="create-btn" *ngIf="!isAdmin" (click)="goToCreateQuery()">
         + Créer une requête
       </button>
     </div>
@@ -34,7 +34,7 @@
             </td>
 
             <td class="actions">
-              <ng-container *ngIf="query.can_manage; else noAction">
+              <ng-container *ngIf="query.can_manage && !isAdmin; else noAction">
 
                 <button (click)="toggleActions(query.id)">
                   Gérer
