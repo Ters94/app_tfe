@@ -118,8 +118,10 @@ get filteredPortfolios(): string[] {
   ) {}
 
   ngOnInit() {
-      console.log('QueryCreate chargé');
-      console.log('TOKEN =', localStorage.getItem('token'));
+    if (localStorage.getItem('role') === 'ADMIN') {
+      this.router.navigate(['/queries']);
+      return;
+    }
     this.groupId = this.route.snapshot.queryParamMap.get('groupId') || '';
      if (this.groupId) {
     this.isGroupFixed = true;
