@@ -25,6 +25,7 @@ executedQueryId: string | null = null;
 queryResults: any[] = [];
 queryStatistics: any = null;
 errorMessage: string = '';
+isAdmin: boolean = localStorage.getItem('role') === 'ADMIN';
 
 constructor(
   private http: HttpClient,
