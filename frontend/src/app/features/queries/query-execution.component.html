@@ -16,7 +16,7 @@
         <code>{{ query.filters | json }}</code>
         <br><br>
 
-        <div>
+        <div *ngIf="!isAdmin">
           <button class="create-btn" (click)="executeQuery(query.id)">Exécuter</button>
           <button class="create-btn" (click)="startEdit()">Modifier</button>
           <button class="create-btn" (click)="deleteQuery(query.id)">Supprimer</button>
