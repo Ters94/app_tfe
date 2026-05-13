@@ -53,6 +53,12 @@ def build_deal_filter(filters: dict):
 
 @router.post("/")
 def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs ne peuvent pas créer de queries."
+        )
+
     if not ObjectId.is_valid(query.group_id):
         raise HTTPException(status_code=400, detail="Invalid group id")
 
@@ -66,7 +72,7 @@ def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
         "user_id": current_user
     })
 
-    if not membership and not is_admin(current_user):
+    if not membership:
         raise HTTPException(
             status_code=403,
             detail="Vous devez être membre du groupe pour créer une query."
@@ -133,7 +139,7 @@ def get_queries(current_user=Depends(get_current_user)):
             "group_id": str(group_id),
             "created_by": str(query.get("created_by")),
             "created_at": query.get("created_at"),
-            "can_manage": is_owner or is_member or is_admin(current_user)
+            "can_manage": is_owner or is_member
         })
 
     return queries
@@ -161,6 +167,12 @@ def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
 
 @router.get("/{query_id}/execute")
 def execute_query(query_id: str, current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs ne peuvent pas exécuter de queries."
+        )
+
     if not ObjectId.is_valid(query_id):
         raise HTTPException(status_code=400, detail="Invalid query id")
 
@@ -176,7 +188,7 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
         "user_id": current_user
     })
 
-    if not membership and not is_admin(current_user):
+    if not membership:
         raise HTTPException(
             status_code=403,
             detail="Vous devez être membre du groupe pour exécuter cette query."
@@ -277,6 +289,12 @@ def update_query(
     query: QueryCreate,
     current_user=Depends(get_current_user)
 ):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs ne peuvent pas modifier de queries."
+        )
+
     if not ObjectId.is_valid(query_id):
         raise HTTPException(status_code=400, detail="Invalid query id")
 
@@ -295,7 +313,7 @@ def update_query(
         "user_id": current_user
     })
 
-    if not membership and not is_admin(current_user):
+    if not membership:
         raise HTTPException(
             status_code=403,
             detail="Vous devez être membre du groupe pour modifier cette query."
@@ -355,6 +373,12 @@ def update_query(
 
 @router.delete("/{query_id}")
 def delete_query(query_id: str, current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs ne peuvent pas supprimer de queries."
+        )
+
     if not ObjectId.is_valid(query_id):
         raise HTTPException(status_code=400, detail="Invalid query id")
 
@@ -373,7 +397,7 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
         "user_id": current_user
     })
 
-    if not membership and not is_admin(current_user):
+    if not membership:
         raise HTTPException(
             status_code=403,
             detail="Vous devez être membre du groupe pour supprimer cette query."
