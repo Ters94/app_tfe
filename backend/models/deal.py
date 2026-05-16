@@ -19,40 +19,13 @@ class ProductType(str, Enum):
 
 
 class DealBase(BaseModel):
+    model_config = {"extra": "allow"}
 
-    # Champs stables
     deal_type: DealType
     product: ProductType
-
-    # Champs métier dynamiques
-    portfolio: str
-    desk: Optional[str] = None
-    trader_code: Optional[str] = None
-    counterparty_name: Optional[str] = None
-    business_unit: Optional[str] = None
-
-    # Dates
-    trade_date: Optional[date] = None
     delivery_date: date
-    creation_date: Optional[datetime] = None
-
-    # Quantité / finance
-    volume: float
-    quantity_unit: str = "MWh"
     amount: float
-    price: Optional[float] = None
-    open_quantity: Optional[float] = None
-    cash: Optional[float] = None
-    margin_cost: Optional[float] = None
-    total_margin_cost: Optional[float] = None
-
-    # Livraison
-    delivery_point: Optional[str] = None
-    delivery_type: Optional[str] = None
-    transport_corridor: Optional[str] = None
-
-    # Statut
-    booking_status: str = "BOOKED"
+    volume: float
 
 
 class DealCreate(DealBase):
@@ -64,11 +37,10 @@ class DealInDB(DealBase):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
     model_config = {
+        "extra": "allow",
         "populate_by_name": True,
         "arbitrary_types_allowed": True,
-        "json_encoders": {
-            PyObjectId: str
-        }
+        "json_encoders": {PyObjectId: str}
     }
 
 

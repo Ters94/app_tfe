@@ -31,23 +31,11 @@ def create_test_deal(deal: DealCreate, current_user=Depends(get_current_user)):
 
 @router.get("/", response_model=List[DealPublic])
 def get_deals(current_user=Depends(get_current_user)):
-    """
-    Liste les deals disponibles pour tester les filtres.
-    """
-
     deals = []
-
     for deal in db.deals.find():
-        deals.append({
-            "id": str(deal["_id"]),
-            "type": deal["type"],
-            "product": deal["product"],
-            "delivery_date": deal["delivery_date"],
-            "amount": deal["amount"],
-            "volume": deal["volume"],
-            "created_at": deal.get("created_at")
-        })
-
+        deal["id"] = str(deal["_id"])
+        deal.pop("_id", None)
+        deals.append(deal)
     return deals
 
 
@@ -231,13 +219,7 @@ def get_deal_by_id(deal_id: str, current_user=Depends(get_current_user)):
     if not deal:
         raise HTTPException(status_code=404, detail="Deal not found")
 
-    return {
-        "id": str(deal["_id"]),
-        "type": deal["type"],
-        "product": deal["product"],
-        "delivery_date": deal["delivery_date"],
-        "amount": deal["amount"],
-        "volume": deal["volume"],
-        "created_at": deal.get("created_at")
-    }
+    deal["id"] = str(deal["_id"])
+    deal.pop("_id", None)
+    return deal
 
