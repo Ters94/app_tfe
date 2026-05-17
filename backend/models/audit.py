@@ -13,7 +13,7 @@ class AuditInDB(MongoBaseModel):
     target_label: str | None = None
 
     user_id: str
-    group_id: str | None = None
+    group_id: str
 
     old_values: dict | None = None
     new_values: dict | None = None
@@ -30,7 +30,7 @@ class AuditPublic(BaseModel):
 
     user_id: str
     username: str | None = None
-    group_id: str | None = None
+    group_id: str
 
     old_values: dict | None = None
     new_values: dict | None = None
