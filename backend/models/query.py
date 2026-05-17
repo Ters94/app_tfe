@@ -1,7 +1,7 @@
-from typing import Dict,Any, List, Optional
+from typing import Dict, Any, List, Optional
 
 from pydantic import BaseModel, Field
-from backend.models.base import MongoBaseModel, PyObjectId
+from backend.models.base import MongoBaseModel
 
 
 class QueryCreate(BaseModel):
@@ -15,5 +15,5 @@ class Query(MongoBaseModel):
     query_name: str
     filters: Dict[str, Any] = Field(default_factory=dict)
     data_fields: List[str] = []
-    created_by: PyObjectId = Field(...)
-    group_id: PyObjectId = Field(...)
+    created_by: str
+    group_id: str

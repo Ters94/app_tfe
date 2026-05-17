@@ -79,8 +79,8 @@ def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
         )
 
     query_dict = query.model_dump()
-    query_dict["created_by"] = ObjectId(current_user)
-    query_dict["group_id"] = ObjectId(query.group_id)
+    query_dict["created_by"] = current_user
+    query_dict["group_id"] = query.group_id
     query_dict["created_at"] = datetime.utcnow()
 
     selected_fields = query_dict.get("selected_fields", {})
@@ -108,8 +108,8 @@ def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
         "id": query_id,
         "query_name": query_dict["query_name"],
         "filters": query_dict["filters"],
-        "group_id": str(query_dict["group_id"]),
-        "created_by": str(query_dict["created_by"]),
+        "group_id": query_dict["group_id"],
+        "created_by": query_dict["created_by"],
         "created_at": query_dict["created_at"],
         "selected_fields": selected_fields
     }
@@ -127,7 +127,7 @@ def get_queries(current_user=Depends(get_current_user)):
             "group_id": str(group_id)
         })
 
-        group = db.groups.find_one({"_id": group_id})
+        group = db.groups.find_one({"_id": ObjectId(group_id)})
 
         is_owner = group and str(group.get("owner_id")) == str(current_user)
         is_member = membership is not None
@@ -136,8 +136,8 @@ def get_queries(current_user=Depends(get_current_user)):
             "id": str(query["_id"]),
             "query_name": query.get("query_name"),
             "filters": query.get("filters", {}),
-            "group_id": str(group_id),
-            "created_by": str(query.get("created_by")),
+            "group_id": group_id,
+            "created_by": query.get("created_by"),
             "created_at": query.get("created_at"),
             "can_manage": is_owner or is_member
         })
@@ -152,13 +152,13 @@ def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
 
     queries = []
 
-    for query in db.queries.find({"group_id": ObjectId(group_id)}):
+    for query in db.queries.find({"group_id": group_id}):
         queries.append({
             "id": str(query["_id"]),
             "query_name": query.get("query_name"),
             "filters": query.get("filters", {}),
-            "group_id": str(query.get("group_id")),
-            "created_by": str(query.get("created_by")),
+            "group_id": query.get("group_id"),
+            "created_by": query.get("created_by"),
             "selected_fields": query.get("selected_fields", {})
         })
 
@@ -181,7 +181,7 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
     if not query:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    group_id = str(query.get("group_id"))
+    group_id = query.get("group_id")
 
     membership = db.memberships.find_one({
         "group_id": group_id,
@@ -270,15 +270,15 @@ def get_query_by_id(query_id: str, current_user=Depends(get_current_user)):
     if not query:
         raise HTTPException(status_code=404, detail="Query not found")
 
-    group = db.groups.find_one({"_id": query.get("group_id")})
+    group = db.groups.find_one({"_id": ObjectId(query.get("group_id"))})
 
     return {
         "id": str(query["_id"]),
         "query_name": query.get("query_name"),
         "filters": query.get("filters", {}),
-        "group_id": str(query.get("group_id")),
+        "group_id": query.get("group_id"),
         "group_name": group.get("name") if group else "—",
-        "created_by": str(query.get("created_by")),
+        "created_by": query.get("created_by"),
         "selected_fields": query.get("selected_fields", {})
     }
 
@@ -304,12 +304,11 @@ def update_query(
         raise HTTPException(status_code=404, detail="Query not found")
 
     old_group_id = old_query.get("group_id")
-    old_group_id_str = str(old_group_id)
 
-    group = db.groups.find_one({"_id": old_group_id})
+    group = db.groups.find_one({"_id": ObjectId(old_group_id)})
 
     membership = db.memberships.find_one({
-        "group_id": old_group_id_str,
+        "group_id": old_group_id,
         "user_id": current_user
     })
 
@@ -359,7 +358,7 @@ def update_query(
         action="UPDATE_QUERY",
         target_type="QUERY",
         current_user=current_user,
-        group_id=old_group_id_str,
+        group_id=old_group_id,
         target_id=query_id,
         target_label=query.query_name,
         old_values=old_values,
@@ -388,12 +387,11 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Query not found")
 
     old_group_id = old_query.get("group_id")
-    old_group_id_str = str(old_group_id)
 
-    group = db.groups.find_one({"_id": old_group_id})
+    group = db.groups.find_one({"_id": ObjectId(old_group_id)})
 
     membership = db.memberships.find_one({
-        "group_id": old_group_id_str,
+        "group_id": old_group_id,
         "user_id": current_user
     })
 
@@ -419,7 +417,7 @@ def delete_query(query_id: str, current_user=Depends(get_current_user)):
         action="DELETE_QUERY",
         target_type="QUERY",
         current_user=current_user,
-        group_id=old_group_id_str,
+        group_id=old_group_id,
         target_id=query_id,
         target_label=old_query.get("query_name"),
         old_values=old_values,
