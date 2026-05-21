@@ -285,7 +285,12 @@ loadMyGroups(): void {
   });
 }
   goBack(): void {
-    this.router.navigate(['/groups',this.groupId]);
+    const finalGroupId = this.isGroupFixed ? this.groupId : this.selectedGroupId;
+    if (finalGroupId) {
+      this.router.navigate(['/groups', finalGroupId]);
+    } else {
+      this.router.navigate(['/groups']);
+    }
   }
   logout(): void {
   localStorage.removeItem('token');
