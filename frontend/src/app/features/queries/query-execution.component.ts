@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {FormsModule} from "@angular/forms";
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
@@ -130,14 +130,6 @@ constructor(
     this.loadQuery();
   }
 
-   getHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      })
-    };
-  }
   getGroupName(groupId: string): string {
   const group = this.groups.find(g => g._id === groupId || g.id === groupId);
   return group ? group.name : '—';
@@ -148,8 +140,7 @@ constructor(
 
 loadFilterOptions(): void {
   this.http.get<any>(
-    'http://127.0.0.1:8000/deals/filter-options',
-    this.getHeaders()
+    '/api/deals/filter-options',
   ).subscribe({
     next: (data) => {
       this.filterOptions = data;
@@ -170,13 +161,7 @@ Object.keys(this.dealFilters).forEach(key => {
   }
 });
 
-  this.http.get<any>(
-    'http://127.0.0.1:8000/deals/search',
-    {
-      ...this.getHeaders(),
-      params: cleanFilters
-    }
-  ).subscribe({
+  this.http.get<any>('/api/deals/search', { params: cleanFilters }).subscribe({
     next: (response) => {
       const results = response.results || [];
 results.sort((a: any, b: any) => {
@@ -197,13 +182,13 @@ this.dealsResults = results;
 
 
 deleteQuery(id: string) {
-  this.http.delete(`http://127.0.0.1:8000/queries/${id}`, this.getHeaders())
+  this.http.delete(`/api/queries/${id}`)
     .subscribe(() => {
       this.router.navigate(['/queries']);
     });
 }
   loadGroups() {
-    this.http.get<any[]>('http://127.0.0.1:8000/groups/', this.getHeaders())
+    this.http.get<any[]>('/api/groups/')
       .subscribe({
         next: (data) => {
           this.groups = data;
@@ -215,8 +200,7 @@ deleteQuery(id: string) {
   }
    loadQuery() {
      this.http.get<any>(
-    `http://127.0.0.1:8000/queries/${this.queryId}`,
-    this.getHeaders()
+    `/api/queries/${this.queryId}`,
   ).subscribe({
     next: (data) => {
       this.query = data;
@@ -237,8 +221,7 @@ deleteQuery(id: string) {
 
   executeQuery(queryId: string) {
   this.http.get<any>(
-    `http://127.0.0.1:8000/queries/${queryId}/execute`,
-    this.getHeaders()
+    `/api/queries/${queryId}/execute`,
   ).subscribe({
     next: (res) => {
       const results = res.results || [];
@@ -299,9 +282,8 @@ updateQuery() {
     this.errorMessage = '';
     this.successMessage = '';
   this.http.put(
-    `http://127.0.0.1:8000/queries/${this.queryId}`,
+    `/api/queries/${this.queryId}`,
     body,
-    this.getHeaders()
   ).subscribe({
     next: () => {
       this.showCreateForm = false;

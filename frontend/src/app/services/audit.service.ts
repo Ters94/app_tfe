@@ -29,28 +29,17 @@ export interface Group {
 })
 export class AuditService {
 
-  private apiUrl = 'http://localhost:8000/audits';
+  private apiUrl = '/api/audits';
 
   constructor(private http: HttpClient) {}
 
   getGroups(): Observable<Group[]> {
-  const token = localStorage.getItem('token');
+    return this.http.get<Group[]>('/api/groups/');
+  }
 
-  return this.http.get<Group[]>('http://localhost:8000/groups/', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-}
-getGroupAudits(groupId: string): Observable<Audit[]> {
-  const token = localStorage.getItem('token');
-
-  return this.http.get<Audit[]>(`${this.apiUrl}/groups/${groupId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-}
+  getGroupAudits(groupId: string): Observable<Audit[]> {
+    return this.http.get<Audit[]>(`${this.apiUrl}/groups/${groupId}`);
+  }
 
 
 }

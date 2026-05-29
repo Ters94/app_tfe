@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -19,7 +19,7 @@ export class GroupDetailComponent implements OnInit {
 
   role: string = '';
   currentUserId: string = '';
-
+ 
   selectedUserId: string = '';
   errorMessage: string = '';
   successMessage: string = '';
@@ -46,16 +46,6 @@ export class GroupDetailComponent implements OnInit {
     this.loadUsers();
   }
 
-  getHeaders() {
-  const token = localStorage.getItem('token');
-
-  return {
-    headers: new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    })
-  };
-}
-
   canManageMembers(group: any): boolean {
     return this.role === 'ADMIN' || this.group.owner_id === this.currentUserId;
   }
@@ -66,11 +56,7 @@ goToCreateQuery() {
   });
 }
   loadGroup(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get(`http://localhost:8000/groups/${this.groupId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.get(`/api/groups/${this.groupId}`).subscribe({
       next: (res: any) => {
         this.group = res;
       },
@@ -86,11 +72,7 @@ editGroupPage(): void {
   this.router.navigate(['/groups/edit', this.groupId]);
 }
   loadMembers(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get(`http://localhost:8000/groups/${this.groupId}/members`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.get(`/api/groups/${this.groupId}/members`).subscribe({
       next: (res: any) => {
         this.members = res;
       },
@@ -102,11 +84,7 @@ editGroupPage(): void {
   }
 
   loadUsers(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get('http://localhost:8000/users/', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.get('/api/users/').subscribe({
       next: (res: any) => {
         this.users = res;
       },
@@ -122,16 +100,12 @@ editGroupPage(): void {
       return;
     }
 
-    const token = localStorage.getItem('token');
-
     const payload = {
       user_id: this.selectedUserId,
       role: 'MEMBER'
     };
 
-    this.http.post(`http://localhost:8000/groups/${this.groupId}/members`, payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.post(`/api/groups/${this.groupId}/members`, payload).subscribe({
       next: () => {
         this.successMessage = 'Membre ajouté avec succès';
         this.errorMessage = '';
@@ -150,11 +124,7 @@ editGroupPage(): void {
     const confirmed = confirm('Voulez-vous supprimer ce membre du groupe ?');
     if (!confirmed) return;
 
-    const token = localStorage.getItem('token');
-
-    this.http.delete(`http://localhost:8000/groups/${this.groupId}/members/${member.id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.delete(`/api/groups/${this.groupId}/members/${member.id}`).subscribe({
       next: () => {
         this.successMessage = 'Membre supprimé avec succès';
         this.errorMessage = '';
@@ -177,10 +147,7 @@ editGroupPage(): void {
 }
 
 loadGroupQueries() {
-  this.http.get<any[]>(
-    `http://127.0.0.1:8000/queries/group/${this.groupId}`,
-    this.getHeaders()
-  ).subscribe({
+  this.http.get<any[]>(`/api/queries/group/${this.groupId}`).subscribe({
     next: (data) => {
       this.groupQueries = data;
     },
@@ -193,11 +160,7 @@ loadGroupQueries() {
 transferOwner(newOwnerId: string) {
   if (!confirm('Transférer le rôle d’owner à ce membre ?')) return;
 
-  this.http.put(
-    `http://127.0.0.1:8000/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`,
-    {},
-    this.getHeaders()
-  ).subscribe({
+  this.http.put(`/api/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`, {}).subscribe({
     next: () => {
       this.successMessage = 'Ownership transféré avec succès';
       this.loadGroup();
@@ -219,8 +182,7 @@ editQuery(queryId: string) {
 deleteQuery(queryId: string) {
   if (!confirm('Supprimer cette query ?')) return;
 
-  this.http.delete(`http://127.0.0.1:8000/queries/${queryId}`, this.getHeaders())
-    .subscribe({
+  this.http.delete(`/api/queries/${queryId}`).subscribe({
       next: () => this.loadGroupQueries(),
       error: (err) => this.errorMessage = err.error?.detail || 'Erreur suppression query'
     });
@@ -228,11 +190,5 @@ deleteQuery(queryId: string) {
   goBack(): void {
     this.router.navigate(['/groups']);
   }
-  logout(): void {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('user_id');
-  this.router.navigate(['/']);
 }
-}
+

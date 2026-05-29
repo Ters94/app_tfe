@@ -62,18 +62,7 @@ export class GroupsComponent implements OnInit {
   }
 
   loadGroups(): void {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.http.get('http://localhost:8000/groups/', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).subscribe({
+    this.http.get('/api/groups/').subscribe({
       next: (res: any) => {
         this.groups = res;
       },
@@ -84,23 +73,10 @@ export class GroupsComponent implements OnInit {
   }
 
   loadMyGroups(): void {
-    const token = localStorage.getItem('token');
     const userId = localStorage.getItem('user_id');
+    if (!userId) return;
 
-    if (!token || !userId) {
-      alert('Session expirée');
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.http.get<any>(
-      `http://127.0.0.1:8000/users/${userId}/groups`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    ).subscribe({
+    this.http.get<any>(`/api/users/${userId}/groups`).subscribe({
       next: (res) => {
         this.myOwnedGroups = res.owned_groups || [];
         this.myMemberGroups = res.member_groups || [];
@@ -188,13 +164,6 @@ export class GroupsComponent implements OnInit {
   }
 
   saveGroup(): void {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
     this.clearMessages();
 
     if (!this.group.name || this.group.name.trim() === '') {
@@ -214,11 +183,7 @@ export class GroupsComponent implements OnInit {
     };
 
     if (this.isEdit && this.selectedGroupId) {
-      this.http.put(`http://localhost:8000/groups/${this.selectedGroupId}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).subscribe({
+      this.http.put(`/api/groups/${this.selectedGroupId}`, payload).subscribe({
         next: () => {
           this.successMessage = 'Groupe modifié avec succès';
           this.showForm = false;
@@ -230,11 +195,7 @@ export class GroupsComponent implements OnInit {
         }
       });
     } else {
-      this.http.post('http://localhost:8000/groups/', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).subscribe({
+      this.http.post('/api/groups/', payload).subscribe({
         next: () => {
           this.successMessage = 'Groupe créé avec succès';
           this.showForm = false;
@@ -260,15 +221,7 @@ export class GroupsComponent implements OnInit {
   confirmDeleteGroup(): void {
     if (!this.confirmDeleteGroupId) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.http.delete(`http://localhost:8000/groups/${this.confirmDeleteGroupId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.delete(`/api/groups/${this.confirmDeleteGroupId}`).subscribe({
       next: () => {
         this.confirmDeleteGroupId = null;
         this.successMessage = 'Groupe désactivé avec succès';
@@ -283,17 +236,7 @@ export class GroupsComponent implements OnInit {
   }
 
   loadUsers(): void {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      return;
-    }
-
-    this.http.get('http://localhost:8000/users/', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).subscribe({
+    this.http.get('/api/users/').subscribe({
       next: (res: any) => {
         this.users = res;
       },
@@ -326,12 +269,5 @@ export class GroupsComponent implements OnInit {
     this.successMessage = '';
   }
 
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('username');
-    localStorage.removeItem('name');
-    localStorage.removeItem('user_id');
-    this.router.navigate(['/']);
-  }
 }
+

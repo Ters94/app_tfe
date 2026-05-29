@@ -1,53 +1,40 @@
-<div class="queries-page">
+<div class="app-page">
+  <main class="content">
 
-   <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
-  <section class="card">
-    <div class="header-actions">
-      <h2>Liste des queries</h2>
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
 
-      <button class="create-btn" *ngIf="!isAdmin" (click)="goToCreateQuery()">
+    <div class="page-header">
+      <h2>Liste des requêtes</h2>
+      <button class="primary-btn" *ngIf="!isAdmin" (click)="goToCreateQuery()">
         + Créer une requête
       </button>
     </div>
-
+    <div class="toolbar">
+        <input type="text" placeholder="Rechercher par nom de query ou groupe..." [(ngModel)]="searchTerm"/>
+</div>
     <table>
       <thead>
         <tr>
           <th>Nom</th>
           <th>Groupe</th>
           <th>Filtres</th>
-          <th>Action</th>
+          <th class="actions-col">Actions</th>
         </tr>
       </thead>
-
       <tbody>
-
-        <ng-container *ngFor="let query of queries">
-
+        <ng-container *ngFor="let query of filteredQueries">
           <tr>
             <td>{{ query.query_name }}</td>
-
             <td>{{ getGroupName(query.group_id) }}</td>
-
             <td>
               <code>{{ query.filters | json }}</code>
             </td>
-
             <td class="actions">
               <ng-container *ngIf="query.can_manage && !isAdmin; else noAction">
-
-                <button (click)="toggleActions(query.id)">
-                  Gérer
-                </button>
-
-                <div *ngIf="selectedQueryId === query.id" class="action-menu">
-                  <button (click)="executeQuery(query.id)">Exécuter</button>
-                  <button (click)="editQuery(query)">Modifier</button>
-                  <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
-                </div>
-
+                <button (click)="openQuery(query.id)">Exécuter</button>
+                <button (click)="editQuery(query)">Modifier</button>
+                <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
               </ng-container>
-
               <ng-template #noAction>
                 <span class="readonly">Lecture seule</span>
               </ng-template>
@@ -56,68 +43,36 @@
 
           <tr *ngIf="executedQueryId === query.id">
             <td colspan="4">
-
-              <section class="execution-result">
-
-                <h3>Résumé de l’exécution</h3>
-
+              <div class="execution-panel">
+                <h3>Résumé de l'exécution</h3>
                 <div class="summary-grid">
                   <div>
                     <strong>Deals</strong>
                     <span>{{ queryStatistics?.results_count }}</span>
                   </div>
-
                   <div>
                     <strong>Quantité totale</strong>
                     <span>{{ queryStatistics?.total_volume }} MWh</span>
                   </div>
-
                   <div>
                     <strong>Montant total</strong>
                     <span>{{ queryStatistics?.total_amount }} €</span>
                   </div>
-
                   <div>
                     <strong>Prix moyen pondéré</strong>
                     <span>{{ queryStatistics?.average_price }} €/MWh</span>
                   </div>
                 </div>
-
-                <table class="results-table" *ngIf="queryResults.length > 0">
-                  <thead>
-                    <tr>
-                      <th>Produit</th>
-                      <th>Type</th>
-                      <th>Date livraison</th>
-                      <th>Amount</th>
-                      <th>Volume</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    <tr *ngFor="let deal of queryResults">
-                      <td>{{ deal.product }}</td>
-                      <td>{{ deal.deal_type }}</td>
-                      <td>{{ deal.delivery_date }}</td>
-                      <td>{{ deal.amount }}</td>
-                      <td>{{ deal.volume }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <p *ngIf="queryResults.length === 0">
-                  Aucun résultat trouvé.
-                </p>
-
-              </section>
-
+              </div>
             </td>
           </tr>
-
         </ng-container>
 
+        <tr *ngIf="queries.length === 0">
+          <td colspan="4" class="empty-message">Aucune requête trouvée.</td>
+        </tr>
       </tbody>
     </table>
-  </section>
 
+  </main>
 </div>

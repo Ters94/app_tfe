@@ -27,50 +27,33 @@ export class UsersComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
     this.role = localStorage.getItem('role') || '';
 
-    if (!token) {
-      alert('Session expirée, reconnecte-toi');
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.http.get('http://localhost:8000/users', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).subscribe({
+    this.http.get('/api/users/').subscribe({
       next: (res: any) => {
         this.users = res;
       },
       error: (err) => {
-        console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors du chargement des utilisateurs';
-
-        if (err.status === 401) {
-          localStorage.removeItem('token');
-          this.router.navigate(['/']);
+        if (err.status !== 401) {
+          this.errorMessage = err?.error?.detail || 'Erreur lors du chargement des utilisateurs';
         }
       }
     });
   }
+
   get isAdmin(): boolean {
-  return localStorage.getItem('role') === 'ADMIN';
+    return localStorage.getItem('role') === 'ADMIN';
   }
+
   viewUser(user: any): void {
     this.router.navigate(['/users', user.id]);
   }
 
   editUser(user: any): void {
     this.router.navigate(['/users/edit', user.id]);
-    if (!this.isAdmin) {
-    this.errorMessage = "Accès refusé";
-    return;
-}
   }
 
-    askDeleteUser(id: string): void {
+  askDeleteUser(id: string): void {
     if (!this.isAdmin) {
       this.errorMessage = 'Accès refusé';
       return;
@@ -87,15 +70,7 @@ export class UsersComponent implements OnInit {
   confirmDelete(): void {
     if (!this.confirmDeleteId) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
-    this.http.delete(`http://localhost:8000/users/${this.confirmDeleteId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    this.http.delete(`/api/users/${this.confirmDeleteId}`).subscribe({
       next: () => {
         this.users = this.users.filter(u => u.id !== this.confirmDeleteId);
         this.confirmDeleteId = null;
@@ -103,14 +78,17 @@ export class UsersComponent implements OnInit {
       },
       error: (err) => {
         this.confirmDeleteId = null;
-        if (err.status === 401 || err.status === 403) {
+        if (err.status === 403) {
           this.errorMessage = "Vous n'avez pas le droit de supprimer cet utilisateur.";
-        } else {
+            } else if (err.status === 400) {
+          this.errorMessage = err.error?.detail || "Suppression impossible : cet utilisateur possède encore un ou plusieurs groupes.";
+        } else if (err.status !== 401) {
           this.errorMessage = err.error?.detail || 'Erreur lors de la suppression.';
         }
       }
     });
   }
+
   createUser(): void {
     this.router.navigate(['/users/create']);
   }
@@ -121,10 +99,5 @@ export class UsersComponent implements OnInit {
       (user.name || '').toLowerCase().includes(this.searchTerm.toLowerCase()) ||
       (user.email || '').toLowerCase().includes(this.searchTerm.toLowerCase())
     );
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    this.router.navigate(['/']);
   }
 }

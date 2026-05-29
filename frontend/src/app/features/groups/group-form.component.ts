@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-group-form',
@@ -15,19 +15,28 @@ export class GroupFormComponent implements OnInit {
 
   errorMessage: string = '';
   successMessage: string = '';
-
   groupId: string | null = null;
-
-  group: any = {
-    name: '',
-    description: '',
-    owner_id: ''
-  };
-
+  group: any = { name: '', description: '', owner_id: '' };
   users: any[] = [];
   members: any[] = [];
   selectedUserId: string = '';
   groupQueries: any[] = [];
+  selectedUserToAdd: any = null;
+memberSearchTerm: string = '';
+get filteredUsersToAdd(): any[] {
+  const term = this.memberSearchTerm.toLowerCase().trim();
+
+  if (!term) {
+    return [];
+  }
+
+  return this.users.filter(user =>
+    (user.username || '').toLowerCase().includes(term) ||
+    (user.name || '').toLowerCase().includes(term) ||
+    (user.lastname || '').toLowerCase().includes(term) ||
+    (user.email || '').toLowerCase().includes(term)
+  );
+}
 
   constructor(
     private http: HttpClient,
@@ -37,242 +46,114 @@ export class GroupFormComponent implements OnInit {
 
   ngOnInit(): void {
     this.groupId = this.route.snapshot.paramMap.get('id');
-
-    if (!this.groupId) {
-      this.errorMessage = 'Aucun groupe sélectionné';
-      return;
-    }
-
+    if (!this.groupId) { this.errorMessage = 'Aucun groupe sélectionné'; return; }
     this.loadGroup();
     this.loadUsers();
     this.loadMembers();
     this.loadGroupQueries();
   }
 
- getHeaders() {
-   const token = localStorage.getItem('token');
-
-   return {
-     headers: new HttpHeaders({
-       Authorization: `Bearer ${token}`
-     })
-   };
- }
+ selectUserToAdd(user: any): void {
+  this.selectedUserToAdd = user;
+  this.selectedUserId = user.id;
+  this.memberSearchTerm = `${user.username} - ${user.email}`;
+}
   loadGroupQueries() {
-  this.http.get<any[]>(
-    `http://127.0.0.1:8000/queries/group/${this.groupId}`,
-    this.getHeaders()
-  ).subscribe({
-    next: (data) => {
-      this.groupQueries = data;
-    },
-    error: (err) => {
-      this.errorMessage = err.error?.detail || 'Erreur chargement queries';
-    }
-  });
-}
-
-transferOwner(newOwnerId: string) {
-  if (!confirm('Transférer le rôle d’owner à ce membre ?')) return;
-
-  this.http.put(
-    `http://127.0.0.1:8000/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`,
-    {},
-    this.getHeaders()
-  ).subscribe({
-    next: () => {
-      this.successMessage = 'Ownership transféré avec succès';
-      this.loadGroup();
-      this.loadMembers();
-    },
-    error: (err) => {
-      this.errorMessage = err.error?.detail || 'Erreur transfert owner';
-    }
-  });
-}
-executeQuery(queryId: string) {
-  this.router.navigate(['/queries', queryId]);
-}
-
-editQuery(queryId: string) {
-  this.router.navigate(['/queries', queryId]);
-}
-
-deleteQuery(queryId: string) {
-  if (!confirm('Supprimer cette query ?')) return;
-
-  this.http.delete(`http://127.0.0.1:8000/queries/${queryId}`, this.getHeaders())
-    .subscribe({
-      next: () => this.loadGroupQueries(),
-      error: (err) => this.errorMessage = err.error?.detail || 'Erreur suppression query'
+    this.http.get<any[]>(`/api/queries/group/${this.groupId}`).subscribe({
+      next: (data) => { this.groupQueries = data; },
+      error: (err) => { this.errorMessage = err.error?.detail || 'Erreur chargement queries'; }
     });
-}
-  loadGroup(): void {
-    const token = localStorage.getItem('token');
+  }
 
-    this.http.get(`http://localhost:8000/groups/${this.groupId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (res: any) => {
-        this.group = res;
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = 'Erreur lors du chargement du groupe';
-      }
+  transferOwner(newOwnerId: string) {
+    if (!confirm("Transférer le rôle d'owner à ce membre ?")) return;
+    this.http.put(`/api/groups/${this.groupId}/transfer-owner?new_owner_id=${newOwnerId}`, {}).subscribe({
+      next: () => { this.successMessage = 'Ownership transféré avec succès'; this.loadGroup(); this.loadMembers(); },
+      error: (err) => { this.errorMessage = err.error?.detail || 'Erreur transfert owner'; }
+    });
+  }
+
+  executeQuery(queryId: string) { this.router.navigate(['/queries', queryId]); }
+  editQuery(queryId: string) { this.router.navigate(['/queries', queryId]); }
+
+  deleteQuery(queryId: string) {
+    if (!confirm('Supprimer cette query ?')) return;
+    this.http.delete(`/api/queries/${queryId}`).subscribe({
+      next: () => this.loadGroupQueries(),
+      error: (err) => { this.errorMessage = err.error?.detail || 'Erreur suppression query'; }
+    });
+  }
+
+  loadGroup(): void {
+    this.http.get(`/api/groups/${this.groupId}`).subscribe({
+      next: (res: any) => { this.group = res; },
+      error: (err) => { this.errorMessage = 'Erreur lors du chargement du groupe'; }
     });
   }
 
   saveGroup(): void {
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      this.router.navigate(['/']);
-      return;
-    }
-
     this.clearMessages();
-
     if (!this.group.name || this.group.name.trim() === '') {
       this.errorMessage = 'Le nom du groupe est obligatoire';
       return;
     }
-
-    const payload = {
-      name: this.group.name,
-      description: this.group.description
-    };
-
-    this.http.put(`http://localhost:8000/groups/${this.groupId}`, payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: () => {
-        this.successMessage = 'Groupe modifié avec succès';
-        this.loadGroup();
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = err?.error?.detail || 'Erreur lors de la modification du groupe';
-      }
+    const payload = { name: this.group.name, description: this.group.description };
+    this.http.put(`/api/groups/${this.groupId}`, payload).subscribe({
+      next: () => { this.successMessage = 'Groupe modifié avec succès'; this.loadGroup(); },
+      error: (err) => { this.errorMessage = err?.error?.detail || 'Erreur lors de la modification du groupe'; }
     });
   }
 
   loadUsers(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get('http://localhost:8000/users/', {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (res: any) => {
-        this.users = res;
-      },
-      error: () => {
-        this.users = [];
-      }
+    this.http.get('/api/users/').subscribe({
+      next: (res: any) => { this.users = res; },
+      error: () => { this.users = []; }
     });
   }
 
   addMember(): void {
-    if (!this.selectedUserId) {
-      this.errorMessage = 'Veuillez sélectionner un utilisateur';
-      return;
-    }
-
-    const token = localStorage.getItem('token');
-
-    const payload = {
-      user_id: this.selectedUserId,
-      role: 'MEMBER'
-    };
-
-    this.http.post(`http://localhost:8000/groups/${this.groupId}/members`, payload, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
+    if (!this.selectedUserId) { this.errorMessage = 'Veuillez sélectionner un utilisateur'; return; }
+    const payload = { user_id: this.selectedUserId, role: 'MEMBER' };
+    this.http.post(`/api/groups/${this.groupId}/members`, payload).subscribe({
       next: () => {
         this.successMessage = 'Membre ajouté avec succès';
         this.errorMessage = '';
         this.selectedUserId = '';
-        this.loadMembers();
-      },
-      error: (err) => {
-        console.error(err);
-        this.successMessage = '';
-        this.errorMessage = err?.error?.detail || 'Erreur lors de l’ajout du membre';
-      }
+        this.selectedUserToAdd = null;
+        this.memberSearchTerm = '';
+        this.loadMembers(); },
+      error: (err) => { this.successMessage = ''; this.errorMessage = err?.error?.detail || "Erreur lors de l'ajout du membre"; }
     });
   }
 
   loadMembers(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get<any[]>(`http://localhost:8000/groups/${this.groupId}/members`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: (data) => {
-        this.members = data;
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = 'Erreur lors du chargement des membres';
-      }
+    this.http.get<any[]>(`/api/groups/${this.groupId}/members`).subscribe({
+      next: (data) => { this.members = data; },
+      error: () => { this.errorMessage = 'Erreur lors du chargement des membres'; }
     });
   }
 
-  get role(): string {
-    return localStorage.getItem('role') || '';
-  }
-
-  get currentUserId(): string {
-    return localStorage.getItem('user_id') || '';
-  }
+  get role(): string { return localStorage.getItem('role') || ''; }
+  get currentUserId(): string { return localStorage.getItem('user_id') || ''; }
 
   canManageMembers(group: any): boolean {
     return this.role === 'ADMIN' || group.owner_id === this.currentUserId;
   }
 
-  goBack(): void {
-    this.router.navigate(['/groups']);
-  }
- viewUser(member: any): void {
-  if (!member.user_id) {
-    this.errorMessage = "Utilisateur introuvable";
-    return;
+  goBack(): void { this.router.navigate(['/groups']); }
+
+  viewUser(member: any): void {
+    if (!member.user_id) { this.errorMessage = 'Utilisateur introuvable'; return; }
+    this.router.navigate(['/users', member.user_id]);
   }
 
-  this.router.navigate(['/users', member.user_id]);
-}
- removeMember(member: any): void {
-    const confirmed = confirm('Voulez-vous supprimer ce membre du groupe ?');
-    if (!confirmed) return;
-
-    const token = localStorage.getItem('token');
-
-    this.http.delete(`http://localhost:8000/groups/${this.groupId}/members/${member.id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).subscribe({
-      next: () => {
-        this.successMessage = 'Membre supprimé avec succès';
-        this.errorMessage = '';
-        this.loadMembers();
-      },
-      error: (err) => {
-        console.error(err);
-        this.successMessage = '';
-        this.errorMessage = err?.error?.detail || 'Erreur lors de la suppression du membre';
-      }
+  removeMember(member: any): void {
+    if (!confirm('Voulez-vous supprimer ce membre du groupe ?')) return;
+    this.http.delete(`/api/groups/${this.groupId}/members/${member.id}`).subscribe({
+      next: () => { this.successMessage = 'Membre supprimé avec succès'; this.errorMessage = ''; this.loadMembers(); },
+      error: (err) => { this.successMessage = ''; this.errorMessage = err?.error?.detail || 'Erreur lors de la suppression du membre'; }
     });
   }
 
-  clearMessages(): void {
-    this.errorMessage = '';
-    this.successMessage = '';
-  }
-
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('username');
-    localStorage.removeItem('user_id');
-    this.router.navigate(['/']);
-  }
+  clearMessages(): void { this.errorMessage = ''; this.successMessage = ''; }
 }

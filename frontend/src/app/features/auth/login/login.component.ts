@@ -16,6 +16,7 @@ export class LoginComponent {
   email = '';
   password = '';
   error = '';
+  currentYear = new Date().getFullYear();
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -25,7 +26,7 @@ login() : void{
   body.set('username', this.email);
   body.set('password', this.password);
 
-  this.http.post('http://localhost:8000/auth/login', body.toString(), {
+  this.http.post('/api/auth/login', body.toString(), {
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -35,11 +36,7 @@ login() : void{
 
       localStorage.setItem('token', token); //
 
-      this.http.get('http://localhost:8000/users/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      }).subscribe({
+      this.http.get('/api/users/me').subscribe({
         next: (user: any) => {
           localStorage.setItem('role', user.role);
           localStorage.setItem('username', user.username);

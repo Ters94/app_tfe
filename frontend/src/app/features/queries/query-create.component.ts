@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 
@@ -21,6 +21,7 @@ export class QueryCreateComponent implements OnInit {
 
 
   newQueryName: string = '';
+  errorMessage: string = '';
   showCreateForm: boolean = true;
   groupId: string = '';
   group: any = null;
@@ -135,16 +136,6 @@ get filteredPortfolios(): string[] {
   this.loadFilterOptions();
   }
 
-  getHeaders() {
-    const token = localStorage.getItem('token');
-
-    return {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      })
-    };
-  }
-
   onProductChange(): void {
     const allowed = this.filteredPortfolios;
     if (this.dealFilters.portfolio && !allowed.includes(this.dealFilters.portfolio)) {
@@ -153,10 +144,7 @@ get filteredPortfolios(): string[] {
   }
 
   loadFilterOptions(): void {
-  this.http.get<any>(
-    'http://127.0.0.1:8000/deals/filter-options',
-    this.getHeaders()
-  ).subscribe({
+  this.http.get<any>('/api/deals/filter-options').subscribe({
     next: (data) => {
         console.log('FILTER OPTIONS =', data);
       this.filterOptions = data;
@@ -168,10 +156,7 @@ get filteredPortfolios(): string[] {
 }
 
   loadGroup() {
-    this.http.get<any>(
-      `http://127.0.0.1:8000/groups/${this.groupId}`,
-      this.getHeaders()
-    ).subscribe({
+    this.http.get<any>(`/api/groups/${this.groupId}`).subscribe({
       next: (data) => {
         this.group = data;
       },
@@ -182,10 +167,7 @@ get filteredPortfolios(): string[] {
   }
 
 loadMyGroups(): void {
-  this.http.get<any[]>(
-    'http://127.0.0.1:8000/groups/my-groups',
-    this.getHeaders()
-  ).subscribe({
+  this.http.get<any[]>('/api/groups/my-groups').subscribe({
     next: (data) => {
       console.log('MY GROUPS =', data);
       this.groups = data;
@@ -211,13 +193,7 @@ loadMyGroups(): void {
 
   console.log('Filtres envoyés :', cleanFilters);
 
-  this.http.get<any>(
-    'http://127.0.0.1:8000/deals/search',
-    {
-      ...this.getHeaders(),
-      params: cleanFilters
-    }
-  ).subscribe({
+  this.http.get<any>('/api/deals/search', { params: cleanFilters }).subscribe({
     next: (response) => {
       const results = response.results || [];
       results.sort((a: any, b: any) => {
@@ -245,12 +221,12 @@ loadMyGroups(): void {
   const finalGroupId = this.isGroupFixed ? this.groupId : this.selectedGroupId;
 
   if (!this.newQueryName || this.newQueryName.trim() === '') {
-    alert('Le nom de la query est obligatoire.');
+    this.errorMessage = 'Le nom de la requête est obligatoire.';
     return;
   }
 
   if (!finalGroupId) {
-    alert('Veuillez sélectionner un groupe.');
+    this.errorMessage = 'Veuillez sélectionner un groupe.';
     return;
   }
 
@@ -271,11 +247,7 @@ loadMyGroups(): void {
     selected_fields: this.selectedDataFields
   };
 
-  this.http.post(
-    'http://127.0.0.1:8000/queries/',
-    body,
-    this.getHeaders()
-  ).subscribe({
+  this.http.post('/api/queries/', body).subscribe({
     next: () => {
       this.router.navigate(['/groups', finalGroupId]);
     },
