@@ -22,6 +22,7 @@ export class UserFormComponent implements OnInit {
     password: ''
   };
 
+  confirmPassword: string = '';
   isEdit: boolean = false;
   userId: string | null = null;
   errorMessage: string = '';
@@ -36,14 +37,7 @@ export class UserFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
-
-    if (!token) {
-      alert('Session expirée, reconnecte-toi');
-      this.router.navigate(['/']);
-      return;
-    }
 
     if (role !== 'ADMIN') {
       this.errorMessage = "Accès refusé - vous n'avez pas les permissions nécessaires";
@@ -60,13 +54,7 @@ export class UserFormComponent implements OnInit {
   }
 
   loadUser(): void {
-    const token = localStorage.getItem('token');
-
-    this.http.get(`http://localhost:8000/users/${this.userId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).subscribe({
+    this.http.get(`/api/users/${this.userId}`).subscribe({
       next: (res: any) => {
         this.user = {
           lastname: res.lastname || '',
@@ -122,6 +110,13 @@ export class UserFormComponent implements OnInit {
     if (!this.isEdit && (!this.user.password || this.user.password.trim() === '')) {
       this.fieldErrors.password = 'Le mot de passe est obligatoire';
       isValid = false;
+    }
+
+    if (this.user.password && this.user.password.trim() !== '') {
+      if (this.confirmPassword !== this.user.password) {
+        this.fieldErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -203,14 +198,6 @@ export class UserFormComponent implements OnInit {
       return;
     }
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      this.errorMessage = 'Session expirée, reconnecte-toi';
-      this.router.navigate(['/']);
-      return;
-    }
-
     const payload: any = {
       lastname: this.user.lastname,
       name: this.user.name,
@@ -225,11 +212,7 @@ export class UserFormComponent implements OnInit {
     }
 
     if (this.isEdit) {
-      this.http.put(`http://localhost:8000/users/${this.userId}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).subscribe({
+      this.http.put(`/api/users/${this.userId}`, payload).subscribe({
         next: () => {
           this.successMessage = 'Utilisateur modifié avec succès.';
           setTimeout(() => this.router.navigate(['/users']), 1200);
@@ -244,11 +227,7 @@ export class UserFormComponent implements OnInit {
         return;
       }
 
-      this.http.post('http://localhost:8000/users/', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }).subscribe({
+      this.http.post('/api/users/', payload).subscribe({
         next: () => {
           this.successMessage = 'Utilisateur créé avec succès.';
           setTimeout(() => this.router.navigate(['/users']), 1200);
