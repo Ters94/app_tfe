@@ -70,6 +70,12 @@ export const routes: Routes = [
       .then(m => m.UserFormComponent)
 },
 {
+  path: 'change-password',
+  loadComponent: () =>
+    import('./features/users/change-password.component')
+      .then(m => m.ChangePasswordComponent)
+},
+{
   path: 'groups/:id',
   loadComponent: () =>
     import('./features/groups/group-detail.component').then(m => m.GroupDetailComponent)

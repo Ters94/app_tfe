@@ -4,6 +4,7 @@
 
     <button class="back-btn" (click)="goBack()">← Retour</button>
 
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
     <section class="user-card">
       <div class="user-header">
         <div>
@@ -32,7 +33,28 @@
           <strong>Email</strong>
           <span>{{ user.email || '-' }}</span>
         </div>
+
       </div>
+       <div class="actions">
+        <button *ngIf="isAdmin" class="primary-btn" (click)="editUser(user)">
+          Modifier
+        </button>
+        <button *ngIf="isAdmin" class="danger-btn" (click)="askDeleteUser(user.id)">
+          Supprimer
+        </button>
+        <button *ngIf="isOwnProfile" class="primary-btn" routerLink="/change-password">
+          Changer le mot de passe
+        </button>
+      </div>
+       <div *ngIf="confirmDeleteId" class="modal-overlay">
+    <div class="modal-box">
+      <p>Voulez-vous vraiment supprimer cet utilisateur ?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="modal-confirm" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
 
       <section class="groups-section">
         <h3 class="groups-title">Groupes liés à cet utilisateur</h3>
@@ -66,17 +88,9 @@
         </p>
       </section>
 
-      <div class="actions">
-        <button *ngIf="isAdmin" class="primary-btn" (click)="editUser()">
-          Modifier
-        </button>
-        <button class="secondary-btn" (click)="goBack()">
-          Annuler
-        </button>
-      </div>
+
     </section>
 
-    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
 
   </main>
 

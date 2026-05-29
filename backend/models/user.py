@@ -35,7 +35,12 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
     phone: str | None = Field(
         default=None,
-        pattern=r'^(\+?\d{1,3})?[0-9]{9,12}$'
+        pattern=r'^(\+?[1-9]\d{1,3})?\d{8,12}$'
     )
-    adress: str | None = None
+    address: str | None = None
     role: RoleEnum | None = None
+    password: str | None = None
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str

@@ -3,8 +3,8 @@ from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from backend.database import db, get_users_collection, get_groups_collection
 from backend.models import user
-from backend.models.user import UserCreate, UserInDB, UserPublic, UserUpdate
-from backend.security import get_password_hash
+from backend.models.user import UserCreate, UserInDB, UserPublic, UserUpdate, PasswordChange
+from backend.security import get_password_hash, verify_password
 from fastapi import Depends
 from backend.security import get_current_user, get_current_admin
 
@@ -102,6 +102,27 @@ def get_me(current_user: str = Depends(get_current_user)):
         address=user.get("address"),
         role=user.get("role")
     )
+
+@router.put("/me/change-password", status_code=status.HTTP_200_OK)
+def change_password(
+    data: PasswordChange,
+    current_user: str = Depends(get_current_user)
+):
+    users_collection = get_users_collection()
+    user = users_collection.find_one({"_id": ObjectId(current_user)})
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+
+    if not verify_password(data.old_password, user["password_hash"]):
+        raise HTTPException(status_code=400, detail="Ancien mot de passe incorrect")
+
+    users_collection.update_one(
+        {"_id": ObjectId(current_user)},
+        {"$set": {"password_hash": get_password_hash(data.new_password)}}
+    )
+
+    return {"message": "Mot de passe modifié avec succès"}
 
 @router.get("/{user_id}", response_model=UserPublic)
 def get_user_by_id(user_id: str,):
@@ -233,8 +254,11 @@ def update_user(
         raise HTTPException(status_code=400, detail="Invalid user ID")
 
     update_data = {
-        k: v for k, v in data.dict().items() if v is not None
+        k: v for k, v in data.dict().items() if v is not None and k != 'password'
     }
+
+    if data.password:
+        update_data['password_hash'] = get_password_hash(data.password)
 
     result = users_collection.update_one(
         {"_id": ObjectId(user_id)},
