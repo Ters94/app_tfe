@@ -1,8 +1,24 @@
-from pydantic import Field
-from backend.models.base import MongoBaseModel, PyObjectId
+from pydantic import BaseModel
+from backend.models.base import MongoBaseModel
 
 
-class Membership(MongoBaseModel):
-    user_id: PyObjectId = Field(...)
-    group_id: PyObjectId = Field(...)
-#on utilise les id car Mongodb gere les relations via les id pas comme un ORM SQL 
+class MembershipCreate(BaseModel):
+    user_id: str
+    role: str = "MEMBER"
+
+
+class MembershipInDB(MongoBaseModel):
+    user_id: str
+    group_id: str
+    role: str = "MEMBER"
+
+
+class MembershipPublic(BaseModel):
+    id: str
+    user_id: str
+    group_id: str
+    username: str | None = None
+    email: str | None = None
+
+    role: str
+    

@@ -1,0 +1,211 @@
+<div class="query-create-page">
+
+  <button class="back-btn" (click)="goBack()">← Retour</button>
+
+  <!-- 1. Informations principales de la Query -->
+  <section class="card">
+    <h2>Créer une Query</h2>
+
+    <div class="form-row">
+      <input
+        type="text"
+        placeholder="Nom de la query"
+        [(ngModel)]="newQueryName"
+        required
+      >
+
+      <div *ngIf="isGroupFixed">
+
+  <input [value]="group?.name" disabled>
+</div>
+
+<div *ngIf="!isGroupFixed">
+  <select [(ngModel)]="selectedGroupId">
+    <option value="">Sélectionner un groupe</option>
+    <option *ngFor="let g of groups" [value]="g.id">
+      {{ g.name }}
+    </option>
+  </select>
+</div>
+
+      <select [(ngModel)]="dealFilters.product" (ngModelChange)="onProductChange()">
+        <option value="">Produit</option>
+        <option value="GAS">GAS</option>
+        <option value="ELECTRICITY">ELECTRICITY</option>
+        <option value="OIL">OIL</option>
+        <option value="CO2">CO2</option>
+      </select>
+
+      <select [(ngModel)]="dealFilters.deal_type">
+        <option value="">Type</option>
+        <option value="BUY">BUY</option>
+        <option value="SELL">SELL</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- 2. Filtres Deals -->
+  <section class="card">
+    <h3>Filtres</h3>
+<div class="filters-grid">
+
+ <div>
+    <label>Portfolio</label>
+  <select [(ngModel)]="dealFilters.portfolio" >
+  <option value="">Tous</option>
+  <option *ngFor="let p of filteredPortfolios" [value]="p">
+    {{ p }}
+  </option>
+</select>
+  </div>
+
+  <div>
+  <label>Date début</label>
+  <input
+    type="date"
+    name="start_date"
+    [(ngModel)]="dealFilters.start_date"
+    [max]="today">
+</div>
+
+<div>
+  <label>Date fin</label>
+  <input
+    type="date"
+    name="end_date"
+    [(ngModel)]="dealFilters.end_date"
+    [min]="dealFilters.start_date"
+    [max]="today">
+</div>
+
+  <div>
+    <label>Prix min</label>
+    <input type="number" name="price_min" [(ngModel)]="dealFilters.price_min">
+  </div>
+
+  <div>
+    <label>Prix max</label>
+    <input type="number" name="price_max" [(ngModel)]="dealFilters.price_max">
+  </div>
+
+</div>
+
+    <button class="primary-btn" type="button" (click)="searchDeals()">
+      Rechercher les deals
+    </button>
+  </section>
+
+  <!-- 3. Data à afficher -->
+  <section class="card">
+    <h3>Data</h3>
+
+    <div class="data-grid">
+      <ng-container *ngFor="let field of dataFields">
+  <label *ngIf="field === 'TradeDate'" style="font-weight:700; color:var(--color-text-muted);">
+    <input type="checkbox" [checked]="true" disabled>
+    {{ field }} <span style="font-size:11px;color:#6b7280">(obligatoire)</span>
+  </label>
+  <label *ngIf="field !== 'TradeDate'">
+    <input type="checkbox" [(ngModel)]="selectedDataFields[field]">
+    {{ field }}
+  </label>
+</ng-container>
+    </div>
+  </section>
+
+
+  <section class="card" *ngIf="dealsResults.length > 0">
+     <div class="results-header">
+    <h3>Résultats trouvés : {{ dealsCount }}</h3>
+    <div class="results-stats">
+      <div class="stat-chip">
+        <span class="stat-label">Volume total</span>
+        <span class="stat-value">{{ totalVolume | number:'1.0-0' }} MWh</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Montant total</span>
+        <span class="stat-value">{{ totalAmount | number:'1.2-2' }} €</span>
+      </div>
+      <div class="stat-chip">
+        <span class="stat-label">Prix moyen pondéré</span>
+        <span class="stat-value">{{ averagePrice | number:'1.2-2' }} €/MWh</span>
+      </div>
+    </div>
+  </div>
+    <h3>Résultats trouvés : {{ dealsCount }}</h3>
+
+    <div class="table-wrapper">
+  <table>
+  <thead>
+    <tr>
+      <th>TradeDate</th>
+      <th *ngIf="selectedDataFields.DealId">DealId</th>
+      <th *ngIf="selectedDataFields.Portfolio">Portfolio</th>
+      <th *ngIf="selectedDataFields.Desk">Desk</th>
+      <th *ngIf="selectedDataFields.Entity">Entity</th>
+      <th *ngIf="selectedDataFields.Direction">Direction</th>
+      <th *ngIf="selectedDataFields.Quantity">Quantity</th>
+      <th *ngIf="selectedDataFields.QuantityUnit">QuantityUnit</th>
+      <th *ngIf="selectedDataFields.DeliveryPoint">DeliveryPoint</th>
+      <th *ngIf="selectedDataFields.CounterpartyName">CounterpartyName</th>
+      <th *ngIf="selectedDataFields.TransportCorridor">TransportCorridor</th>
+      <th *ngIf="selectedDataFields.DeliveryType">DeliveryType</th>
+      <th *ngIf="selectedDataFields.DealType">DealType</th>
+      <th *ngIf="selectedDataFields.TraderCode">TraderCode</th>
+      <th *ngIf="selectedDataFields.Price">Price</th>
+      <th *ngIf="selectedDataFields.Cash">Cash</th>
+      <th *ngIf="selectedDataFields.OpenQuantity">OpenQuantity</th>
+      <th *ngIf="selectedDataFields.BookingStatus">BookingStatus</th>
+      <th *ngIf="selectedDataFields.MarginCost">MarginCost</th>
+      <th *ngIf="selectedDataFields.TotalMarginCost">TotalMarginCost</th>
+      <th *ngIf="selectedDataFields.BusinessUnit">BusinessUnit</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let deal of dealsResults">
+      <td>{{ deal.trade_date || '—' }}</td>
+      <td *ngIf="selectedDataFields.DealId">{{ deal.deal_id }}</td>
+      <td *ngIf="selectedDataFields.Portfolio">{{ deal.portfolio }}</td>
+      <td *ngIf="selectedDataFields.Desk">{{ deal.desk }}</td>
+      <td *ngIf="selectedDataFields.Entity">{{ deal.entity }}</td>
+      <td *ngIf="selectedDataFields.Direction">{{ deal.direction }}</td>
+      <td *ngIf="selectedDataFields.Quantity">{{ deal.volume }}</td>
+      <td *ngIf="selectedDataFields.QuantityUnit">{{ deal.quantity_unit }}</td>
+      <td *ngIf="selectedDataFields.DeliveryPoint">{{ deal.delivery_point }}</td>
+      <td *ngIf="selectedDataFields.CounterpartyName">{{ deal.counterparty_name }}</td>
+      <td *ngIf="selectedDataFields.TransportCorridor">{{ deal.transport_corridor }}</td>
+      <td *ngIf="selectedDataFields.DeliveryType">{{ deal.delivery_type }}</td>
+      <td *ngIf="selectedDataFields.DealType">{{ deal.deal_type }}</td>
+      <td *ngIf="selectedDataFields.TraderCode">{{ deal.trader_code }}</td>
+      <td *ngIf="selectedDataFields.Price">{{ deal.price }}</td>
+      <td *ngIf="selectedDataFields.Cash">{{ deal.cash }}</td>
+      <td *ngIf="selectedDataFields.OpenQuantity">{{ deal.open_quantity }}</td>
+      <td *ngIf="selectedDataFields.BookingStatus">{{ deal.booking_status }}</td>
+      <td *ngIf="selectedDataFields.MarginCost">{{ deal.margin_cost }}</td>
+      <td *ngIf="selectedDataFields.TotalMarginCost">{{ deal.total_margin_cost }}</td>
+      <td *ngIf="selectedDataFields.BusinessUnit">{{ deal.business_unit }}</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+  </section>
+  <section class="card empty-state" *ngIf="searchDone && dealsResults.length === 0">
+  <span class="empty-icon">🔍</span>
+  <p>Aucun deal trouvé pour ces filtres.</p>
+</section>
+
+  <!-- MODIFIÉ : SAVE au lieu de CRÉER -->
+<div class="actions-row">
+  <button class="save-btn" (click)="createQuery()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+      <polyline points="17 21 17 13 7 13 7 21"/>
+      <polyline points="7 3 7 8 15 8"/>
+    </svg>
+    Save
+  </button>
+  <button class="cancel-btn" (click)="goBack()">Annuler</button>
+</div>
+
+</div>
