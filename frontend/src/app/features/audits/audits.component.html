@@ -1,0 +1,114 @@
+<div class="audit-page">
+
+  <button class="back-btn" (click)="goBack()">← Retour</button>
+
+  <div class="audit-header">
+    <div class="header-left">
+      <h2>Journal d'audit</h2>
+      <p *ngIf="selectedGroup">Groupe : {{ selectedGroup.name }}</p>
+    </div>
+    <button
+      class="pdf-btn"
+      (click)="exportPdf()"
+      [disabled]="audits.length === 0 || pdfLoading"
+      title="Télécharger le journal en PDF"
+    >
+      <span class="pdf-btn-icon">
+        <svg *ngIf="!pdfLoading" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span *ngIf="pdfLoading" class="pdf-spinner"></span>
+      </span>
+      {{ pdfLoading ? 'Génération en cours…' : 'Exporter PDF' }}
+    </button>
+  </div>
+
+  <div *ngIf="!isGroupMode" class="search-card">
+    <div class="autocomplete">
+      <input
+        type="text"
+        [(ngModel)]="groupSearch"
+        (input)="onSearchChange()"
+        placeholder="Rechercher un groupe par nom..."
+        autocomplete="off"
+      />
+      <div class="suggestions" *ngIf="filteredGroups.length > 0">
+        <div
+          class="suggestion-item"
+          *ngFor="let group of filteredGroups"
+          (click)="selectGroup(group)"
+        >
+          <strong>{{ group.name }}</strong>
+          <span>{{ group.description }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p *ngIf="loading" class="message">Chargement...</p>
+
+  <p *ngIf="errorMessage" class="error">{{ errorMessage }}</p>
+
+  <table *ngIf="audits.length > 0" class="audit-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Action</th>
+        <th>Cible</th>
+        <th>Utilisateur</th>
+        <th>Anciennes valeurs</th>
+        <th>Nouvelles valeurs</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let audit of audits">
+        <td>{{ audit.timestamp | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>
+          <span class="badge"
+            [ngClass]="{
+              'badge-remove': audit.action === 'REMOVE_MEMBER',
+              'badge-delete': audit.action === 'DELETE_QUERY',
+              'badge-update': audit.action === 'UPDATE_QUERY',
+              'badge-add':    audit.action === 'ADD_MEMBER',
+              'badge-create': audit.action === 'CREATE_QUERY'
+            }">
+            {{ audit.action }}
+          </span>
+        </td>
+        <td>{{ audit.target_type }} - {{ audit.target_label }}</td>
+        <td>{{ audit.username || audit.user_id }}</td>
+
+        <td>
+          <div *ngIf="formatValues(audit.old_values).length > 0; else noOldValues">
+            <div class="value-line" *ngFor="let item of formatValues(audit.old_values)">
+              <span class="value-key">{{ item.key }}</span>
+              <pre class="value-value">{{ formatAuditValue(item.value) }}</pre>
+            </div>
+          </div>
+          <ng-template #noOldValues>
+            <span class="empty-value">Aucune</span>
+          </ng-template>
+        </td>
+
+        <td>
+          <div *ngIf="formatValues(audit.new_values).length > 0; else noNewValues">
+            <div class="value-line" *ngFor="let item of formatValues(audit.new_values)">
+              <span class="value-key">{{ item.key }}</span>
+              <pre class="value-value">{{ formatAuditValue(item.value) }}</pre>
+            </div>
+          </div>
+          <ng-template #noNewValues>
+            <span class="empty-value">Aucune</span>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && audits.length === 0 && groupId && !errorMessage" class="message">
+    Aucun audit trouvé pour ce groupe.
+  </p>
+
+</div>

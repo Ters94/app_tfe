@@ -1,0 +1,97 @@
+<div class="app-page">
+
+  <main class="content">
+
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
+    <section class="user-card">
+      <div class="user-header">
+        <div>
+          <h2>{{ user.lastname }} {{ user.name }}</h2>
+          <p>{{ user.email }}</p>
+        </div>
+        <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+          {{ user.role }}
+        </span>
+      </div>
+
+      <div class="info-grid">
+        <div>
+          <strong>Username</strong>
+          <span>{{ user.username || '-' }}</span>
+        </div>
+        <div>
+          <strong>Téléphone</strong>
+          <span>{{ user.phone || '-' }}</span>
+        </div>
+        <div>
+          <strong>Adresse</strong>
+          <span>{{ user.address || '-' }}</span>
+        </div>
+        <div>
+          <strong>Email</strong>
+          <span>{{ user.email || '-' }}</span>
+        </div>
+
+      </div>
+       <div class="actions">
+        <button *ngIf="isAdmin" class="primary-btn" (click)="editUser(user)">
+          Modifier
+        </button>
+        <button *ngIf="isAdmin" class="danger-btn" (click)="askDeleteUser(user.id)">
+          Supprimer
+        </button>
+        <button *ngIf="isOwnProfile" class="primary-btn" routerLink="/change-password">
+          Changer le mot de passe
+        </button>
+      </div>
+       <div *ngIf="confirmDeleteId" class="modal-overlay">
+    <div class="modal-box">
+      <p>Voulez-vous vraiment supprimer cet utilisateur ?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" (click)="cancelDelete()">Annuler</button>
+        <button class="modal-confirm" (click)="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+      <section class="groups-section">
+        <h3 class="groups-title">Groupes liés à cet utilisateur</h3>
+
+        <div *ngIf="ownedGroups.length > 0" class="group-block">
+          <div class="group-block-header owner">Owner</div>
+          <ul class="group-list">
+            <li *ngFor="let group of ownedGroups">
+              <a class="group-link" [routerLink]="['/groups/group-form', group.id]">
+                {{ group.name }}
+              </a>
+              <span class="group-desc">{{ group.description }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <div *ngIf="memberGroups.length > 0" class="group-block">
+          <div class="group-block-header member">Membre</div>
+          <ul class="group-list">
+            <li *ngFor="let group of memberGroups">
+              <a class="group-link" [routerLink]="['/groups/group-form', group.id]">
+                {{ group.name }}
+              </a>
+              <span class="group-desc">{{ group.description }}</span>
+            </li>
+          </ul>
+        </div>
+
+        <p *ngIf="ownedGroups.length === 0 && memberGroups.length === 0" class="no-groups">
+          Cet utilisateur n'appartient à aucun groupe.
+        </p>
+      </section>
+
+
+    </section>
+
+
+  </main>
+
+</div>

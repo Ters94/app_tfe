@@ -1,0 +1,147 @@
+<div class="app-page">
+
+
+
+  <main class="content">
+    <button class="back-btn" (click)="goBack()">← Retour</button>
+    <div class="page-header">
+      <h2>Gestion des groupes</h2>
+
+
+    </div>
+
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-box">
+      {{ successMessage }}
+    </div>
+
+
+
+    <section class="form-card">
+
+
+
+
+
+   <h2>{{ group.name }}</h2>
+      <p>{{ group.description || 'Aucune description' }}</p>
+
+
+    </section>
+
+    <section *ngIf="canManageMembers" class="form-card">
+      <h3>Ajouter un membre</h3>
+<div class="form-row">
+        <select [(ngModel)]="selectedUserId">
+          <option value="">Sélectionner un utilisateur</option>
+          <option *ngFor="let user of users" [value]="user.id">
+            {{ user.username }} - {{ user.email }}
+          </option>
+        </select>
+<br>
+<br>
+</div>
+<div class="form-actions">
+        <button class="primary-btn" (click)="addMember()">
+           + Ajouter
+        </button>
+
+        <button class="secondary-btn" (click)="goBack()">
+          Annuler
+        </button>
+      </div>
+
+
+    </section>
+
+<section class="members-section">
+      <h3>Liste des membres</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th *ngIf="canManageMembers">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let member of members">
+            <td>{{ member.username || '-' }}</td>
+            <td>{{ member.email || '-' }}</td>
+            <td>
+              <span class="role-badge" [class.owner]="member.role === 'OWNER'">
+                {{ member.role }}
+              </span>
+            </td>
+            <td *ngIf="canManageMembers">
+
+               <button class="info-btn" (click)="viewUser(member)">
+                  Consulter
+                </button>
+                <button
+                  *ngIf="member.role === 'MEMBER'"
+                  class="info-btn"
+                  (click)="transferOwner(member.user_id)">
+                      Transférer owner
+              </button>
+              <button
+                class="danger"
+                *ngIf="member.role !== 'OWNER'"
+                (click)="removeMember(member)"
+              >
+                Supprimer
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="members.length === 0">
+            <td colspan="4" class="empty-message">
+              Aucun membre trouvé.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+<section class="members-section" *ngIf="groupQueries.length > 0">
+  <h3>Queries du groupe</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Filtres</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let query of groupQueries">
+        <td>{{ query.query_name }}</td>
+        <td><code>{{ query.filters | json }}</code></td>
+        <td class="actions">
+  <button (click)="executeQuery(query.id)">Exécuter</button>
+  <button (click)="editQuery(query.id)">Modifier</button>
+  <button class="danger" (click)="deleteQuery(query.id)">Supprimer</button>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<button
+  class="primary-btn"
+  [routerLink]="['/queries/query-create']"
+  [queryParams]="{ groupId: groupId }">
+  + Créer une query
+</button>
+
+  </main>
+</div>
+

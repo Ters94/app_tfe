@@ -1,0 +1,88 @@
+<div class="page-container">
+
+  <h2>Deals</h2>
+
+  <div class="filters-card">
+    <h3>Filtres dynamiques</h3>
+
+    <div class="filters-grid">
+
+      <div>
+        <label>Portfolio</label>
+        <input [(ngModel)]="filters.portfolio" placeholder="Gas_BE">
+      </div>
+
+      <div>
+        <label>Produit</label>
+        <select [(ngModel)]="filters.product">
+          <option value="">Tous</option>
+          <option value="GAS">GAS</option>
+          <option value="ELECTRICITY">ELECTRICITY</option>
+          <option value="OIL">OIL</option>
+          <option value="CO2">CO2</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Type</label>
+        <select [(ngModel)]="filters.deal_type">
+          <option value="">Tous</option>
+          <option value="BUY">BUY</option>
+          <option value="SELL">SELL</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Trader</label>
+        <input [(ngModel)]="filters.trader_code" placeholder="TR001">
+      </div>
+
+      <div>
+        <label>Prix min</label>
+        <input type="number" [(ngModel)]="filters.price_min">
+      </div>
+
+      <div>
+        <label>Prix max</label>
+        <input type="number" [(ngModel)]="filters.price_max">
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button (click)="searchDeals()">Rechercher</button>
+      <button class="secondary" (click)="resetFilters()">Réinitialiser</button>
+    </div>
+  </div>
+
+  <p class="count">{{ count }} résultat(s)</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Produit</th>
+        <th>Type</th>
+        <th>Portfolio</th>
+        <th>Trader</th>
+        <th>Counterparty</th>
+        <th>Volume</th>
+        <th>Prix</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let deal of deals">
+        <td>{{ deal.product }}</td>
+        <td>{{ deal.deal_type }}</td>
+        <td>{{ deal.portfolio }}</td>
+        <td>{{ deal.trader_code }}</td>
+        <td>{{ deal.counterparty_name }}</td>
+        <td>{{ deal.volume }}</td>
+        <td>{{ deal.price }}</td>
+        <td>{{ deal.booking_status }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

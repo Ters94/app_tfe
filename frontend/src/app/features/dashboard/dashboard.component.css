@@ -1,0 +1,15 @@
+.content {
+  padding: 32px;
+}
+
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.welcome {
+  color: var(--color-text-muted);
+  margin-bottom: 28px;
+  font-size: 0.9375rem;
+}

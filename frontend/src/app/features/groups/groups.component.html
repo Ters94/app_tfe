@@ -1,0 +1,163 @@
+<div class="app-page">
+
+
+  <main class="content">
+
+    <div class="page-header">
+      <h2>Gestion des groupes</h2>
+
+      <button class="primary-btn" (click)="openCreateForm()">
+        + Nouveau groupe
+      </button>
+    </div>
+
+    <div class="toolbar">
+      <input
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher par nom, description ou owner..."
+      />
+    </div>
+
+    <div *ngIf="errorMessage" class="error-box">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-box">
+      {{ successMessage }}
+    </div>
+
+    <section *ngIf="showForm" class="form-card">
+      <h3>{{ isEdit ? 'Modifier un groupe' : 'Créer un groupe' }}</h3>
+
+      <div class="form-group">
+        <label>Nom du groupe</label>
+        <input
+          [(ngModel)]="group.name"
+          name="name"
+          placeholder="Ex : ENGIE_GAZ"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea
+          [(ngModel)]="group.description"
+          name="description"
+          placeholder="Description du groupe"
+        ></textarea>
+      </div>
+
+      <div class="form-group" *ngIf="isAdmin() && !isEdit">
+        <label>Owner</label>
+        <select [(ngModel)]="group.owner_id" name="owner_id" required>
+          <option value="">Sélectionner un owner</option>
+          <option *ngFor="let user of users" [value]="user.id">
+            {{ user.username }} - {{ user.email }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="primary-btn" (click)="saveGroup()">
+          {{ isEdit ? 'Modifier' : 'Créer' }}
+        </button>
+
+        <button class="secondary-btn" (click)="cancelForm()">
+          Annuler
+        </button>
+      </div>
+    </section>
+
+    <div class="groups-actions">
+ <button
+  class="filter-btn"
+  [class.active-filter]="!showMyGroups"
+  (click)="showAllGroups()">
+  Tous les groupes
+  </button>
+
+  <button
+  class="filter-btn"
+  [class.active-filter]="showMyGroups && selectedGroupRole === 'OWNER'"
+  (click)="showMyOwnedGroups()">
+  Je suis owner
+  </button>
+
+  <button
+  class="filter-btn"
+  [class.active-filter]="showMyGroups && selectedGroupRole === 'MEMBER'"
+  (click)="showMyMemberGroups()">
+  Je suis membre
+  </button>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Description</th>
+      <th>Owner</th>
+      <th>Statut</th>
+      <th class="actions-col">Actions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr *ngFor="let group of filteredDisplayedGroups" [class.disabled-row]="group.status === false">
+      <td>{{ group.name || '-' }}</td>
+      <td>{{ group.description || '-' }}</td>
+      <td>{{ group.owner_username || group.owner_id || '-' }}</td>
+
+      <td>
+        <span class="badge" [class.inactive]="group.status === false">
+          {{ group.status === false ? 'Clôturé' : 'Actif' }}
+        </span>
+      </td>
+
+      <td class="actions">
+        <button (click)="viewGroup(group)">
+          Consulter
+        </button>
+
+        <button
+          *ngIf="canEdit(group)"
+          [routerLink]="['/groups/group-form', group.id]"
+        >
+          Modifier
+        </button>
+
+        <button
+          class="danger"
+          *ngIf="canEdit(group) && group.status !== false"
+          (click)="askDeleteGroup(group.id)"
+        >
+          Désactiver
+        </button>
+
+        <button
+          class="disabled-btn"
+          *ngIf="group.status === false"
+          disabled
+        >
+          Désactivé
+        </button>
+      </td>
+    </tr>
+
+    <tr *ngIf="filteredDisplayedGroups.length === 0">
+      <td colspan="5" class="empty-message">
+        Aucun groupe trouvé.
+      </td>
+    </tr>
+  </tbody>
+</table>
+  </main>
+   <div *ngIf="confirmDeleteGroupId" class="modal-overlay">
+    <div class="modal-box">
+      <p>Voulez-vous vraiment désactiver ce groupe ?</p>
+      <div class="modal-actions">
+        <button class="modal-cancel" (click)="cancelDeleteGroup()">Annuler</button>
+        <button class="modal-confirm" (click)="confirmDeleteGroup()">Désactiver</button>
+      </div>
+    </div>
+  </div>
+</div>

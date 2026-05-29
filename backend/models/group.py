@@ -10,7 +10,7 @@ class GroupBase(BaseModel):
 
 
 class GroupCreate(GroupBase):
-    pass
+    owner_id: str | None = None  # Seul un admin peut spécifier un owner_id, sinon c'est le current_user
 
 
 class GroupInDB(MongoBaseModel, GroupBase):
@@ -22,7 +22,11 @@ class GroupInDB(MongoBaseModel, GroupBase):
 class GroupPublic(GroupBase):
     id: str
     owner_id: str
+    owner_username: str | None = None
+    status: bool=True
+    created_at: datetime | None = None
 
 class GroupUpdate(BaseModel):
     name: str | None = None
     description: str | None = None
+    
