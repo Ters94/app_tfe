@@ -1,40 +1,40 @@
 <div class="login-page">
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="brand">ENGIE – Queries</div>
 
-  <div class="login-card">
-    <div class="brand">ENGIE – Queries</div>
+      <h2 class="login-title">Connexion</h2>
+      <p class="login-subtitle">Accédez à votre espace sécurisé</p>
 
-    <h2>Connexion</h2>
-    <p class="subtitle">Accédez à votre espace sécurisé</p>
+      <form (ngSubmit)="login()">
+        <div class="form-group">
+          <label>EMAIL</label>
+          <input
+            [(ngModel)]="email"
+            name="email"
+            type="email"
+            placeholder="user@example.com"
+            required
+          />
+        </div>
 
-    <form (ngSubmit)="login()">
-      <div class="form-group">
-        <label>Email</label>
-        <input
-          [(ngModel)]="email"
-          name="email"
-          type="email"
-          placeholder="exemple@engie.com"
-          required
-        />
-      </div>
+        <div class="form-group">
+          <label>MOT DE PASSE</label>
+          <input
+            [(ngModel)]="password"
+            name="password"
+            type="password"
+            placeholder="••••••"
+            required
+          />
+        </div>
 
-      <div class="form-group">
-        <label>Mot de passe</label>
-        <input
-          [(ngModel)]="password"
-          name="password"
-          type="password"
-          placeholder="Votre mot de passe"
-          required
-        />
-      </div>
+        <button type="submit" class="submit-btn">Se connecter</button>
+      </form>
 
-      <button type="submit">Se connecter</button>
-    </form>
-
-    <p *ngIf="error" class="error-message">
-      {{ error }}
-    </p>
+      <p *ngIf="error" class="error-message">
+        {{ error }}
+      </p>
+    </div>
   </div>
-
 </div>
