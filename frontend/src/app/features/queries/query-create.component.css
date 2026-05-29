@@ -1,9 +1,21 @@
-/* All shared styles come from styles.css */
-
 .query-create-page {
-  padding: 28px 32px;
-  max-width: 1440px;
-  margin: 0 auto;
+  padding: 24px;
+}
+
+.card {
+  background: var(--color-surface);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+h3 {
+  margin-bottom: 15px;
 }
 
 .form-row {
@@ -14,42 +26,31 @@
 
 .form-row input,
 .form-row select {
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-family: inherit;
-  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
 }
 
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 25px;
 }
 
 .filters-grid label {
   display: block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--color-text-muted);
-  margin-bottom: 6px;
+  font-weight: 600;
+  margin-bottom: 5px;
 }
 
 .filters-grid input,
 .filters-grid select {
   width: 100%;
   height: 38px;
-  padding: 0 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: 0.9rem;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-light);
+  box-sizing: border-box;
 }
 
 .data-grid {
@@ -61,44 +62,105 @@
 .data-grid label {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.875rem;
-  color: var(--color-text);
+  gap: 6px;
+}
+
+.primary-btn {
+  margin-top: 15px;
+  padding: 10px 16px;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.create-btn {
+  padding: 12px 18px;
+  background: var(--color-primary);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.create-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.back-btn {
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  border: none;
+  background: var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: var(--color-border-light);
 }
 
 .table-wrapper {
   width: 100%;
   overflow-x: auto;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   border: 1px solid var(--color-border);
 }
 
-.table-wrapper table {
+table {
+  width: 100%;
   min-width: 1200px;
-  border: none;
-  border-radius: 0;
-  font-size: 0.8125rem;
+  border-collapse: collapse;
+  background: var(--color-surface);
+  font-size: 13px;
 }
 
-.table-wrapper thead {
+thead {
+  background: var(--color-header-bg);
   position: sticky;
   top: 0;
   z-index: 1;
 }
 
-.table-wrapper th:first-child,
-.table-wrapper td:first-child {
+th {
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-primary-hover);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--color-border);
+}
+
+td {
+  padding: 10px 12px;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-header-bg);
+  color: var(--color-text);
+}
+
+tbody tr:hover {
+  background: var(--color-row-hover);
+}
+
+th:first-child,
+td:first-child {
   position: sticky;
   left: 0;
-  z-index: 2;
-  font-weight: 700;
-  color: var(--color-accent);
   background: var(--color-header-bg);
+  z-index: 2;
+  font-weight: 600;
+  color: var(--color-accent);
   border-right: 2px solid var(--color-border);
 }
 
-.table-wrapper tbody td:first-child {
+tbody td:first-child {
   background: var(--color-surface);
 }
 
@@ -113,8 +175,6 @@
 
 .results-header h3 {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
 }
 
 .results-stats {
@@ -123,27 +183,55 @@
   flex-wrap: wrap;
 }
 
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--color-row-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  min-width: 130px;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 2px;
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 3rem;
+  padding: 2.5rem;
   color: var(--color-text-muted);
   gap: 8px;
 }
 
 .empty-icon {
-  font-size: 2.5rem;
+  font-size: 2rem;
 }
 
 .empty-state p {
   font-size: 0.9rem;
+  margin: 0;
 }
 
 .actions-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  margin-top: 8px;
   margin-bottom: 24px;
 }
 
@@ -151,38 +239,44 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 0 20px;
+  padding: 0 1.25rem;
   height: 40px;
   background: var(--color-primary);
-  color: #FFFFFF;
+  color: var(--color-surface);
   border: none;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 }
 
-.save-btn:hover { background: var(--color-primary-hover); }
+.save-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.save-btn:active {
+  transform: scale(0.97);
+}
 
 .cancel-btn {
-  padding: 0 20px;
+  padding: 0 1.25rem;
   height: 40px;
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
+  background: transparent;
+  color: var(--color-primary-hover);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 8px;
+  font-size: 0.875rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.cancel-btn:hover { background: var(--color-surface-2); }
-
-@media (max-width: 900px) {
-  .filters-grid { grid-template-columns: repeat(2, 1fr); }
-  .data-grid    { grid-template-columns: repeat(2, 1fr); }
+.cancel-btn:hover {
+  background: var(--color-row-hover);
+}
+input[type="checkbox"] {
+  accent-color: var(--color-text-muted);
 }
