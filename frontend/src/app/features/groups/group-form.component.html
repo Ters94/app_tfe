@@ -79,7 +79,7 @@
                 {{ member.role }}
               </span>
             </td>
-            <td *ngIf="canManageMembers">
+            <td class="actions" *ngIf="canManageMembers">
 
                <button class="info-btn" (click)="viewUser(member)">
                   Consulter
@@ -109,7 +109,7 @@
       </table>
     </section>
 
-<section class="members-section" *ngIf="groupQueries.length > 0">
+<section class="members-section" *ngIf="groupQueries.length > 0 && role !== 'ADMIN'">
   <h3>Queries du groupe</h3>
 
   <table>
@@ -136,6 +136,7 @@
 </section>
 
 <button
+  *ngIf="role !== 'ADMIN'"
   class="primary-btn"
   [routerLink]="['/queries/query-create']"
   [queryParams]="{ groupId: groupId }">

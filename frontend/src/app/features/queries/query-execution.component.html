@@ -3,27 +3,25 @@
   <div *ngIf="successMessage" class="success-box">{{ successMessage }}</div>
 
 
-  <div class="page-header">
-    <button class="back-btn" (click)="goBack()">← Retour</button>
-    <div>
-      <h2>Gestion des queries</h2>
-      <p>Exécuter des requêtes pour filtrer les deals disponibles.</p>
+  <button class="back-btn" (click)="goBack()">← Retour</button>
 
-      <div *ngIf="query">
-        <h2>{{ query.query_name }}</h2>
-        <p><strong>Groupe :</strong> {{ query.group_name }}</p>
-        <p><strong>Filtres :</strong></p>
-        <code>{{ query.filters | json }}</code>
-        <br><br>
-
-        <div *ngIf="!isAdmin">
-          <button class="create-btn" (click)="executeQuery(query.id)">Exécuter</button>
-          <button class="create-btn" (click)="startEdit()">Modifier</button>
-          <button class="create-btn" (click)="deleteQuery(query.id)">Supprimer</button>
-        </div>
-      </div>
-    </div>
+  <div class="exec-title">
+    <h2>Gestion des queries</h2>
+    <p>Exécuter des requêtes pour filtrer les deals disponibles.</p>
   </div>
+
+  <section class="card" *ngIf="query">
+    <h3 class="query-name">{{ query.query_name }}</h3>
+    <p><strong>Groupe :</strong> {{ query.group_name }}</p>
+    <p><strong>Filtres :</strong></p>
+    <code>{{ query.filters | json }}</code>
+
+    <div class="query-actions" *ngIf="!isAdmin">
+      <button class="primary-btn" (click)="executeQuery(query.id)">Exécuter</button>
+      <button class="secondary-btn" (click)="startEdit()">Modifier</button>
+      <button class="danger-btn" (click)="deleteQuery(query.id)">Supprimer</button>
+    </div>
+  </section>
 
   <!-- Résumé statistiques -->
   <section class="card" *ngIf="statistics">
