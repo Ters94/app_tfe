@@ -107,19 +107,19 @@
     </section>
 
     <button
-       *ngIf="group?.id && canManageMembers(group)"
+       *ngIf="group?.id && canManageMembers(group) && role !== 'ADMIN'"
       class="primary-btn"
 [routerLink]="['/queries/query-create']"
 [queryParams]="{ groupId: group.id }" >
       + Créer une query
     </button>
 
-    <button class="secondary-btn" (click)="loadGroupQueries()">
+    <button class="secondary-btn" *ngIf="role !== 'ADMIN'" (click)="loadGroupQueries()">
   Afficher les queries
 </button>
 <br>
 <br>
-<section class="queries-section" *ngIf="groupQueries.length > 0">
+<section class="queries-section" *ngIf="groupQueries.length > 0 && role !== 'ADMIN'">
   <h3>Queries du groupe</h3>
   <table class="queries-table">
     <thead>

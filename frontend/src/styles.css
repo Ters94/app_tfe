@@ -328,14 +328,17 @@ tbody tr:last-child td {
 }
 
 .actions-col {
-  width: 220px;
+  width: 1%;
+  white-space: nowrap;
 }
 
 td.actions {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: flex-end;
+  white-space: nowrap;
 }
 
 .disabled-row {
