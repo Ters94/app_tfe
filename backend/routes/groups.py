@@ -287,7 +287,7 @@ def update_group(
 
 
 @router.delete("/{group_id}")
-def desactivate_group(
+def deactivate_group(
     group_id: str,
     current_user: str = Depends(get_current_user)
 ):
@@ -369,7 +369,7 @@ def desactivate_group(
     except Exception as e:
         logger.error(f"Erreur envoi email suppression groupe : {e}")
 
-    return {"message": "Group desactivated"}
+    return {"message": "Group deactivated"}
 
 
 @router.put("/{group_id}/transfer-owner")

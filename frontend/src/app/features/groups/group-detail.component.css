@@ -142,13 +142,15 @@
 .query-actions,
 .member-actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .info-btn,
-.transfer-btn {
+.transfer-btn,
+.member-actions .danger,
+.query-actions .danger {
   display: inline-flex;
   align-items: center;
   padding: 5px 11px;
@@ -160,7 +162,7 @@
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.12s, border-color 0.12s;
   white-space: nowrap;
 }
 
@@ -168,4 +170,16 @@
 .transfer-btn:hover {
   background: var(--color-surface-2);
   border-color: var(--color-accent);
+}
+
+.member-actions .danger,
+.query-actions .danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger-light);
+}
+
+.member-actions .danger:hover,
+.query-actions .danger:hover {
+  background: var(--color-danger-bg);
+  border-color: var(--color-danger);
 }
