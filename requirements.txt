@@ -3,6 +3,10 @@ uvicorn
 pydantic
 pymongo
 python-jose
-passlib[bcrypt]
+passlib
+bcrypt==4.0.1
 python-dotenv
 email-validator
+python-multipart
+apscheduler
+reportlab
