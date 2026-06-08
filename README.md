@@ -11,20 +11,13 @@ Fonctionnalités principales : gestion des **utilisateurs**, **groupes** et **ad
 
 ## 1. Prérequis
 
-| Outil | Version recommandée | Vérifier avec |
-|-------|--------------------|---------------|
-| **Python** | 3.11 ou 3.12 | `python --version` |
-| **Node.js** | 18 LTS ou + | `node --version` |
-| **npm** | 9 ou + | `npm --version` |
-| **MongoDB Server** | 6.x / 7.x / 8.x | `mongod --version` |
-| **Git** | — | `git --version` |
-
-> 💡 **MongoDB** doit être installé et **en cours d'exécution** sur `localhost:27017`.
-> Sous Windows, MongoDB s'installe généralement comme **service** qui démarre automatiquement.
-> Pour vérifier qu'il tourne : `Get-Service MongoDB` (PowerShell) — le statut doit être `Running`.
-> Outil graphique optionnel : **MongoDB Compass**.
-
-L'Angular CLI n'a pas besoin d'être installé globalement : les commandes utilisent `npx ng`.
+| Outil              | Version recommandée | Vérifier avec      |
+| ------------------ | ------------------- | ------------------ |
+| **Python**         | 3.11 ou 3.12        | `python --version` |
+| **Node.js**        | 18 LTS ou +         | `node --version`   |
+| **npm**            | 9 ou +              | `npm --version`    |
+| **MongoDB Server** | 6.x / 7.x / 8.x     | `mongod --version` |
+| **Git**            | —                   | `git --version`    |
 
 ---
 
@@ -61,15 +54,15 @@ APP_NAME=ENGIE Queries
 ```
 
 | Variable | Rôle | Obligatoire |
-|----------|------|-------------|
-| `MONGO_URI` | URL de connexion MongoDB | ✅ |
-| `DATABASE_NAME` | Nom de la base utilisée | ✅ |
-| `JWT_SECRET` | Clé secrète de signature des tokens (mettre une valeur forte) | ✅ |
+| --- | --- | --- |
+| `MONGO_URI` | URL de connexion MongoDB | Oui |
+| `DATABASE_NAME` | Nom de la base utilisée | Oui |
+| `JWT_SECRET` | Clé secrète de signature des tokens (mettre une valeur forte) | Oui |
 | `JWT_ALGORITHM` | Algorithme JWT (défaut `HS256`) | — |
 | `JWT_EXPIRE_MINUTES` | Durée de validité d'un token (minutes) | — |
-| `SMTP_*` | Serveur d'e-mail pour l'envoi automatique des journaux d'audit | ❌ |
+| `SMTP_*` | Serveur d'e-mail pour l'envoi automatique des journaux d'audit | Non |
 
-> ⚠️ Sans `SMTP_USER` / `SMTP_PASSWORD`, l'application démarre normalement, mais l'**envoi mensuel des audits par e-mail** ne fonctionnera pas.
+> Sans `SMTP_USER` / `SMTP_PASSWORD`, l'application démarre normalement, mais l'**envoi mensuel des audits par e-mail** ne fonctionnera pas.
 > Pour Gmail, utilisez un **mot de passe d'application** (pas votre mot de passe habituel).
 
 ---
@@ -80,13 +73,15 @@ Depuis la racine `app_tfe/` :
 
 ### 4.1 Créer et activer un environnement virtuel
 
-**Windows (PowerShell)**
+#### Windows (PowerShell)
+
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-**Linux / macOS**
+#### Linux / macOS
+
 ```bash
 python -m venv venv
 source venv/bin/activate
@@ -102,15 +97,15 @@ pip install fastapi uvicorn pydantic pymongo python-jose passlib "bcrypt==4.0.1"
             python-dotenv email-validator apscheduler reportlab python-multipart
 ```
 
-> ℹ️ Dépendances **en plus** de `requirements.txt` : `apscheduler`, `reportlab`, `python-multipart`.
+> Dépendances **en plus** de `requirements.txt` : `apscheduler`, `reportlab`, `python-multipart`.
 >
-> ⚠️ **Important : figez `bcrypt==4.0.1`.** `passlib 1.7.4` (utilisé par le projet) est incompatible
+> **Important : figez `bcrypt==4.0.1`.** `passlib 1.7.4` (utilisé par le projet) est incompatible
 > avec `bcrypt >= 4.1`. Avec une version trop récente de `bcrypt`, la vérification des mots de passe
 > échoue et **toutes les connexions renvoient une erreur 500** (voir §8 Dépannage).
 
 ### 4.3 Lancer le serveur
 
-⚠️ **À lancer depuis la racine `app_tfe/`** (le code importe le package `backend`) :
+**À lancer depuis la racine `app_tfe/`** (le code importe le package `backend`) :
 
 ```bash
 uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
@@ -118,12 +113,13 @@ uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 
 Le backend est alors disponible sur :
 
-- API : **http://127.0.0.1:8000**
-- Documentation interactive (Swagger UI) : **http://127.0.0.1:8000/docs**
-- Documentation ReDoc : **http://127.0.0.1:8000/redoc**
+- API : <http://127.0.0.1:8000>
+- Documentation interactive (Swagger UI) : <http://127.0.0.1:8000/docs>
+- Documentation ReDoc : <http://127.0.0.1:8000/redoc>
 
 Au démarrage, vous devez voir dans la console :
-```
+
+```text
 Connected to MongoDB
 Application startup complete.
 ```
@@ -143,10 +139,11 @@ npm start
 `npm start` lance `ng serve` qui utilise automatiquement le proxy (`proxy.conf.json`) :
 toutes les requêtes vers `/api` sont redirigées vers le backend `http://127.0.0.1:8000`.
 
-Le frontend est disponible sur : **http://127.0.0.1:4200**
+Le frontend est disponible sur : <http://127.0.0.1:4200>
 
-> ℹ️ Les paquets `jspdf` et `jspdf-autotable` (utilisés pour l'export PDF côté client) sont
+> Les paquets `jspdf` et `jspdf-autotable` (utilisés pour l'export PDF côté client) sont
 > nécessaires. S'ils manquent après `npm install`, installez-les explicitement :
+>
 > ```bash
 > npm install jspdf jspdf-autotable
 > ```
@@ -156,18 +153,18 @@ Le frontend est disponible sur : **http://127.0.0.1:4200**
 ## 6. Récapitulatif : tout démarrer
 
 | Terminal | Dossier | Commande |
-|----------|---------|----------|
+| --- | --- | --- |
 | 1 — Backend | `app_tfe/` (venv activé) | `uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload` |
 | 2 — Frontend | `app_tfe/frontend/` | `npm start` |
 
-Puis ouvrez **http://127.0.0.1:4200** dans votre navigateur.
+Puis ouvrez <http://127.0.0.1:4200> dans votre navigateur.
 (MongoDB doit tourner en arrière-plan sur le port 27017.)
 
 ---
 
 ## 7. Structure du projet
 
-```
+```text
 app_tfe/
 ├── .env                    # Variables d'environnement (à créer, non versionné)
 ├── requirements.txt        # Dépendances Python (à compléter, voir §4.2)
@@ -190,7 +187,7 @@ app_tfe/
 ## 8. Dépannage
 
 | Problème | Cause probable | Solution |
-|----------|----------------|----------|
+| --- | --- | --- |
 | Le backend ne démarre pas, erreur de connexion Mongo | MongoDB n'est pas lancé | Démarrer le service MongoDB (`Get-Service MongoDB` puis `Start-Service MongoDB`) |
 | La connexion (`/auth/login`) renvoie **500** / impossible de se connecter (admin comme user) | `bcrypt` trop récent, incompatible avec `passlib 1.7.4` | Figer la bonne version : `pip install "bcrypt==4.0.1"` puis redémarrer le backend |
 | `RuntimeError: Form data requires "python-multipart"` | Dépendance manquante | `pip install python-multipart` |
