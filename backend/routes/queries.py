@@ -117,6 +117,12 @@ def create_query(query: QueryCreate, current_user=Depends(get_current_user)):
 
 @router.get("/")
 def get_queries(current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs n'ont pas accès aux queries."
+        )
+
     queries = []
 
     for query in db.queries.find():
@@ -147,6 +153,12 @@ def get_queries(current_user=Depends(get_current_user)):
 
 @router.get("/group/{group_id}")
 def get_queries_by_group(group_id: str, current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs n'ont pas accès aux queries."
+        )
+
     if not ObjectId.is_valid(group_id):
         raise HTTPException(status_code=400, detail="Invalid group id")
 
@@ -262,6 +274,12 @@ def execute_query(query_id: str, current_user=Depends(get_current_user)):
 
 @router.get("/{query_id}")
 def get_query_by_id(query_id: str, current_user=Depends(get_current_user)):
+    if is_admin(current_user):
+        raise HTTPException(
+            status_code=403,
+            detail="Les administrateurs n'ont pas accès aux queries."
+        )
+
     if not ObjectId.is_valid(query_id):
         raise HTTPException(status_code=400, detail="Invalid query id")
 
