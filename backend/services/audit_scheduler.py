@@ -56,11 +56,13 @@ def flatten_values(values: dict | None) -> str:
         return "—"
     lines = []
     for k, v in values.items():
+        if k == "id" or k.endswith("_id"):
+            continue
         if isinstance(v, dict):
             lines.append(f"{k}:\n{json.dumps(v, indent=2, ensure_ascii=False)}")
         else:
             lines.append(f"{k}: {v}")
-    return "\n".join(lines)
+    return "\n".join(lines) if lines else "—"
 
 
 def generate_audit_pdf(group_name: str, audits: list[dict], month_label: str) -> bytes:
@@ -325,8 +327,6 @@ def send_monthly_audit_reports() -> None:
 def start_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone="Europe/Paris")
 
-    #run_at  = datetime.now() + timedelta(minutes=2)
-    #trigger = CronTrigger(hour=run_at.hour, minute=run_at.minute)
     trigger = CronTrigger(day="last", hour=8, minute=0)
 
     scheduler.add_job(
