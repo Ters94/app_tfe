@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from bson import ObjectId
 import logging
+import re
 
 from backend.database import db, get_groups_collection
 from backend.models import group
@@ -19,6 +20,21 @@ logger = logging.getLogger(__name__)
 def is_admin(user_id: str) -> bool:
     user = db.users.find_one({"_id": ObjectId(user_id)})
     return user is not None and user.get("role") == RoleEnum.ADMIN
+
+
+def group_name_taken(name: str, exclude_group_id: str | None = None) -> bool:
+    normalized = (name or "").strip()
+    if not normalized:
+        return False
+
+    query = {
+        "name": {"$regex": rf"^\s*{re.escape(normalized)}\s*$", "$options": "i"},
+        "status": True,
+    }
+    if exclude_group_id:
+        query["_id"] = {"$ne": ObjectId(exclude_group_id)}
+
+    return db.groups.find_one(query) is not None
 
 
 def create_audit(
@@ -51,6 +67,14 @@ def create_group(
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    group.name = (group.name or "").strip()
+
+    if group_name_taken(group.name):
+        raise HTTPException(
+            status_code=400,
+            detail="Un groupe portant ce nom existe déjà.",
+        )
 
     if user.get("role") == "ADMIN":
         if not group.owner_id:
@@ -247,6 +271,15 @@ def update_group(
         k: v for k, v in group_update.model_dump().items()
         if v is not None
     }
+
+    if "name" in update_data:
+        update_data["name"] = (update_data["name"] or "").strip()
+
+        if group_name_taken(update_data["name"], exclude_group_id=group_id):
+            raise HTTPException(
+                status_code=400,
+                detail="Un groupe portant ce nom existe déjà.",
+            )
 
     old_values = {
         "name": group.get("name"),
