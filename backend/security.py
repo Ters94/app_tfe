@@ -68,3 +68,22 @@ def create_access_token(data: dict):
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+PASSWORD_RESET_EXPIRE_MINUTES = 30
+
+
+def create_password_reset_token(user_id: str) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=PASSWORD_RESET_EXPIRE_MINUTES)
+    to_encode = {"sub": user_id, "purpose": "pwd_reset", "exp": expire}
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def verify_password_reset_token(token: str) -> str:
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    if payload.get("purpose") != "pwd_reset":
+        raise JWTError("Invalid token purpose")
+    user_id = payload.get("sub")
+    if not user_id:
+        raise JWTError("Missing subject")
+    return user_id

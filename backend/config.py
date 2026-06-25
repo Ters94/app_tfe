@@ -23,4 +23,6 @@ class Settings:
 
     APP_NAME        = os.getenv("APP_NAME", "ENGIE Queries")
 
+    FRONTEND_URL    = os.getenv("FRONTEND_URL", "http://localhost:4200")
+
 settings = Settings()

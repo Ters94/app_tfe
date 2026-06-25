@@ -19,7 +19,10 @@ export class AppComponent {
       this.router.events
         .pipe(filter(event => event instanceof NavigationEnd))
         .subscribe((event: any) => {
-      this.showNavbar = event.urlAfterRedirects !== '/';
+      const url = event.urlAfterRedirects;
+      this.showNavbar = url !== '/'
+        && !url.startsWith('/forgot-password')
+        && !url.startsWith('/reset-password');
       });
   }
 }
