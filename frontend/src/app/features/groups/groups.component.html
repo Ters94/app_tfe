@@ -18,7 +18,7 @@
       />
     </div>
 
-    <div *ngIf="errorMessage" class="error-box">
+    <div *ngIf="errorMessage && !showForm" class="error-box">
       {{ errorMessage }}
     </div>
 
@@ -28,6 +28,10 @@
 
     <section *ngIf="showForm" class="form-card">
       <h3>{{ isEdit ? 'Modifier un groupe' : 'Créer un groupe' }}</h3>
+
+      <div *ngIf="errorMessage" class="error-box">
+        {{ errorMessage }}
+      </div>
 
       <div class="form-group">
         <label>Nom du groupe</label>
